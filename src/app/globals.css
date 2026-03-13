@@ -150,6 +150,28 @@ body {
   }
 }
 
+/* ── Full-bleed Carousel Track (Embla) ── */
+/* Left padding aligns first card with container-mosaiko content edge */
+/* Right padding is smaller to hint at more content beyond viewport */
+.carousel-track {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .carousel-track {
+    padding-left: max(1.5rem, calc((100vw - var(--container-max)) / 2 + 1.5rem));
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .carousel-track {
+    padding-left: max(2rem, calc((100vw - var(--container-max)) / 2 + 2rem));
+    padding-right: 3rem;
+  }
+}
+
 /* ── Grain Overlay ── */
 .grain-overlay::after {
   content: "";
