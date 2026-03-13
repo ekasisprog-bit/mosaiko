@@ -8,6 +8,7 @@ import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import { CookieBanner } from '@/components/layout/CookieBanner';
 import '../globals.css';
 
 const playfair = Playfair_Display({
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
           </main>
           <Footer />
           <CartDrawer />
+          <CookieBanner />
         </NextIntlClientProvider>
       </body>
     </html>

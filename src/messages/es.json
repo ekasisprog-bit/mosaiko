@@ -119,6 +119,16 @@
     "pieces": "{count} piezas",
     "customDesign": "Diseño personalizado"
   },
+  "cookies": {
+    "title": "Tu privacidad nos importa",
+    "description": "Usamos cookies para mejorar tu experiencia, analizar el tráfico y personalizar anuncios. Puedes aceptar todas o configurar tus preferencias.",
+    "accept": "Aceptar",
+    "configure": "Configurar",
+    "savePreferences": "Guardar preferencias",
+    "necessary": "Esenciales (siempre activas)",
+    "analytics": "Analíticas (Google Analytics)",
+    "marketing": "Marketing (Google Ads)"
+  },
   "footer": {
     "tagline": "Transforma tus recuerdos en arte magnético",
     "shop": "Tienda",

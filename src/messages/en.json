@@ -119,6 +119,16 @@
     "pieces": "{count} pieces",
     "customDesign": "Custom design"
   },
+  "cookies": {
+    "title": "Your privacy matters",
+    "description": "We use cookies to improve your experience, analyze traffic, and personalize ads. You can accept all or manage your preferences.",
+    "accept": "Accept",
+    "configure": "Configure",
+    "savePreferences": "Save preferences",
+    "necessary": "Essential (always active)",
+    "analytics": "Analytics (Google Analytics)",
+    "marketing": "Marketing (Google Ads)"
+  },
   "footer": {
     "tagline": "Transform your memories into magnetic art",
     "shop": "Shop",

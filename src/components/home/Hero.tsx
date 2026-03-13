@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
@@ -26,36 +26,189 @@ const fadeUp = {
   },
 } as const;
 
-/* ── Tile spring-in for the mosaic grid ── */
-const tileVariants = {
-  hidden: { opacity: 0, scale: 0.7, rotateZ: -4 },
-  visible: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    rotateZ: 0,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 260,
-      damping: 20,
-      delay: 0.4 + i * 0.08,
-    },
-  }),
-};
+/* ── Products that cycle through the hero mosaic ── */
+interface HeroProduct {
+  src: string;
+  cols: number;
+  rows: number;
+  label: string;
+  // Mosaic region within the product photo (0-1 fractions)
+  region: { x: number; y: number; w: number; h: number };
+}
 
-/* ── Single image split into 3×3 mosaic tiles ── */
-const HERO_IMAGE = '/products/mosaico-9-proposal.png';
-const GRID_SIZE = 3;
+const heroProducts: HeroProduct[] = [
+  {
+    src: '/products/mosaico-9-proposal.png',
+    cols: 3,
+    rows: 3,
+    label: '9 piezas',
+    region: { x: 0.09, y: 0.06, w: 0.82, h: 0.88 },
+  },
+  {
+    src: '/products/mosaico-3-panoramic.png',
+    cols: 3,
+    rows: 1,
+    label: '3 piezas',
+    region: { x: 0.12, y: 0.52, w: 0.76, h: 0.34 },
+  },
+  {
+    src: '/products/polaroid-sunset.png',
+    cols: 2,
+    rows: 2,
+    label: '4 piezas',
+    region: { x: 0.21, y: 0.16, w: 0.58, h: 0.66 },
+  },
+  {
+    src: '/products/mosaico-6-family.png',
+    cols: 2,
+    rows: 3,
+    label: '6 piezas',
+    region: { x: 0.18, y: 0.07, w: 0.62, h: 0.84 },
+  },
+];
 
-// Generate tile positions: [{row: 0, col: 0}, {row: 0, col: 1}, ...]
-const heroTiles = Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, i) => ({
-  row: Math.floor(i / GRID_SIZE),
-  col: i % GRID_SIZE,
-}));
+/* ── Tile position calculator ── */
+function getTileStyle(
+  col: number,
+  row: number,
+  cols: number,
+  rows: number,
+  region: HeroProduct['region']
+) {
+  // Scale image so the mosaic region fills the grid
+  const imgWidth = (cols / region.w) * 100;
+  const imgHeight = (rows / region.h) * 100;
+  // Position to show correct tile portion
+  const imgLeft = -(region.x * cols / region.w + col) * 100;
+  const imgTop = -(region.y * rows / region.h + row) * 100;
 
+  return {
+    width: `${imgWidth}%`,
+    height: `${imgHeight}%`,
+    left: `${imgLeft}%`,
+    top: `${imgTop}%`,
+  };
+}
+
+/* ── Mosaic Grid Component ── */
+function MosaicGrid({
+  product,
+  isInView,
+}: {
+  product: HeroProduct;
+  isInView: boolean;
+}) {
+  const { cols, rows, src, region } = product;
+  const totalTiles = cols * rows;
+
+  const tiles = Array.from({ length: totalTiles }, (_, i) => ({
+    row: Math.floor(i / cols),
+    col: i % cols,
+    index: i,
+  }));
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="absolute inset-0 flex items-center justify-center p-8 sm:p-10 lg:p-12"
+    >
+      <div
+        className="grid h-full w-full gap-2 sm:gap-2.5 lg:gap-3"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+        }}
+      >
+        {tiles.map((tile) => (
+          <motion.div
+            key={`${tile.col}-${tile.row}`}
+            initial={{ opacity: 0, scale: 0.6, rotateZ: -6 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              rotateZ: 0,
+              transition: {
+                type: 'spring' as const,
+                stiffness: 260,
+                damping: 20,
+                delay: 0.3 + tile.index * 0.09,
+              },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.6,
+              rotateZ: 6,
+              transition: {
+                type: 'spring' as const,
+                stiffness: 300,
+                damping: 25,
+                delay: (totalTiles - 1 - tile.index) * 0.06,
+              },
+            }}
+            className="relative overflow-hidden rounded-lg"
+            style={{
+              boxShadow:
+                '0 3px 10px -3px rgba(0,0,0,0.25), 0 1px 3px -1px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
+            }}
+          >
+            {/* Full image scaled and positioned to show this tile's portion */}
+            <div
+              className="absolute"
+              style={getTileStyle(tile.col, tile.row, cols, rows, region)}
+            >
+              <Image
+                src={src}
+                alt={`Mosaiko magnet tile ${tile.index + 1}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 300px, (max-width: 1024px) 350px, 440px"
+                priority
+              />
+            </div>
+            {/* Tile shine overlay */}
+            <div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%)',
+              }}
+            />
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Main Hero ── */
 export function Hero() {
   const t = useTranslations('hero');
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const currentProduct = heroProducts[currentIndex];
+
+  // Cycle through products: enter → hold → exit → next
+  useEffect(() => {
+    if (!isInView) return;
+
+    const tileCount = currentProduct.cols * currentProduct.rows;
+    // Time for all tiles to spring in + settle
+    const enterTime = 300 + tileCount * 90 + 600;
+    // Hold visible
+    const holdTime = 2500;
+    // Total before triggering next (exit animation plays via AnimatePresence)
+    const totalTime = enterTime + holdTime;
+
+    const timer = setTimeout(() => {
+      setCurrentIndex((i) => (i + 1) % heroProducts.length);
+    }, totalTime);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, isInView, currentProduct]);
 
   return (
     <section
@@ -64,7 +217,6 @@ export function Hero() {
     >
       {/* ── Background texture layers ── */}
       <div className="absolute inset-0">
-        {/* Diagonal warm gradient */}
         <div
           className="absolute inset-0"
           style={{
@@ -72,7 +224,6 @@ export function Hero() {
               'linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 40%, #F5E6D3 70%, var(--cream) 100%)',
           }}
         />
-        {/* Subtle radial glow behind content */}
         <div
           className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/3"
           style={{
@@ -82,7 +233,6 @@ export function Hero() {
               'radial-gradient(circle, rgba(232,168,56,0.08) 0%, transparent 60%)',
           }}
         />
-        {/* Noise texture overlay */}
         <div
           className="absolute inset-0 opacity-[0.035]"
           style={{
@@ -101,7 +251,6 @@ export function Hero() {
           animate={isInView ? 'visible' : 'hidden'}
           className="flex flex-col items-start pt-28 pb-8 sm:pt-32 lg:w-1/2 lg:py-20"
         >
-          {/* Badge */}
           <motion.div variants={fadeUp}>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3.5 py-1.5 text-sm font-medium text-gold-dark">
               <svg
@@ -121,7 +270,6 @@ export function Hero() {
             </span>
           </motion.div>
 
-          {/* Heading */}
           <motion.h1
             variants={fadeUp}
             className="mt-6 font-serif text-[2.75rem] font-bold leading-[1.08] tracking-tight text-charcoal sm:text-5xl lg:text-6xl xl:text-7xl"
@@ -129,7 +277,6 @@ export function Hero() {
             {t('title')}
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             variants={fadeUp}
             className="mt-5 max-w-md text-lg leading-relaxed text-warm-gray sm:text-xl lg:max-w-lg"
@@ -137,7 +284,6 @@ export function Hero() {
             {t('subtitle')}
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             variants={fadeUp}
             className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4"
@@ -173,7 +319,7 @@ export function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Right: Product mosaic on fridge surface */}
+        {/* Right: Cycling mosaic on fridge surface */}
         <div className="relative flex flex-1 items-center justify-center pb-16 lg:pb-0">
           <div className="relative">
             {/* Fridge surface */}
@@ -202,53 +348,30 @@ export function Hero() {
                 }}
               />
 
-              {/* 3×3 mosaic — one image split across tiles */}
-              <div className="absolute inset-0 flex items-center justify-center p-8 sm:p-10 lg:p-12">
-                <div className="grid h-full w-full grid-cols-3 grid-rows-3 gap-2 sm:gap-2.5 lg:gap-3">
-                  {heroTiles.map((tile, i) => (
-                    <motion.div
-                      key={i}
-                      custom={i}
-                      variants={tileVariants}
-                      initial="hidden"
-                      animate={isInView ? 'visible' : 'hidden'}
-                      className="relative overflow-hidden rounded-lg"
-                      style={{
-                        boxShadow:
-                          '0 3px 10px -3px rgba(0,0,0,0.25), 0 1px 3px -1px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
-                      }}
-                    >
-                      {/* Full image scaled to 300% and positioned to show this tile's portion */}
-                      <div
-                        className="absolute"
-                        style={{
-                          width: '300%',
-                          height: '300%',
-                          left: `${-tile.col * 100}%`,
-                          top: `${-tile.row * 100}%`,
-                        }}
-                      >
-                        <Image
-                          src={HERO_IMAGE}
-                          alt={`Mosaiko magnet tile ${i + 1} of 9`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 280px, (max-width: 1024px) 350px, 440px"
-                          priority={i < 4}
-                        />
-                      </div>
-                      {/* Tile shine overlay */}
-                      <div
-                        className="absolute inset-0 rounded-lg"
-                        style={{
-                          background:
-                            'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%)',
-                        }}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              {/* Cycling mosaic tiles */}
+              <AnimatePresence mode="wait">
+                <MosaicGrid
+                  key={currentIndex}
+                  product={currentProduct}
+                  isInView={isInView}
+                />
+              </AnimatePresence>
+
+              {/* Piece count label */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`label-${currentIndex}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0, transition: { delay: 0.8, duration: 0.4 } }}
+                  exit={{ opacity: 0, y: -8, transition: { duration: 0.2 } }}
+                  className="absolute -bottom-8 left-1/2 -translate-x-1/2"
+                >
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-charcoal/8 px-3 py-1 text-xs font-medium text-warm-gray">
+                    <span className="h-1.5 w-1.5 rounded-full bg-terracotta" />
+                    {currentProduct.label}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
             </motion.div>
 
             {/* Floating decorative elements */}
@@ -257,20 +380,14 @@ export function Hero() {
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               className="absolute -right-4 top-8 hidden h-10 w-10 rounded-lg bg-gold/20 backdrop-blur-sm lg:block"
-              style={{
-                boxShadow: '0 4px 12px -2px rgba(232,168,56,0.2)',
-              }}
+              style={{ boxShadow: '0 4px 12px -2px rgba(232,168,56,0.2)' }}
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
-              animate={
-                isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }
-              }
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
               transition={{ delay: 1.4, duration: 0.5 }}
               className="absolute -left-6 bottom-12 hidden h-8 w-8 rounded-md bg-terracotta/15 backdrop-blur-sm lg:block"
-              style={{
-                boxShadow: '0 4px 12px -2px rgba(196,101,58,0.15)',
-              }}
+              style={{ boxShadow: '0 4px 12px -2px rgba(196,101,58,0.15)' }}
             />
           </div>
         </div>
