@@ -5,83 +5,139 @@ import { motion, useInView } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
+import AutoScroll from 'embla-carousel-auto-scroll';
 
-const products = [
+/* ── Product data ── */
+type Badge = 'bestseller' | 'new' | 'limited';
+
+interface Product {
+  src: string;
+  alt: string;
+  category: string;
+  grid: string;
+  pieces: number;
+  price: number;
+  badge?: Badge;
+}
+
+const products: Product[] = [
   {
     src: '/products/mosaico-9-proposal.png',
-    alt: 'Mosaico 9 piezas — Propuesta de matrimonio',
+    alt: 'Propuesta de matrimonio',
     category: 'Mosaicos',
     grid: '3×3',
+    pieces: 9,
+    price: 480,
+    badge: 'bestseller',
   },
   {
     src: '/products/ghibli-chihiro.png',
-    alt: 'El Viaje de Chihiro — Studio Ghibli',
+    alt: 'El Viaje de Chihiro',
     category: 'Studio Ghibli',
     grid: '2×3',
+    pieces: 6,
+    price: 360,
+    badge: 'new',
   },
   {
     src: '/products/arte-noche-estrellada.png',
-    alt: 'La Noche Estrellada — Van Gogh',
+    alt: 'La Noche Estrellada',
     category: 'Arte',
     grid: '4×2+1',
+    pieces: 9,
+    price: 480,
   },
   {
     src: '/products/flores-9.png',
-    alt: 'Flores — 9 piezas',
+    alt: 'Ramo de flores',
     category: 'Flores',
     grid: '3×3',
+    pieces: 9,
+    price: 480,
   },
   {
     src: '/products/polaroid-sunset.png',
-    alt: 'Polaroid — Atardecer',
+    alt: 'Atardecer Polaroid',
     category: 'Polaroid',
     grid: '2×2',
+    pieces: 4,
+    price: 280,
   },
   {
     src: '/products/save-the-date-9.png',
-    alt: 'Save the Date — 9 piezas',
+    alt: 'Save the Date',
     category: 'Save the Date',
     grid: '3×3',
+    pieces: 9,
+    price: 480,
+    badge: 'bestseller',
   },
   {
     src: '/products/arte-mona-lisa.png',
-    alt: 'La Mona Lisa — Leonardo da Vinci',
+    alt: 'La Mona Lisa',
     category: 'Arte',
     grid: '4×2+1',
+    pieces: 9,
+    price: 480,
   },
   {
     src: '/products/ghibli-totoro.png',
-    alt: 'Mi Vecino Totoro — Studio Ghibli',
+    alt: 'Mi Vecino Totoro',
     category: 'Studio Ghibli',
     grid: '2×3',
+    pieces: 6,
+    price: 360,
+    badge: 'new',
   },
   {
     src: '/products/arte-el-beso.png',
-    alt: 'El Beso — Gustav Klimt',
+    alt: 'El Beso — Klimt',
     category: 'Arte',
     grid: '4×2+1',
+    pieces: 9,
+    price: 480,
+    badge: 'limited',
   },
   {
     src: '/products/ghibli-mononoke.png',
-    alt: 'La Princesa Mononoke — Studio Ghibli',
+    alt: 'Princesa Mononoke',
     category: 'Studio Ghibli',
     grid: '2×3',
+    pieces: 6,
+    price: 360,
   },
   {
     src: '/products/mosaico-6-family.png',
-    alt: 'Mosaico 6 piezas — Familia',
+    alt: 'Familia',
     category: 'Mosaicos',
     grid: '2×3',
+    pieces: 6,
+    price: 360,
   },
   {
     src: '/products/mosaico-3-panoramic.png',
-    alt: 'Mosaico 3 piezas — Panorámica',
+    alt: 'Panoramica',
     category: 'Mosaicos',
     grid: '1×3',
+    pieces: 3,
+    price: 200,
   },
 ];
 
+const badgeStyles: Record<Badge, { label: string; bg: string }> = {
+  bestseller: { label: 'Mas vendido', bg: 'bg-gold text-charcoal' },
+  new: { label: 'Nuevo', bg: 'bg-teal text-white' },
+  limited: { label: 'Edicion limitada', bg: 'bg-terracotta text-white' },
+};
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 0,
+  }).format(price);
+
+/* ── Heading animation ── */
 const headingVariants = {
   hidden: { opacity: 0, y: 24 },
   visible: {
@@ -94,9 +150,7 @@ const headingVariants = {
 export function ProductCarousel() {
   const t = useTranslations('carousel');
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.12 });
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(true);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
@@ -107,8 +161,10 @@ export function ProductCarousel() {
       dragFree: true,
     },
     [
-      Autoplay({
-        delay: 3000,
+      AutoScroll({
+        speed: 0.6,
+        startDelay: 1500,
+        direction: 'forward',
         stopOnInteraction: false,
         stopOnMouseEnter: true,
         stopOnFocusIn: true,
@@ -116,37 +172,34 @@ export function ProductCarousel() {
     ]
   );
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
-    onSelect();
-    return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  // Respect prefers-reduced-motion
+  useEffect(() => {
+    if (!emblaApi) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mq.matches) {
+      const autoScroll = emblaApi.plugins()?.autoScroll;
+      if (autoScroll && 'stop' in autoScroll) {
+        (autoScroll as { stop: () => void }).stop();
+      }
+    }
+  }, [emblaApi]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-cream py-20 sm:py-24 lg:py-32"
+      className="carousel-section relative overflow-hidden py-20 sm:py-24 lg:py-32"
+      aria-roledescription="carousel"
+      aria-label={t('title')}
     >
-      {/* Heading — stays inside the container */}
+      {/* Heading — inside the container */}
       <motion.div
         variants={headingVariants}
         initial="hidden"
         animate={isInView ? 'visible' : 'hidden'}
-        className="container-mosaiko mb-12 sm:mb-16"
+        className="container-mosaiko mb-14 sm:mb-18 lg:mb-20"
       >
         <div className="flex items-end justify-between">
           <div>
@@ -158,12 +211,11 @@ export function ProductCarousel() {
             </p>
           </div>
 
-          {/* Desktop nav arrows — aligned with heading */}
+          {/* Desktop nav arrows */}
           <div className="hidden items-center gap-2 sm:flex">
             <button
               onClick={scrollPrev}
-              disabled={!canScrollPrev}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-light-gray bg-white text-charcoal transition-all hover:border-terracotta hover:text-terracotta disabled:opacity-30 disabled:hover:border-light-gray disabled:hover:text-charcoal"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-light-gray bg-white/80 text-charcoal backdrop-blur-sm transition-all hover:border-terracotta hover:text-terracotta"
               aria-label="Anterior"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -172,8 +224,7 @@ export function ProductCarousel() {
             </button>
             <button
               onClick={scrollNext}
-              disabled={!canScrollNext}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-light-gray bg-white text-charcoal transition-all hover:border-terracotta hover:text-terracotta disabled:opacity-30 disabled:hover:border-light-gray disabled:hover:text-charcoal"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-light-gray bg-white/80 text-charcoal backdrop-blur-sm transition-all hover:border-terracotta hover:text-terracotta"
               aria-label="Siguiente"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -184,65 +235,84 @@ export function ProductCarousel() {
         </div>
       </motion.div>
 
-      {/* Full-bleed Embla carousel */}
-      <div className="relative">
+      {/* Full-bleed gallery carousel — no card containers */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
+        transition={{ delay: 0.25, duration: 0.8 }}
+        className="relative"
+      >
         {/* Fade edges */}
-        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-6 bg-gradient-to-r from-cream to-transparent sm:w-12" />
-        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-6 bg-gradient-to-l from-cream to-transparent sm:w-16" />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-10 bg-gradient-to-r from-cream to-transparent sm:w-20 lg:w-28" />
+        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-10 bg-gradient-to-l from-cream to-transparent sm:w-20 lg:w-28" />
 
-        {/* Embla viewport — full-bleed with container-aligned padding */}
+        {/* Embla viewport */}
         <div ref={emblaRef} className="carousel-track overflow-hidden">
-          <div className="flex gap-5 sm:gap-6">
-            {products.map((product, index) => (
-              <motion.div
+          <div className="flex items-end gap-6 sm:gap-8">
+            {products.map((product) => (
+              <div
                 key={product.src}
-                initial={{ opacity: 0, y: 40 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  delay: 0.15 + index * 0.05,
-                  duration: 0.6,
-                  ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
-                }}
-                className="group min-w-0 flex-[0_0_280px] sm:flex-[0_0_320px] lg:flex-[0_0_340px]"
+                className="group relative min-w-0 flex-[0_0_320px] cursor-pointer sm:flex-[0_0_380px] lg:flex-[0_0_420px]"
+                aria-roledescription="slide"
               >
-                <div className="relative overflow-hidden rounded-2xl border border-transparent bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-light-gray group-hover:shadow-lg">
-                  {/* Category badge — floating overlay */}
-                  <div className="absolute left-3 top-3 z-[2]">
-                    <span className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-teal backdrop-blur-sm">
-                      {product.category}
-                    </span>
-                  </div>
+                {/* The image itself — no card container, just the product */}
+                <div className="relative overflow-hidden rounded-xl transition-transform duration-500 ease-out group-hover:scale-[1.03]">
+                  {/* Badge — always visible in top corner */}
+                  {product.badge && (
+                    <div className="absolute left-3 top-3 z-20">
+                      <span className={`inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider shadow-sm ${badgeStyles[product.badge].bg}`}>
+                        {badgeStyles[product.badge].label}
+                      </span>
+                    </div>
+                  )}
 
-                  {/* Grid badge — top right */}
-                  <div className="absolute right-3 top-3 z-[2]">
-                    <span className="inline-flex items-center rounded-full bg-charcoal/70 px-2 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm">
-                      {product.grid}
-                    </span>
-                  </div>
-
-                  {/* Image */}
-                  <div className="relative aspect-[4/5] overflow-hidden bg-warm-white">
+                  {/* Product image — large, no padding, no background */}
+                  <div className="relative aspect-[3/4]">
                     <Image
                       src={product.src}
                       alt={product.alt}
                       fill
-                      className="object-contain p-5 transition-transform duration-500 ease-out group-hover:scale-[1.06]"
-                      sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 340px"
+                      className="object-contain drop-shadow-lg"
+                      sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 420px"
                     />
                   </div>
 
-                  {/* Bottom info bar */}
-                  <div className="border-t border-cream-dark px-4 py-3">
-                    <p className="truncate text-sm font-medium text-charcoal">
-                      {product.alt}
-                    </p>
+                  {/* Hover overlay — elegant info reveal from bottom */}
+                  <div className="absolute inset-0 z-10 flex flex-col justify-end opacity-0 transition-opacity duration-400 group-hover:opacity-100">
+                    {/* Gradient scrim */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/30 to-transparent" />
+
+                    {/* Info content */}
+                    <div className="relative translate-y-3 px-5 pb-5 pt-16 transition-transform duration-400 ease-out group-hover:translate-y-0">
+                      <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/80 backdrop-blur-sm">
+                        {product.category} · {product.grid}
+                      </span>
+                      <h3 className="mt-2 font-serif text-lg font-semibold leading-tight text-white sm:text-xl">
+                        {product.alt}
+                      </h3>
+                      <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-lg font-bold text-white">
+                          {formatPrice(product.price)}
+                        </span>
+                        <span className="text-xs text-white/60">
+                          {product.pieces} piezas
+                        </span>
+                      </div>
+                      {/* CTA hint */}
+                      <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-white/70">
+                        <span>Ver detalles</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

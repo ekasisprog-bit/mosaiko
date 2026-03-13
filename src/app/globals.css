@@ -150,9 +150,14 @@ body {
   }
 }
 
+/* ── Carousel Section Background ── */
+.carousel-section {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 50%, var(--cream-dark) 0%, var(--cream) 70%);
+}
+
 /* ── Full-bleed Carousel Track (Embla) ── */
 /* Left padding aligns first card with container-mosaiko content edge */
-/* Right padding is smaller to hint at more content beyond viewport */
 .carousel-track {
   padding-left: 1rem;
   padding-right: 1rem;
