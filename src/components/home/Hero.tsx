@@ -42,18 +42,15 @@ const tileVariants = {
   }),
 };
 
-/* ── Real product images for the mosaic ── */
-const heroTiles = [
-  { src: '/products/mosaico-9-proposal.png', alt: 'Mosaico propuesta' },
-  { src: '/products/ghibli-chihiro.png', alt: 'Studio Ghibli' },
-  { src: '/products/arte-noche-estrellada.png', alt: 'Arte clásico' },
-  { src: '/products/flores-9.png', alt: 'Flores' },
-  { src: '/products/polaroid-sunset.png', alt: 'Polaroid' },
-  { src: '/products/save-the-date-9.png', alt: 'Save the Date' },
-  { src: '/products/arte-mona-lisa.png', alt: 'La Mona Lisa' },
-  { src: '/products/ghibli-totoro.png', alt: 'Mi Vecino Totoro' },
-  { src: '/products/arte-el-beso.png', alt: 'El Beso' },
-];
+/* ── Single image split into 3×3 mosaic tiles ── */
+const HERO_IMAGE = '/products/mosaico-9-proposal.png';
+const GRID_SIZE = 3;
+
+// Generate tile positions: [{row: 0, col: 0}, {row: 0, col: 1}, ...]
+const heroTiles = Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, i) => ({
+  row: Math.floor(i / GRID_SIZE),
+  col: i % GRID_SIZE,
+}));
 
 export function Hero() {
   const t = useTranslations('hero');
@@ -205,12 +202,12 @@ export function Hero() {
                 }}
               />
 
-              {/* 3x3 product mosaic grid */}
-              <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 lg:p-10">
+              {/* 3×3 mosaic — one image split across tiles */}
+              <div className="absolute inset-0 flex items-center justify-center p-8 sm:p-10 lg:p-12">
                 <div className="grid h-full w-full grid-cols-3 grid-rows-3 gap-2 sm:gap-2.5 lg:gap-3">
                   {heroTiles.map((tile, i) => (
                     <motion.div
-                      key={tile.src}
+                      key={i}
                       custom={i}
                       variants={tileVariants}
                       initial="hidden"
@@ -221,19 +218,31 @@ export function Hero() {
                           '0 3px 10px -3px rgba(0,0,0,0.25), 0 1px 3px -1px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
                       }}
                     >
-                      <Image
-                        src={tile.src}
-                        alt={tile.alt}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 130px"
-                      />
+                      {/* Full image scaled to 300% and positioned to show this tile's portion */}
+                      <div
+                        className="absolute"
+                        style={{
+                          width: '300%',
+                          height: '300%',
+                          left: `${-tile.col * 100}%`,
+                          top: `${-tile.row * 100}%`,
+                        }}
+                      >
+                        <Image
+                          src={HERO_IMAGE}
+                          alt={`Mosaiko magnet tile ${i + 1} of 9`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 280px, (max-width: 1024px) 350px, 440px"
+                          priority={i < 4}
+                        />
+                      </div>
                       {/* Tile shine overlay */}
                       <div
                         className="absolute inset-0 rounded-lg"
                         style={{
                           background:
-                            'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 40%)',
+                            'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%)',
                         }}
                       />
                     </motion.div>
