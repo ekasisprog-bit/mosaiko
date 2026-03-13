@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll from 'embla-carousel-auto-scroll';
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 /* ── Product data ── */
 type Badge = 'bestseller' | 'new' | 'limited';
@@ -169,6 +170,7 @@ export function ProductCarousel() {
         stopOnMouseEnter: true,
         stopOnFocusIn: true,
       }),
+      WheelGesturesPlugin({ forceWheelAxis: 'x' }),
     ]
   );
 
@@ -247,12 +249,12 @@ export function ProductCarousel() {
         <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-10 bg-gradient-to-l from-cream to-transparent sm:w-20 lg:w-28" />
 
         {/* Embla viewport */}
-        <div ref={emblaRef} className="carousel-track overflow-hidden">
-          <div className="flex items-end gap-6 sm:gap-8">
+        <div ref={emblaRef} className="carousel-track cursor-grab overflow-hidden active:cursor-grabbing">
+          <div className="flex items-center gap-3 sm:gap-4">
             {products.map((product) => (
               <div
                 key={product.src}
-                className="group relative min-w-0 flex-[0_0_320px] cursor-pointer sm:flex-[0_0_380px] lg:flex-[0_0_420px]"
+                className="group relative min-w-0 flex-[0_0_280px] sm:flex-[0_0_340px] lg:flex-[0_0_380px]"
                 aria-roledescription="slide"
               >
                 {/* The image itself — no card container, just the product */}
@@ -267,12 +269,12 @@ export function ProductCarousel() {
                   )}
 
                   {/* Product image — large, no padding, no background */}
-                  <div className="relative aspect-[3/4]">
+                  <div className="relative aspect-square">
                     <Image
                       src={product.src}
                       alt={product.alt}
                       fill
-                      className="object-contain drop-shadow-lg"
+                      className="object-contain object-center drop-shadow-lg"
                       sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 420px"
                     />
                   </div>

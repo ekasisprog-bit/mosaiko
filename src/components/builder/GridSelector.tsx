@@ -11,20 +11,24 @@ interface GridSelectorProps {
 
 const GRID_OPTIONS: GridSize[] = [3, 4, 6, 9];
 
-/** Visual SVG icon for each grid layout. */
+/** Visual SVG icon for each grid layout — all tiles are square (like real magnets). */
 function GridIcon({ size, isSelected }: { size: GridSize; isSelected: boolean }) {
   const config = GRID_CONFIGS[size];
   const fillColor = isSelected ? '#C4653A' : '#1B4D4F';
   const gap = 2;
-  const viewSize = 48;
-  const cellW = (viewSize - gap * (config.cols - 1)) / config.cols;
-  const cellH = (viewSize - gap * (config.rows - 1)) / config.rows;
+  const cell = 12;
+  const vw = config.cols * cell + (config.cols - 1) * gap;
+  const vh = config.rows * cell + (config.rows - 1) * gap;
+  const maxDim = 48;
+  const scale = maxDim / Math.max(vw, vh);
+  const displayW = Math.round(vw * scale);
+  const displayH = Math.round(vh * scale);
 
   return (
     <svg
-      width={48}
-      height={48}
-      viewBox={`0 0 ${viewSize} ${viewSize}`}
+      width={displayW}
+      height={displayH}
+      viewBox={`0 0 ${vw} ${vh}`}
       aria-hidden="true"
       className="shrink-0"
     >
@@ -32,10 +36,10 @@ function GridIcon({ size, isSelected }: { size: GridSize; isSelected: boolean })
         Array.from({ length: config.cols }).map((_, col) => (
           <rect
             key={`${row}-${col}`}
-            x={col * (cellW + gap)}
-            y={row * (cellH + gap)}
-            width={cellW}
-            height={cellH}
+            x={col * (cell + gap)}
+            y={row * (cell + gap)}
+            width={cell}
+            height={cell}
             rx={2}
             fill={fillColor}
             opacity={isSelected ? 0.9 : 0.6}
@@ -44,6 +48,14 @@ function GridIcon({ size, isSelected }: { size: GridSize; isSelected: boolean })
       )}
     </svg>
   );
+}
+
+const TILE_CM = 7;
+
+function getDimensions(config: { cols: number; rows: number }) {
+  const totalW = config.cols * TILE_CM;
+  const totalH = config.rows * TILE_CM;
+  return { tile: `${TILE_CM}×${TILE_CM}cm`, total: `${totalW}×${totalH}cm` };
 }
 
 const containerVariants = {
@@ -130,6 +142,9 @@ export function GridSelector({ onSelect, selected }: GridSelectorProps) {
                 </span>
                 <span className="text-xs text-warm-gray leading-snug text-center">
                   {t(descKey)}
+                </span>
+                <span className="mt-0.5 text-[10px] text-warm-gray/70 leading-tight text-center">
+                  {getDimensions(config).tile} c/u · {getDimensions(config).total} total
                 </span>
               </div>
 

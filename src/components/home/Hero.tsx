@@ -27,13 +27,17 @@ const fadeUp = {
 } as const;
 
 /* ── Products that cycle through the hero mosaic ── */
+type TileRegion = { x: number; y: number; w: number; h: number };
+
 interface HeroProduct {
   src: string;
   cols: number;
   rows: number;
   label: string;
   // Mosaic region within the product photo (0-1 fractions)
-  region: { x: number; y: number; w: number; h: number };
+  region: TileRegion;
+  // Per-tile regions for products with unequal magnet sizes (overrides equal division)
+  tileRegions?: TileRegion[];
 }
 
 const heroProducts: HeroProduct[] = [
@@ -42,43 +46,49 @@ const heroProducts: HeroProduct[] = [
     cols: 3,
     rows: 3,
     label: '9 piezas',
-    region: { x: 0.09, y: 0.06, w: 0.82, h: 0.88 },
+    region: { x: 0.197, y: 0.092, w: 0.574, h: 0.742 },
   },
   {
     src: '/products/mosaico-3-panoramic.png',
     cols: 3,
     rows: 1,
     label: '3 piezas',
-    region: { x: 0.12, y: 0.52, w: 0.76, h: 0.34 },
+    region: { x: 0.197, y: 0.577, w: 0.573, h: 0.247 },
+    // Pixel-measured per-magnet regions (magnets are 624, 619, 631px wide)
+    tileRegions: [
+      { x: 0.1973, y: 0.5769, w: 0.1891, h: 0.2475 }, // magnet 1
+      { x: 0.3900, y: 0.5769, w: 0.1876, h: 0.2475 }, // magnet 2
+      { x: 0.5806, y: 0.5769, w: 0.1912, h: 0.2475 }, // magnet 3
+    ],
   },
   {
     src: '/products/polaroid-sunset.png',
     cols: 2,
     rows: 2,
     label: '4 piezas',
-    region: { x: 0.21, y: 0.16, w: 0.58, h: 0.66 },
+    region: { x: 0.252, y: 0.274, w: 0.496, h: 0.382 },
   },
   {
     src: '/products/mosaico-6-family.png',
     cols: 2,
     rows: 3,
     label: '6 piezas',
-    region: { x: 0.18, y: 0.07, w: 0.62, h: 0.84 },
+    region: { x: 0.197, y: 0.092, w: 0.383, h: 0.742 },
   },
 ];
 
-/* ── Tile position calculator ── */
+/* ── Tile position calculators ── */
+
+/** Default: equal division of a single region across the grid */
 function getTileStyle(
   col: number,
   row: number,
   cols: number,
   rows: number,
-  region: HeroProduct['region']
+  region: TileRegion
 ) {
-  // Scale image so the mosaic region fills the grid
   const imgWidth = (cols / region.w) * 100;
   const imgHeight = (rows / region.h) * 100;
-  // Position to show correct tile portion
   const imgLeft = -(region.x * cols / region.w + col) * 100;
   const imgTop = -(region.y * rows / region.h + row) * 100;
 
@@ -87,6 +97,16 @@ function getTileStyle(
     height: `${imgHeight}%`,
     left: `${imgLeft}%`,
     top: `${imgTop}%`,
+  };
+}
+
+/** Per-tile: each tile maps to its own measured region in the image */
+function getDirectTileStyle(region: TileRegion) {
+  return {
+    width: `${100 / region.w}%`,
+    height: `${100 / region.h}%`,
+    left: `${-(region.x / region.w) * 100}%`,
+    top: `${-(region.y / region.h) * 100}%`,
   };
 }
 
@@ -115,10 +135,14 @@ function MosaicGrid({
       className="absolute inset-0 flex items-center justify-center p-8 sm:p-10 lg:p-12"
     >
       <div
-        className="grid h-full w-full gap-2 sm:gap-2.5 lg:gap-3"
+        className="grid gap-1 sm:gap-1.5 lg:gap-2"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gridTemplateRows: `repeat(${rows}, 1fr)`,
+          aspectRatio: `${cols} / ${rows}`,
+          ...(cols >= rows
+            ? { width: '100%' }
+            : { height: '100%' }),
         }}
       >
         {tiles.map((tile) => (
@@ -150,13 +174,15 @@ function MosaicGrid({
             className="relative overflow-hidden rounded-lg"
             style={{
               boxShadow:
-                '0 3px 10px -3px rgba(0,0,0,0.25), 0 1px 3px -1px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
+                '0 3px 10px -3px rgba(0,0,0,0.25), 0 1px 3px -1px rgba(0,0,0,0.15), inset 0 0 0 1.5px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.15)',
             }}
           >
             {/* Full image scaled and positioned to show this tile's portion */}
             <div
               className="absolute"
-              style={getTileStyle(tile.col, tile.row, cols, rows, region)}
+              style={product.tileRegions
+                ? getDirectTileStyle(product.tileRegions[tile.index])
+                : getTileStyle(tile.col, tile.row, cols, rows, region)}
             >
               <Image
                 src={src}
