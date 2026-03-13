@@ -66,6 +66,10 @@
     "arte": "Arte",
     "flores": "Flores"
   },
+  "carousel": {
+    "title": "Nuestros diseños",
+    "subtitle": "Desde arte clásico hasta fotos personalizadas — descubre todas las posibilidades"
+  },
   "ctaBanner": {
     "title": "¿Listo para crear tus imanes?",
     "subtitle": "Diseña un mosaico magnético único con tu foto favorita",

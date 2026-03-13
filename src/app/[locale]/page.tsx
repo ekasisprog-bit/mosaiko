@@ -4,6 +4,7 @@ import { Hero } from '@/components/home/Hero';
 import { HowItWorks } from '@/components/home/HowItWorks';
 import { FeaturedCategories } from '@/components/home/FeaturedCategories';
 import { TrustBadges } from '@/components/home/TrustBadges';
+import { ProductCarousel } from '@/components/home/ProductCarousel';
 import { CtaBanner } from '@/components/home/CtaBanner';
 
 export async function generateMetadata({
@@ -37,6 +38,7 @@ export default async function HomePage({
     <main>
       <Hero />
       <HowItWorks />
+      <ProductCarousel />
       <FeaturedCategories />
       <TrustBadges />
       <CtaBanner />

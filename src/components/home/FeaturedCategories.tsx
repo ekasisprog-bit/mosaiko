@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import Image from 'next/image';
 
 /* ── Animation variants ── */
 const containerVariants = {
@@ -40,26 +41,26 @@ const categories = [
   {
     slug: 'mosaicos',
     translationKey: 'mosaicos' as const,
-    gradient: 'from-terracotta via-terracotta-light to-gold',
-    accent: 'rgba(196,101,58,0.9)',
+    image: '/categories/mosaicos.png',
+    accent: 'rgba(44,44,44,0.85)',
   },
   {
     slug: 'studio-ghibli',
     translationKey: 'ghibli' as const,
-    gradient: 'from-teal via-teal-light to-gold-light',
-    accent: 'rgba(27,77,79,0.9)',
+    image: '/categories/studio-ghibli.png',
+    accent: 'rgba(27,77,79,0.85)',
   },
   {
     slug: 'arte',
     translationKey: 'arte' as const,
-    gradient: 'from-gold-dark via-terracotta to-terracotta-dark',
-    accent: 'rgba(196,138,32,0.9)',
+    image: '/categories/arte.png',
+    accent: 'rgba(44,44,44,0.85)',
   },
   {
     slug: 'flores',
     translationKey: 'flores' as const,
-    gradient: 'from-terracotta-light via-gold to-gold-light',
-    accent: 'rgba(212,132,95,0.9)',
+    image: '/categories/flores.png',
+    accent: 'rgba(44,44,44,0.85)',
   },
 ];
 
@@ -103,30 +104,15 @@ export function FeaturedCategories() {
                     href={`/catalogo`}
                     className="group relative block overflow-hidden rounded-2xl"
                   >
-                    {/* Card image area (placeholder gradient) */}
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} transition-transform duration-500 ease-out group-hover:scale-110`}
+                    {/* Card image area */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-cream-dark">
+                      <Image
+                        src={cat.image}
+                        alt={t(cat.translationKey)}
+                        fill
+                        className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-105"
+                        sizes="(max-width: 640px) 72vw, (max-width: 1024px) 50vw, 25vw"
                       />
-                      {/* Subtle pattern overlay on the gradient */}
-                      <div
-                        className="absolute inset-0 opacity-10"
-                        style={{
-                          backgroundImage:
-                            'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 50%)',
-                        }}
-                      />
-                      {/* Decorative mini-grid pattern */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-[0.12]">
-                        <div className="grid h-20 w-20 grid-cols-3 grid-rows-3 gap-1">
-                          {Array.from({ length: 9 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className="rounded-sm bg-white"
-                            />
-                          ))}
-                        </div>
-                      </div>
                     </div>
 
                     {/* Category name overlay */}
