@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Playfair_Display, DM_Sans, Montserrat } from 'next/font/google';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
@@ -63,13 +63,14 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
+  const messages = await getMessages();
 
   return (
     <html lang={locale}>
       <body
         className={`${playfair.variable} ${dmSans.variable} ${montserrat.variable} grain-overlay antialiased`}
       >
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <AnnouncementBar />
           <Header />
           <main className="min-h-[calc(100dvh-var(--header-height))]">
