@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useCartStore, selectCartCount } from '@/lib/cart-store';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 const NAV_LINKS = [
   { href: '/catalogo' as const, key: 'catalog' },
@@ -69,11 +70,16 @@ export function Header() {
     >
       <div className="container-mosaiko flex h-full items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-0.5" onClick={closeMobileMenu}>
-          <span className="text-2xl font-bold text-terracotta font-brand tracking-tight">
-            M
-          </span>
-          <span className="text-2xl font-bold text-charcoal font-brand tracking-tight">
+        <Link href="/" className="flex items-center gap-1" onClick={closeMobileMenu}>
+          <Image
+            src="/logos/logo-dark.png"
+            alt="Mosaiko"
+            width={28}
+            height={28}
+            className="h-7 w-7"
+            priority
+          />
+          <span className="text-xl font-bold text-charcoal font-brand tracking-tight">
             OSAIKO
           </span>
         </Link>
