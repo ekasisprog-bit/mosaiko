@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "Mosaiko — Imanes Personalizados con tu Foto",
+    "description": "Transforma tus fotos favoritas en imanes magnéticos para refrigerador. Elige tu diseño, sube tu foto y recibe tus imanes en casa."
+  },
+  "common": {
+    "brandName": "Mosaiko",
+    "currency": "MXN",
+    "addToCart": "Agregar al carrito",
+    "buyNow": "Comprar ahora",
+    "viewAll": "Ver todos",
+    "learnMore": "Saber más",
+    "back": "Volver",
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "pieces": "piezas",
+    "freeShipping": "Envío gratis",
+    "madeInMexico": "Hecho en México"
+  },
+  "announcement": {
+    "text": "Envío gratis en todos los pedidos — ¡Personaliza tus imanes hoy!"
+  },
+  "nav": {
+    "home": "Inicio",
+    "catalog": "Catálogo",
+    "customize": "Personalizar",
+    "cart": "Carrito",
+    "about": "Nosotros",
+    "faq": "Preguntas Frecuentes",
+    "contact": "Contacto",
+    "language": "Idioma"
+  },
+  "hero": {
+    "badge": "Imanes personalizados",
+    "title": "Tu foto, tus imanes",
+    "subtitle": "Transforma cualquier imagen en un mosaico magnético único para tu refrigerador",
+    "cta": "Crear mis imanes",
+    "ctaSecondary": "Ver catálogo"
+  },
+  "howItWorks": {
+    "title": "¿Cómo funciona?",
+    "subtitle": "En 3 simples pasos, crea tus imanes personalizados",
+    "step1Title": "Elige tu diseño",
+    "step1Desc": "Selecciona el tamaño de tu mosaico: 3, 4, 6 o 9 piezas",
+    "step2Title": "Sube tu foto",
+    "step2Desc": "Toma una foto o selecciona una de tu galería y ajústala",
+    "step3Title": "¡Recíbelos en casa!",
+    "step3Desc": "Imprimimos y enviamos tus imanes personalizados a tu puerta"
+  },
+  "trustBadges": {
+    "quality": "Calidad Premium",
+    "qualityDesc": "Impresión de alta resolución en material magnético duradero",
+    "shipping": "Envío Gratis",
+    "shippingDesc": "A toda la República Mexicana sin costo adicional",
+    "satisfaction": "100% Satisfacción",
+    "satisfactionDesc": "Si no te encanta, te devolvemos tu dinero",
+    "secure": "Pago Seguro",
+    "secureDesc": "Tarjeta, OXXO o transferencia — tus datos siempre protegidos"
+  },
+  "featured": {
+    "title": "Categorías populares",
+    "subtitle": "Explora nuestros diseños más queridos",
+    "mosaicos": "Mosaicos",
+    "ghibli": "Studio Ghibli",
+    "arte": "Arte",
+    "flores": "Flores"
+  },
+  "ctaBanner": {
+    "title": "¿Listo para crear tus imanes?",
+    "subtitle": "Diseña un mosaico magnético único con tu foto favorita",
+    "cta": "Personalizar ahora"
+  },
+  "builder": {
+    "title": "Personaliza tus imanes",
+    "subtitle": "Crea un mosaico magnético único con tu foto favorita",
+    "stepGrid": "Elige tamaño",
+    "stepUpload": "Sube tu foto",
+    "stepCrop": "Ajusta tu imagen",
+    "stepPreview": "Vista previa",
+    "grid3": "3 piezas",
+    "grid3Desc": "Tira horizontal — ideal para panorámicas",
+    "grid4": "4 piezas",
+    "grid4Desc": "Cuadrado 2×2 — estilo Polaroid",
+    "grid6": "6 piezas",
+    "grid6Desc": "Retrato 2×3 — perfecto para fotos verticales",
+    "grid9": "9 piezas",
+    "grid9Desc": "Mosaico 3×3 — el favorito para fotos grandes",
+    "uploadTitle": "Sube tu foto",
+    "takePhoto": "Tomar foto",
+    "chooseGallery": "Subir de galería",
+    "dragDrop": "o arrastra y suelta aquí",
+    "imageQuality": "Calidad de imagen",
+    "qualityGood": "Excelente",
+    "qualityMedium": "Aceptable",
+    "qualityLow": "Baja resolución",
+    "cropTitle": "Ajusta tu imagen",
+    "cropHint": "Arrastra y pellizca para ajustar",
+    "previewTitle": "¡Así quedará tu mosaico!",
+    "previewHint": "Vista previa de cómo se verán tus imanes en el refrigerador",
+    "addToCart": "Agregar al carrito — ${price}",
+    "startOver": "Empezar de nuevo"
+  },
+  "cart": {
+    "title": "Tu carrito",
+    "empty": "Tu carrito está vacío",
+    "emptyHint": "¡Agrega imanes personalizados o de nuestro catálogo!",
+    "continueShopping": "Seguir comprando",
+    "subtotal": "Subtotal",
+    "shipping": "Envío",
+    "free": "Gratis",
+    "total": "Total",
+    "checkout": "Ir a pagar",
+    "remove": "Eliminar",
+    "pieces": "{count} piezas",
+    "customDesign": "Diseño personalizado"
+  },
+  "footer": {
+    "tagline": "Transforma tus recuerdos en arte magnético",
+    "shop": "Tienda",
+    "company": "Empresa",
+    "legal": "Legal",
+    "terms": "Términos y Condiciones",
+    "privacy": "Política de Privacidad",
+    "cookies": "Política de Cookies",
+    "madeWith": "Hecho con",
+    "by": "por",
+    "rights": "Todos los derechos reservados"
+  }
+}

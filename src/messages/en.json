@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "Mosaiko — Custom Photo Fridge Magnets",
+    "description": "Turn your favorite photos into magnetic fridge mosaics. Choose your design, upload your photo, and get your magnets delivered."
+  },
+  "common": {
+    "brandName": "Mosaiko",
+    "currency": "MXN",
+    "addToCart": "Add to cart",
+    "buyNow": "Buy now",
+    "viewAll": "View all",
+    "learnMore": "Learn more",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "loading": "Loading...",
+    "pieces": "pieces",
+    "freeShipping": "Free shipping",
+    "madeInMexico": "Made in Mexico"
+  },
+  "announcement": {
+    "text": "Free shipping on all orders — Customize your magnets today!"
+  },
+  "nav": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "customize": "Customize",
+    "cart": "Cart",
+    "about": "About",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "Custom magnets",
+    "title": "Your photo, your magnets",
+    "subtitle": "Transform any image into a unique magnetic mosaic for your fridge",
+    "cta": "Create my magnets",
+    "ctaSecondary": "Browse catalog"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "subtitle": "Create your custom magnets in 3 simple steps",
+    "step1Title": "Choose your design",
+    "step1Desc": "Select your mosaic size: 3, 4, 6, or 9 pieces",
+    "step2Title": "Upload your photo",
+    "step2Desc": "Take a photo or select one from your gallery and adjust it",
+    "step3Title": "Get them delivered!",
+    "step3Desc": "We print and ship your custom magnets straight to your door"
+  },
+  "trustBadges": {
+    "quality": "Premium Quality",
+    "qualityDesc": "High-resolution printing on durable magnetic material",
+    "shipping": "Free Shipping",
+    "shippingDesc": "Delivered anywhere in Mexico at no extra cost",
+    "satisfaction": "100% Satisfaction",
+    "satisfactionDesc": "If you don't love it, we'll refund your money",
+    "secure": "Secure Payment",
+    "secureDesc": "Card, OXXO, or bank transfer — your data always protected"
+  },
+  "featured": {
+    "title": "Popular categories",
+    "subtitle": "Explore our most loved designs",
+    "mosaicos": "Mosaics",
+    "ghibli": "Studio Ghibli",
+    "arte": "Art",
+    "flores": "Flowers"
+  },
+  "ctaBanner": {
+    "title": "Ready to create your magnets?",
+    "subtitle": "Design a unique magnetic mosaic with your favorite photo",
+    "cta": "Customize now"
+  },
+  "builder": {
+    "title": "Customize your magnets",
+    "subtitle": "Create a unique magnetic mosaic with your favorite photo",
+    "stepGrid": "Choose size",
+    "stepUpload": "Upload photo",
+    "stepCrop": "Adjust image",
+    "stepPreview": "Preview",
+    "grid3": "3 pieces",
+    "grid3Desc": "Horizontal strip — great for panoramics",
+    "grid4": "4 pieces",
+    "grid4Desc": "2×2 square — Polaroid style",
+    "grid6": "6 pieces",
+    "grid6Desc": "2×3 portrait — perfect for vertical photos",
+    "grid9": "9 pieces",
+    "grid9Desc": "3×3 mosaic — the favorite for large photos",
+    "uploadTitle": "Upload your photo",
+    "takePhoto": "Take photo",
+    "chooseGallery": "Upload from gallery",
+    "dragDrop": "or drag and drop here",
+    "imageQuality": "Image quality",
+    "qualityGood": "Excellent",
+    "qualityMedium": "Acceptable",
+    "qualityLow": "Low resolution",
+    "cropTitle": "Adjust your image",
+    "cropHint": "Drag and pinch to adjust",
+    "previewTitle": "Here's your mosaic!",
+    "previewHint": "Preview of how your magnets will look on the fridge",
+    "addToCart": "Add to cart — ${price}",
+    "startOver": "Start over"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "emptyHint": "Add custom magnets or browse our catalog!",
+    "continueShopping": "Continue shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "checkout": "Checkout",
+    "remove": "Remove",
+    "pieces": "{count} pieces",
+    "customDesign": "Custom design"
+  },
+  "footer": {
+    "tagline": "Transform your memories into magnetic art",
+    "shop": "Shop",
+    "company": "Company",
+    "legal": "Legal",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookie Policy",
+    "madeWith": "Made with",
+    "by": "by",
+    "rights": "All rights reserved"
+  }
+}

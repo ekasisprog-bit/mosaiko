@@ -1,0 +1,77 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { GridSize } from './grid-config';
+
+export interface CartItem {
+  id: string;
+  type: 'custom' | 'predesigned';
+  name: string;
+  gridSize: GridSize;
+  gridLayout: { rows: number; cols: number };
+  price: number;
+  quantity: number;
+  previewUrl: string;
+  tileUrls: string[];
+  // For predesigned products
+  productId?: string;
+  categorySlug?: string;
+}
+
+interface CartState {
+  items: CartItem[];
+  isDrawerOpen: boolean;
+  addItem: (item: Omit<CartItem, 'id'>) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  toggleDrawer: () => void;
+}
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
+      items: [],
+      isDrawerOpen: false,
+
+      addItem: (item) =>
+        set((state) => ({
+          items: [
+            ...state.items,
+            { ...item, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` },
+          ],
+          isDrawerOpen: true,
+        })),
+
+      removeItem: (id) =>
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== id),
+        })),
+
+      updateQuantity: (id, quantity) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item,
+          ),
+        })),
+
+      clearCart: () => set({ items: [] }),
+
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
+    }),
+    {
+      name: 'mosaiko-cart',
+      partialize: (state) => ({ items: state.items }),
+    },
+  ),
+);
+
+// Derived selectors
+export const selectCartTotal = (state: CartState) =>
+  state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+export const selectCartCount = (state: CartState) =>
+  state.items.reduce((sum, item) => sum + item.quantity, 0);
