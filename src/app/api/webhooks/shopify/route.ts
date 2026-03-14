@@ -1,0 +1,380 @@
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'node:crypto';
+import { uploadPrintTiles } from '@/lib/storage';
+import type { CategoryCustomization } from '@/lib/customization-types';
+import { sendOrderConfirmation, sendAdminNotification } from '@/lib/email/resend-client';
+
+// ─── Environment ─────────────────────────────────────────────────────────────
+
+const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET!;
+const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN!;
+const SHOPIFY_STORE_DOMAIN =
+  process.env.SHOPIFY_STORE_DOMAIN ??
+  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ??
+  '';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface ShopifyLineItemProperty {
+  name: string;
+  value: string;
+}
+
+interface ShopifyLineItem {
+  id: number;
+  title: string;
+  quantity: number;
+  variant_id: number;
+  properties: ShopifyLineItemProperty[];
+}
+
+interface ShopifyOrderWebhook {
+  id: number;
+  order_number: number;
+  name: string;
+  email: string;
+  line_items: ShopifyLineItem[];
+}
+
+// ─── HMAC verification ──────────────────────────────────────────────────────
+
+/**
+ * Verifies the Shopify webhook HMAC-SHA256 signature.
+ * Compares the computed HMAC against the X-Shopify-Hmac-Sha256 header
+ * using timing-safe comparison to prevent timing attacks.
+ */
+function verifyShopifyHmac(rawBody: string, hmacHeader: string): boolean {
+  const computed = crypto
+    .createHmac('sha256', SHOPIFY_WEBHOOK_SECRET)
+    .update(rawBody, 'utf8')
+    .digest('base64');
+
+  // Both must be the same length for timingSafeEqual
+  const computedBuffer = Buffer.from(computed, 'utf8');
+  const receivedBuffer = Buffer.from(hmacHeader, 'utf8');
+
+  if (computedBuffer.length !== receivedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(computedBuffer, receivedBuffer);
+}
+
+// ─── Extract custom attributes from line items ─────────────────────────────
+
+/**
+ * Extracts line items that have custom photo attributes.
+ * Convention: custom attributes have keys prefixed with "_".
+ */
+function extractCustomizedLineItems(order: ShopifyOrderWebhook) {
+  return order.line_items
+    .filter((item) =>
+      item.properties.some((prop) => prop.name.startsWith('_')),
+    )
+    .map((item) => {
+      const attrs: Record<string, string> = {};
+      for (const prop of item.properties) {
+        if (prop.name.startsWith('_')) {
+          attrs[prop.name] = prop.value;
+        }
+      }
+      return {
+        lineItemId: item.id,
+        title: item.title,
+        quantity: item.quantity,
+        attrs,
+      };
+    });
+}
+
+// ─── Update order metafields via Shopify Admin API ──────────────────────────
+
+/**
+ * Updates an order's metafields with print file URLs after generation.
+ */
+async function updateOrderMetafields(
+  orderId: number,
+  printFileUrls: string[],
+): Promise<void> {
+  if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_ADMIN_API_TOKEN) {
+    console.warn(
+      '[webhook/shopify] Shopify Admin API not configured, skipping metafield update',
+    );
+    return;
+  }
+
+  const url = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-01/orders/${orderId}/metafields.json`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': SHOPIFY_ADMIN_API_TOKEN,
+    },
+    body: JSON.stringify({
+      metafield: {
+        namespace: 'mosaiko',
+        key: 'print_files',
+        value: JSON.stringify(printFileUrls),
+        type: 'json',
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(
+      `[webhook/shopify] Failed to update metafields for order ${orderId}:`,
+      errorText,
+    );
+  }
+}
+
+// ─── Process a single customized line item ──────────────────────────────────
+
+// ─── SSRF prevention: only fetch from trusted origins ───────────────────────
+
+const R2_PUBLIC_DOMAIN = process.env.R2_PUBLIC_URL
+  ? new URL(process.env.R2_PUBLIC_URL).hostname
+  : 'r2.mosaiko.mx';
+
+const ALLOWED_PHOTO_HOSTS = new Set([R2_PUBLIC_DOMAIN, 'cdn.shopify.com']);
+const FETCH_TIMEOUT_MS = 15_000;
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+
+function isAllowedPhotoUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && ALLOWED_PHOTO_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+async function processLineItem(
+  orderId: number,
+  lineItem: {
+    lineItemId: number;
+    title: string;
+    quantity: number;
+    attrs: Record<string, string>;
+  },
+): Promise<string[]> {
+  const photoUrl = lineItem.attrs['_photo_url'];
+  const customizationRaw = lineItem.attrs['_customization'];
+  const cropAreaRaw = lineItem.attrs['_crop_area'];
+
+  if (!photoUrl || !customizationRaw || !cropAreaRaw) {
+    console.warn(
+      `[webhook/shopify] Line item ${lineItem.lineItemId} missing required attributes, skipping`,
+    );
+    return [];
+  }
+
+  // Validate photo URL against allowlist (SSRF prevention)
+  if (!isAllowedPhotoUrl(photoUrl)) {
+    console.error(
+      `[webhook/shopify] Line item ${lineItem.lineItemId}: photo URL not from allowed host, skipping`,
+    );
+    return [];
+  }
+
+  // Parse customization and crop area from JSON strings (with error handling)
+  let customization: CategoryCustomization;
+  let cropArea: { x: number; y: number; width: number; height: number };
+  try {
+    customization = JSON.parse(customizationRaw);
+    cropArea = JSON.parse(cropAreaRaw);
+  } catch (error) {
+    console.error(
+      `[webhook/shopify] Line item ${lineItem.lineItemId}: failed to parse JSON attributes:`,
+      error,
+    );
+    return [];
+  }
+
+  // Fetch the original photo (with timeout + size cap)
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let photoResponse: Response;
+  try {
+    photoResponse = await fetch(photoUrl, { signal: controller.signal });
+  } catch (error) {
+    clearTimeout(timeout);
+    const reason = error instanceof Error && error.name === 'AbortError' ? 'timed out' : 'fetch failed';
+    console.error(`[webhook/shopify] Line item ${lineItem.lineItemId}: photo ${reason}`);
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (!photoResponse.ok) {
+    console.error(
+      `[webhook/shopify] Failed to fetch photo for line item ${lineItem.lineItemId}: ${photoResponse.status}`,
+    );
+    return [];
+  }
+
+  const imageBuffer = Buffer.from(await photoResponse.arrayBuffer());
+
+  if (imageBuffer.length > MAX_IMAGE_SIZE) {
+    console.error(
+      `[webhook/shopify] Line item ${lineItem.lineItemId}: photo exceeds ${MAX_IMAGE_SIZE / 1024 / 1024} MB limit`,
+    );
+    return [];
+  }
+
+  // Run print pipeline
+  const { processPrintJob } = await import('@/lib/print-pipeline');
+
+  const jobId = `order-${orderId}-item-${lineItem.lineItemId}`;
+
+  const result = await processPrintJob({
+    imageBuffer,
+    customization,
+    cropArea,
+    jobId,
+  });
+
+  // Upload tiles to R2
+  const storedTiles = await uploadPrintTiles(
+    jobId,
+    result.tiles.map((tile) => ({
+      index: tile.index,
+      buffer: tile.buffer,
+    })),
+  );
+
+  return storedTiles.map((t) => t.publicUrl);
+}
+
+// ─── POST /api/webhooks/shopify ─────────────────────────────────────────────
+
+export async function POST(request: NextRequest) {
+  // ── Read raw body for HMAC verification ─────────────────────────────
+
+  const rawBody = await request.text();
+  const hmacHeader = request.headers.get('X-Shopify-Hmac-Sha256');
+
+  if (!hmacHeader) {
+    return NextResponse.json(
+      { error: 'Missing HMAC signature header' },
+      { status: 401 },
+    );
+  }
+
+  // ── Verify HMAC ───────────────────────────────────────────────────────
+
+  if (!verifyShopifyHmac(rawBody, hmacHeader)) {
+    console.error('[webhook/shopify] HMAC verification failed');
+    return NextResponse.json(
+      { error: 'Invalid HMAC signature' },
+      { status: 401 },
+    );
+  }
+
+  // ── Parse order payload ───────────────────────────────────────────────
+
+  let order: ShopifyOrderWebhook;
+  try {
+    order = JSON.parse(rawBody) as ShopifyOrderWebhook;
+  } catch {
+    return NextResponse.json(
+      { error: 'Invalid JSON payload' },
+      { status: 400 },
+    );
+  }
+
+  // ── Extract customized line items ─────────────────────────────────────
+
+  const customizedItems = extractCustomizedLineItems(order);
+
+  if (customizedItems.length === 0) {
+    // No custom photo items in this order -- nothing to process
+    return NextResponse.json({ status: 'ok', message: 'No custom items' });
+  }
+
+  // ── Process line items ────────────────────────────────────────────────
+  //
+  // NOTE: In production, use Next.js `waitUntil()` or a background job queue
+  // (e.g., Inngest, QStash) to avoid blocking the webhook response.
+  // Shopify expects a 200 response within 5 seconds.
+  //
+  // For now, we respond immediately and process in the background using
+  // a fire-and-forget pattern. Shopify will retry on failure anyway.
+
+  // Respond immediately to acknowledge receipt
+  const response = NextResponse.json({
+    status: 'accepted',
+    orderId: order.id,
+    orderNumber: order.order_number,
+    customItemCount: customizedItems.length,
+  });
+
+  // Process in the background (fire-and-forget with per-item isolation)
+  // TODO: Replace with waitUntil() or a durable job queue (Inngest/QStash)
+  // for reliability in serverless environments.
+  void (async () => {
+    const allPrintUrls: string[] = [];
+
+    for (const item of customizedItems) {
+      try {
+        const urls = await processLineItem(order.id, item);
+        allPrintUrls.push(...urls);
+      } catch (error) {
+        // Isolate errors per line item — continue processing remaining items
+        console.error(
+          `[webhook/shopify] Failed to process line item ${item.lineItemId} ` +
+          `in order ${order.order_number}:`,
+          error,
+        );
+      }
+    }
+
+    // Update order metafields with whatever tiles we successfully generated
+    if (allPrintUrls.length > 0) {
+      try {
+        await updateOrderMetafields(order.id, allPrintUrls);
+      } catch (error) {
+        console.error(
+          `[webhook/shopify] Failed to update metafields for order ${order.order_number}:`,
+          error,
+        );
+      }
+    }
+
+    // Send email notifications
+    const emailData = {
+      orderNumber: String(order.order_number),
+      customerEmail: order.email,
+      items: customizedItems.map((item) => ({
+        title: item.title,
+        gridType: item.attrs['grid_type'] || 'Personalizado',
+        quantity: item.quantity,
+        previewImageUrl: item.attrs['preview_image_url'],
+      })),
+      printFileDownloadUrl: allPrintUrls.length > 0
+        ? `${process.env.NEXT_PUBLIC_SITE_URL || ''}/admin/pedidos/${order.order_number}`
+        : undefined,
+    };
+
+    try {
+      await Promise.all([
+        sendOrderConfirmation(emailData),
+        sendAdminNotification(emailData),
+      ]);
+    } catch (emailError) {
+      console.error(
+        `[webhook/shopify] Failed to send emails for order ${order.order_number}:`,
+        emailError,
+      );
+    }
+
+    console.log(
+      `[webhook/shopify] Order ${order.order_number}: processed ${allPrintUrls.length} print tiles, emails sent`,
+    );
+  })();
+
+  return response;
+}

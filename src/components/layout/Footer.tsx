@@ -13,6 +13,12 @@ const COMPANY_LINKS = [
   { href: '/contacto' as const, key: 'contact' },
 ] as const;
 
+const LEGAL_LINKS = [
+  { href: '/terminos' as const, key: 'terms' },
+  { href: '/privacidad' as const, key: 'privacy' },
+  { href: '/politica-cookies' as const, key: 'cookies' },
+] as const;
+
 export function Footer() {
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
@@ -20,7 +26,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-teal text-cream">
+    <footer className="mt-auto bg-teal text-cream">
       {/* Main Footer */}
       <div className="container-mosaiko py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -87,21 +93,16 @@ export function Footer() {
               {t('legal')}
             </h3>
             <ul className="mt-4 space-y-3">
-              <li>
-                <span className="text-sm text-cream/70">
-                  {t('terms')}
-                </span>
-              </li>
-              <li>
-                <span className="text-sm text-cream/70">
-                  {t('privacy')}
-                </span>
-              </li>
-              <li>
-                <span className="text-sm text-cream/70">
-                  {t('cookies')}
-                </span>
-              </li>
+              {LEGAL_LINKS.map((link) => (
+                <li key={link.key}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-cream/70 transition-colors hover:text-cream"
+                  >
+                    {t(link.key)}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

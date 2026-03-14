@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { useCartStore, selectCartTotal, selectCartCount } from '@/lib/cart-store';
 import { formatPrice } from '@/lib/grid-config';
 import { CartItem } from './CartItem';
+import { CheckoutButton } from './CheckoutButton';
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -193,19 +194,18 @@ export function CartDrawer() {
                   </div>
 
                   {/* Checkout button */}
-                  <motion.div
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                    className="mt-4"
+                  <div className="mt-4">
+                    <CheckoutButton />
+                  </div>
+
+                  {/* View full cart */}
+                  <Link
+                    href="/carrito"
+                    onClick={closeDrawer}
+                    className="mt-2 block w-full text-center text-sm font-medium text-terracotta transition-colors hover:text-terracotta-dark"
                   >
-                    <Link
-                      href="/carrito"
-                      onClick={closeDrawer}
-                      className="flex h-12 w-full items-center justify-center rounded-lg bg-terracotta text-base font-medium text-white transition-colors hover:bg-terracotta-dark"
-                    >
-                      {t('checkout')}
-                    </Link>
-                  </motion.div>
+                    Ver carrito completo
+                  </Link>
 
                   {/* Continue shopping */}
                   <button

@@ -9,17 +9,22 @@ Ecommerce website for a Mexican entrepreneur selling custom photo fridge magnets
 - **Client:** Mexican entrepreneur (logo pending — use placeholder until received)
 
 ## Tech Stack
-- Next.js 15 (App Router) + TypeScript
+- Next.js 16 (App Router) + TypeScript
 - Tailwind CSS 4 + CSS variables (design tokens)
 - Framer Motion (animations)
 - Zustand (state management)
 - react-easy-crop (image cropping)
-- HTML5 Canvas API (image splitting)
-- Stripe Mexico (payments: OXXO, SPEI, cards)
-- Supabase (Postgres + Storage + Auth)
-- Resend (email)
+- HTML5 Canvas API (image splitting) + Sharp (server-side print pipeline)
+- **Shopify** (hosted checkout: OXXO, SPEI, cards — PCI compliant)
+- **Cloudflare R2** (image storage via AWS S3 SDK)
+- Resend (email notifications)
 - next-intl (i18n)
 - Vercel (hosting)
+- bcryptjs + jose (admin auth: password + JWT sessions)
+- archiver (ZIP print file downloads)
+
+### Architecture Decision: Shopify IS the database
+Orders, customers, payments, and fulfillment live in Shopify. Custom data (print file URLs, fulfillment status) stored as Shopify metafields. No Supabase/Postgres needed.
 
 ## Language & Locale
 - **Primary language:** Spanish (Mexico)
@@ -31,13 +36,12 @@ Ecommerce website for a Mexican entrepreneur selling custom photo fridge magnets
 ## Mobile-First
 The site MUST work on mobile, not only desktop. Design mobile-first, then scale up. Test on real mobile devices or accurate emulators. Minimum touch target: 48x48px.
 
-## Admin Panel
-The client needs a full admin panel to:
-- Edit ALL site content (hero, announcements, FAQ, testimonials, about, etc.)
-- Manage products and categories (CRUD)
-- View and manage orders (see custom order images, update status, download print files)
-- Preview analytics (Google Analytics 4 integration, Google Ads metrics)
-- Configure settings (shipping, payments, notifications)
+## Admin Panel (Implemented)
+The admin panel is at `/admin` (always Spanish, excluded from i18n locale processing).
+- **Auth:** bcrypt password + JWT cookie sessions (24h). Single admin user via `ADMIN_PASSWORD_HASH` env var.
+- **Orders:** List with status filter tabs (Todos/Nuevos/Imprimiendo/Enviados/Entregados). Order detail with customer info, product preview, status pipeline controls, print file downloads (individual + ZIP).
+- **Onboarding:** 4-step guided overlay on first login for non-techy client.
+- **Pending:** Content editor (Shopify metaobjects CMS), analytics dashboard (GA4 embed), settings page, products CRUD.
 
 ## Bug Handling Workflow
 During testing, if you encounter bugs DO NOT fix them immediately. Follow this sequence:

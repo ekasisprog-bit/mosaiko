@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { GridSize } from './grid-config';
+import type { CategoryType } from './customization-types';
 
 export interface CartItem {
   id: string;
@@ -15,11 +16,20 @@ export interface CartItem {
   // For predesigned products
   productId?: string;
   categorySlug?: string;
+  // Per-category customization snapshot
+  customizations?: {
+    categoryType: CategoryType;
+    textFields?: Record<string, string>;
+    filterTheme?: string;
+    photoStorageUrl?: string;
+    cropArea?: { x: number; y: number; width: number; height: number };
+  };
 }
 
 interface CartState {
   items: CartItem[];
   isDrawerOpen: boolean;
+  checkoutInProgress: boolean;
   addItem: (item: Omit<CartItem, 'id'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -27,6 +37,7 @@ interface CartState {
   openDrawer: () => void;
   closeDrawer: () => void;
   toggleDrawer: () => void;
+  setCheckoutInProgress: (inProgress: boolean) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -34,6 +45,7 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
       isDrawerOpen: false,
+      checkoutInProgress: false,
 
       addItem: (item) =>
         set((state) => ({
@@ -61,6 +73,7 @@ export const useCartStore = create<CartState>()(
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
       toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
+      setCheckoutInProgress: (inProgress) => set({ checkoutInProgress: inProgress }),
     }),
     {
       name: 'mosaiko-cart',

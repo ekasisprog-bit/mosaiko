@@ -14,6 +14,7 @@ interface MagnetPreviewProps {
   gridConfig: GridConfig;
   onAddToCart: () => void;
   onReset: () => void;
+  isUploading?: boolean;
 }
 
 export function MagnetPreview({
@@ -22,6 +23,7 @@ export function MagnetPreview({
   gridConfig,
   onAddToCart,
   onReset,
+  isUploading = false,
 }: MagnetPreviewProps) {
   const t = useTranslations('builder');
   const tc = useTranslations('common');
@@ -217,8 +219,9 @@ export function MagnetPreview({
             size="lg"
             fullWidth
             onClick={onAddToCart}
+            disabled={isUploading}
           >
-            {priceText}
+            {isUploading ? 'Subiendo foto...' : priceText}
           </Button>
 
           <button

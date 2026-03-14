@@ -69,12 +69,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${playfair.variable} ${dmSans.variable} ${montserrat.variable} grain-overlay antialiased`}
+        className={`${playfair.variable} ${dmSans.variable} ${montserrat.variable} grain-overlay antialiased flex min-h-dvh flex-col`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AnnouncementBar />
           <Header />
-          <main className="min-h-[calc(100dvh-var(--header-height))]">
+          <main>
             {children}
           </main>
           <Footer />

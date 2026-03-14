@@ -5,6 +5,7 @@ export default createMiddleware(routing);
 
 export const config = {
   matcher: [
-    '/((?!api|_next|_vercel|MOSAIKO-images|MOSAIKO-logos|.*\\..*).*)',
+    // Match all paths except: api, _next, _vercel, static assets, admin routes
+    '/((?!api|_next|_vercel|admin|MOSAIKO-images|MOSAIKO-logos|.*\\..*).*)',
   ],
 };

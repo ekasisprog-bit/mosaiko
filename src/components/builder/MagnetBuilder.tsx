@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
@@ -41,8 +41,10 @@ export function MagnetBuilder() {
   const [direction, setDirection] = useState(1);
   const [selectedGrid, setSelectedGrid] = useState<GridSize | null>(null);
   const [, setImageFile] = useState<File | null>(null);
+  const imageFileRef = useRef<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [cropAreaPixels, setCropAreaPixels] = useState<CropArea | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const gridConfig: GridConfig | null = useMemo(
     () => (selectedGrid ? GRID_CONFIGS[selectedGrid] : null),
@@ -73,6 +75,7 @@ export function MagnetBuilder() {
 
   const handleImageSelected = useCallback((file: File) => {
     setImageFile(file);
+    imageFileRef.current = file;
     const url = URL.createObjectURL(file);
     setImageSrc(url);
     setDirection(1);
@@ -91,11 +94,26 @@ export function MagnetBuilder() {
   const handleAddToCart = useCallback(async () => {
     if (!imageSrc || !cropAreaPixels || !gridConfig) return;
 
+    setIsUploading(true);
+
     try {
       // Generate a preview data URL for the cart
       const image = await loadImage(imageSrc);
       const previewCanvas = createPreviewCanvas(image, cropAreaPixels, gridConfig, 120, 4);
       const previewUrl = previewCanvas.toDataURL('image/jpeg', 0.85);
+
+      // Upload original photo to R2 so it survives browser close
+      let photoStorageUrl = '';
+      const file = imageFileRef.current;
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+        if (uploadRes.ok) {
+          const { publicUrl } = await uploadRes.json();
+          photoStorageUrl = publicUrl;
+        }
+      }
 
       addItem({
         type: 'custom',
@@ -105,10 +123,14 @@ export function MagnetBuilder() {
         price: gridConfig.price,
         quantity: 1,
         previewUrl,
-        tileUrls: [], // Tiles regenerated at checkout for full resolution
+        tileUrls: [],
+        customizations: {
+          categoryType: 'mosaicos',
+          photoStorageUrl,
+          cropArea: cropAreaPixels,
+        },
       });
     } catch {
-      // If preview generation fails, still add to cart
       addItem({
         type: 'custom',
         name: `Mosaico ${gridConfig.size} piezas`,
@@ -119,6 +141,8 @@ export function MagnetBuilder() {
         previewUrl: '',
         tileUrls: [],
       });
+    } finally {
+      setIsUploading(false);
     }
   }, [imageSrc, cropAreaPixels, gridConfig, addItem]);
 
@@ -126,6 +150,7 @@ export function MagnetBuilder() {
     if (imageSrc) URL.revokeObjectURL(imageSrc);
     setSelectedGrid(null);
     setImageFile(null);
+    imageFileRef.current = null;
     setImageSrc(null);
     setCropAreaPixels(null);
     setDirection(-1);
@@ -226,6 +251,7 @@ export function MagnetBuilder() {
                     gridConfig={gridConfig}
                     onAddToCart={handleAddToCart}
                     onReset={handleReset}
+                    isUploading={isUploading}
                   />
                 )}
               </motion.div>

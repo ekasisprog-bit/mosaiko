@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { useCartStore, selectCartTotal, selectCartCount } from '@/lib/cart-store';
 import { formatPrice } from '@/lib/grid-config';
 import { CartItem } from './CartItem';
+import { CheckoutButton } from './CheckoutButton';
 
 export function CartPage() {
   const t = useTranslations('cart');
@@ -103,9 +104,9 @@ export function CartPage() {
               </div>
             </div>
 
-            <button className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-terracotta text-base font-semibold text-white transition-colors hover:bg-terracotta-dark">
-              {t('checkout')}
-            </button>
+            <div className="mt-6">
+              <CheckoutButton />
+            </div>
 
             {/* Trust badges */}
             <div className="mt-5 flex items-center justify-center gap-4 text-xs text-warm-gray">
