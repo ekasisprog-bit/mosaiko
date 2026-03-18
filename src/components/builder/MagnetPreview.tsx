@@ -15,6 +15,7 @@ import {
 } from '@/lib/customization-types';
 import { getFloresCSSFilters } from '@/lib/print-pipeline/utils/filter-presets';
 import { Button } from '@/components/ui/Button';
+import { MosaikoWatermark } from './MosaikoWatermark';
 import { SpotifyBarPreview } from './tile-previews/SpotifyBarPreview';
 import { ArteInfoPreview } from './tile-previews/ArteInfoPreview';
 import { GhibliPanelPreview } from './tile-previews/GhibliPanelPreview';
@@ -261,6 +262,9 @@ export function MagnetPreview({
                   </TileWrapper>
                 );
               })}
+
+              {/* Mosaiko logo watermark — bottom-right corner */}
+              <MosaikoWatermark />
             </div>
           )}
         </motion.div>

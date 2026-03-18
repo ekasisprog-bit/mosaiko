@@ -5,6 +5,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
+import { MosaikoLogo } from '@/components/ui/MosaikoLogo';
 
 /* ── Stagger animation orchestrator ── */
 const containerVariants = {
@@ -410,6 +411,27 @@ export function Hero() {
                   isInView={isInView}
                 />
               </AnimatePresence>
+
+              {/* Mosaiko watermark — bottom-right of fridge surface */}
+              <div
+                className="pointer-events-none absolute bottom-3 right-3 z-20 flex items-end opacity-60"
+                style={{ gap: '1.5px' }}
+                aria-hidden="true"
+              >
+                <Image
+                  src="/logos/logo-dark.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  style={{ width: '16px', height: '16px' }}
+                />
+                <span
+                  className="font-bold font-brand leading-none text-charcoal"
+                  style={{ fontSize: '11px', marginBottom: '0.5px' }}
+                >
+                  osaiko
+                </span>
+              </div>
 
               {/* Piece count label */}
               <AnimatePresence mode="wait">

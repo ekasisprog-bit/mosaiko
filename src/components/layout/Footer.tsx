@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import Image from 'next/image';
+import { MosaikoLogo } from '@/components/ui/MosaikoLogo';
 
 const SHOP_LINKS = [
   { href: '/catalogo' as const, key: 'catalog' },
@@ -32,17 +32,8 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-1">
-              <Image
-                src="/logos/logo-white.png"
-                alt="Mosaiko"
-                width={28}
-                height={28}
-                className="h-7 w-7"
-              />
-              <span className="text-xl font-bold text-cream font-brand tracking-tight">
-                OSAIKO
-              </span>
+            <Link href="/" className="inline-flex items-center">
+              <MosaikoLogo variant="light" size={28} />
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-cream/70">
               {t('tagline')}

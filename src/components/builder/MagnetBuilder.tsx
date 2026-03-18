@@ -443,7 +443,7 @@ function LivePreviewSidebar({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="p-6"
+              className="relative p-6"
             >
               <ImagePreviewGrid
                 rows={gridConfig.rows}
@@ -452,6 +452,17 @@ function LivePreviewSidebar({
                 cropArea={liveCropArea}
                 rotation={liveRotation}
               />
+              {/* Mosaiko watermark */}
+              <div
+                className="pointer-events-none absolute bottom-7 right-7 z-20 flex items-end opacity-60"
+                style={{ gap: '1px' }}
+                aria-hidden="true"
+              >
+                <img src="/logos/logo-dark.png" alt="" width={12} height={12} style={{ width: '12px', height: '12px' }} />
+                <span className="font-bold font-brand leading-none text-charcoal" style={{ fontSize: '8px', marginBottom: '0.5px' }}>
+                  osaiko
+                </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
