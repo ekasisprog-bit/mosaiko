@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import crypto from 'node:crypto';
 import { uploadPrintTiles } from '@/lib/storage';
 import type { CategoryCustomization } from '@/lib/customization-types';
@@ -297,14 +297,8 @@ export async function POST(request: NextRequest) {
 
   // ── Process line items ────────────────────────────────────────────────
   //
-  // NOTE: In production, use Next.js `waitUntil()` or a background job queue
-  // (e.g., Inngest, QStash) to avoid blocking the webhook response.
-  // Shopify expects a 200 response within 5 seconds.
-  //
-  // For now, we respond immediately and process in the background using
-  // a fire-and-forget pattern. Shopify will retry on failure anyway.
-
-  // Respond immediately to acknowledge receipt
+  // Respond immediately (Shopify requires 200 within 5s) and process
+  // tiles in the background using Next.js after() for guaranteed completion.
   const response = NextResponse.json({
     status: 'accepted',
     orderId: order.id,
@@ -312,10 +306,30 @@ export async function POST(request: NextRequest) {
     customItemCount: customizedItems.length,
   });
 
-  // Process in the background (fire-and-forget with per-item isolation)
-  // TODO: Replace with waitUntil() or a durable job queue (Inngest/QStash)
-  // for reliability in serverless environments.
-  void (async () => {
+  // Process in the background — after() guarantees completion even after response
+  after(async () => {
+    // ── Idempotency: skip if order already has print files ───────────
+    if (SHOPIFY_STORE_DOMAIN && SHOPIFY_ADMIN_API_TOKEN) {
+      try {
+        const metafieldCheckUrl = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-01/orders/${order.id}/metafields.json?namespace=mosaiko&key=print_files`;
+        const metafieldRes = await fetch(metafieldCheckUrl, {
+          headers: { 'X-Shopify-Access-Token': SHOPIFY_ADMIN_API_TOKEN },
+        });
+        if (metafieldRes.ok) {
+          const data = await metafieldRes.json();
+          if (data.metafields?.length > 0) {
+            console.log(
+              `[webhook/shopify] Order ${order.order_number}: already processed (idempotency check), skipping`,
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        // If idempotency check fails, proceed with processing (safe fallback)
+        console.warn('[webhook/shopify] Idempotency check failed, proceeding:', error);
+      }
+    }
+
     const allPrintUrls: string[] = [];
 
     for (const item of customizedItems) {
@@ -374,7 +388,7 @@ export async function POST(request: NextRequest) {
     console.log(
       `[webhook/shopify] Order ${order.order_number}: processed ${allPrintUrls.length} print tiles, emails sent`,
     );
-  })();
+  });
 
   return response;
 }
