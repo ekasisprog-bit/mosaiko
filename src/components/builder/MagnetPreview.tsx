@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { splitImageIntoTiles, loadImage } from '@/lib/canvas-utils';
 import type { CropArea } from '@/lib/canvas-utils';
 import { formatPrice, type GridConfig } from '@/lib/grid-config';
+import type { CategoryType, FloresTheme } from '@/lib/customization-types';
 import { Button } from '@/components/ui/Button';
 
 interface MagnetPreviewProps {
@@ -16,6 +17,9 @@ interface MagnetPreviewProps {
   onAddToCart: () => void;
   onReset: () => void;
   isUploading?: boolean;
+  categoryType?: CategoryType;
+  textFields?: Record<string, string>;
+  filterTheme?: FloresTheme;
 }
 
 export function MagnetPreview({
@@ -26,6 +30,9 @@ export function MagnetPreview({
   onAddToCart,
   onReset,
   isUploading = false,
+  categoryType: _categoryType,
+  textFields: _textFields,
+  filterTheme: _filterTheme,
 }: MagnetPreviewProps) {
   const t = useTranslations('builder');
   const tc = useTranslations('common');

@@ -4,17 +4,16 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
+import { CATEGORY_REGISTRY, type CategoryType } from '@/lib/customization-types';
 import type { CropArea } from '@/lib/canvas-utils';
 import { useCartStore } from '@/lib/cart-store';
 import { createPreviewCanvas, getCroppedCanvas, loadImage } from '@/lib/canvas-utils';
+import { useBuilderFlow, STEP_I18N_MAP, type StepId } from './useBuilderFlow';
+import { CategorySelector } from './CategorySelector';
 import { GridSelector } from './GridSelector';
 import { PhotoUploader } from './PhotoUploader';
 import { ImageCropper } from './ImageCropper';
 import { MagnetPreview } from './MagnetPreview';
-
-type Step = 1 | 2 | 3 | 4;
-
-const STEP_KEYS = ['stepGrid', 'stepUpload', 'stepCrop', 'stepPreview'] as const;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -36,87 +35,24 @@ export function MagnetBuilder() {
   const tc = useTranslations('common');
   const addItem = useCartStore((s) => s.addItem);
 
-  // Flow state
-  const [currentStep, setCurrentStep] = useState<Step>(1);
-  const [direction, setDirection] = useState(1);
-  const [selectedGrid, setSelectedGrid] = useState<GridSize | null>(null);
-  const [, setImageFile] = useState<File | null>(null);
-  const imageFileRef = useRef<File | null>(null);
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [cropAreaPixels, setCropAreaPixels] = useState<CropArea | null>(null);
-  const [rotation, setRotation] = useState(0);
-  const [liveCropArea, setLiveCropArea] = useState<CropArea | null>(null);
-  const [liveRotation, setLiveRotation] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const flow = useBuilderFlow();
 
-  const gridConfig: GridConfig | null = useMemo(
-    () => (selectedGrid ? GRID_CONFIGS[selectedGrid] : null),
-    [selectedGrid],
-  );
-
-  // ─── Navigation ───
-  function goToStep(step: Step) {
-    setDirection(step > currentStep ? 1 : -1);
-    setCurrentStep(step);
-  }
-
-  function goBack() {
-    if (currentStep > 1) {
-      goToStep((currentStep - 1) as Step);
-    }
-  }
-
-  // ─── Step Handlers ───
-  const handleGridSelect = useCallback((grid: GridSize) => {
-    setSelectedGrid(grid);
-    // Auto-advance after a brief pause for the selection animation
-    setTimeout(() => {
-      setDirection(1);
-      setCurrentStep(2);
-    }, 250);
-  }, []);
-
-  const handleImageSelected = useCallback((file: File) => {
-    setImageFile(file);
-    imageFileRef.current = file;
-    const url = URL.createObjectURL(file);
-    setImageSrc(url);
-    setDirection(1);
-    setCurrentStep(3);
-  }, []);
-
-  const handleCropComplete = useCallback(
-    (_croppedArea: CropArea, croppedAreaPixels: CropArea, cropRotation: number) => {
-      setCropAreaPixels(croppedAreaPixels);
-      setRotation(cropRotation);
-      setDirection(1);
-      setCurrentStep(4);
-    },
-    [],
-  );
-
-  const handleCropChange = useCallback(
-    (croppedAreaPixels: CropArea, cropRotation: number) => {
-      setLiveCropArea(croppedAreaPixels);
-      setLiveRotation(cropRotation);
-    },
-    [],
-  );
-
+  // ─── Add to Cart ───
   const handleAddToCart = useCallback(async () => {
-    if (!imageSrc || !cropAreaPixels || !gridConfig) return;
+    if (!flow.imageSrc || !flow.cropAreaPixels || !flow.gridConfig || !flow.selectedCategory) return;
 
-    setIsUploading(true);
+    flow.setIsUploading(true);
 
     try {
-      // Generate a preview data URL for the cart
-      const image = await loadImage(imageSrc);
-      const previewCanvas = createPreviewCanvas(image, cropAreaPixels, gridConfig, 120, 4, rotation);
+      const image = await loadImage(flow.imageSrc);
+      const previewCanvas = createPreviewCanvas(
+        image, flow.cropAreaPixels, flow.gridConfig, 120, 4, flow.rotation,
+      );
       const previewUrl = previewCanvas.toDataURL('image/jpeg', 0.85);
 
-      // Upload original photo to R2 so it survives browser close
+      // Upload original photo to R2
       let photoStorageUrl = '';
-      const file = imageFileRef.current;
+      const file = flow.imageFileRef.current;
       if (file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -127,51 +63,52 @@ export function MagnetBuilder() {
         }
       }
 
+      const meta = CATEGORY_REGISTRY[flow.selectedCategory];
+      const categoryLabel = meta.label;
+
       addItem({
         type: 'custom',
-        name: `Mosaico ${gridConfig.size} piezas`,
-        gridSize: gridConfig.size,
-        gridLayout: { rows: gridConfig.rows, cols: gridConfig.cols },
-        price: gridConfig.price,
+        name: `Mosaico ${categoryLabel} ${flow.gridConfig.size} piezas`,
+        gridSize: flow.gridConfig.size,
+        gridLayout: { rows: flow.gridConfig.rows, cols: flow.gridConfig.cols },
+        price: flow.gridConfig.price,
         quantity: 1,
         previewUrl,
         tileUrls: [],
         customizations: {
-          categoryType: 'mosaicos',
+          categoryType: flow.selectedCategory,
+          textFields: Object.keys(flow.customizationValues).length > 0
+            ? flow.customizationValues
+            : undefined,
+          filterTheme: flow.selectedTheme ?? undefined,
           photoStorageUrl,
-          cropArea: cropAreaPixels,
-          rotation,
+          cropArea: flow.cropAreaPixels,
+          rotation: flow.rotation,
         },
       });
     } catch {
-      addItem({
-        type: 'custom',
-        name: `Mosaico ${gridConfig.size} piezas`,
-        gridSize: gridConfig.size,
-        gridLayout: { rows: gridConfig.rows, cols: gridConfig.cols },
-        price: gridConfig.price,
-        quantity: 1,
-        previewUrl: '',
-        tileUrls: [],
-      });
+      if (flow.gridConfig) {
+        addItem({
+          type: 'custom',
+          name: `Mosaico ${flow.gridConfig.size} piezas`,
+          gridSize: flow.gridConfig.size,
+          gridLayout: { rows: flow.gridConfig.rows, cols: flow.gridConfig.cols },
+          price: flow.gridConfig.price,
+          quantity: 1,
+          previewUrl: '',
+          tileUrls: [],
+        });
+      }
     } finally {
-      setIsUploading(false);
+      flow.setIsUploading(false);
     }
-  }, [imageSrc, cropAreaPixels, gridConfig, rotation, addItem]);
+  }, [flow, addItem]);
 
-  const handleReset = useCallback(() => {
-    if (imageSrc) URL.revokeObjectURL(imageSrc);
-    setSelectedGrid(null);
-    setImageFile(null);
-    imageFileRef.current = null;
-    setImageSrc(null);
-    setCropAreaPixels(null);
-    setRotation(0);
-    setLiveCropArea(null);
-    setLiveRotation(0);
-    setDirection(-1);
-    setCurrentStep(1);
-  }, [imageSrc]);
+  // ─── Determine allowed grid sizes for current category ───
+  const allowedGridSizes = useMemo(() => {
+    if (!flow.selectedCategory) return undefined;
+    return CATEGORY_REGISTRY[flow.selectedCategory].allowedGridSizes;
+  }, [flow.selectedCategory]);
 
   return (
     <div className="container-mosaiko py-6 md:py-10">
@@ -187,9 +124,12 @@ export function MagnetBuilder() {
 
       {/* ── Step Indicator ── */}
       <StepIndicator
-        currentStep={currentStep}
-        onStepClick={(step) => {
-          if (step < currentStep) goToStep(step);
+        stepSequence={flow.stepSequence}
+        currentStepId={flow.currentStepId}
+        onStepClick={(stepId) => {
+          const idx = flow.stepSequence.indexOf(stepId);
+          const currentIdx = flow.stepSequence.indexOf(flow.currentStepId);
+          if (idx < currentIdx) flow.goToStep(stepId);
         }}
       />
 
@@ -199,12 +139,12 @@ export function MagnetBuilder() {
         <div className="min-w-0">
           {/* Back button */}
           <AnimatePresence>
-            {currentStep > 1 && (
+            {flow.currentStepIndex > 0 && (
               <motion.button
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -12 }}
-                onClick={goBack}
+                onClick={flow.goBack}
                 className="mb-4 flex min-h-[48px] items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-warm-gray transition-colors hover:text-charcoal cursor-pointer"
               >
                 <svg
@@ -228,10 +168,10 @@ export function MagnetBuilder() {
 
           {/* Step content with slide animations */}
           <div className="relative overflow-hidden">
-            <AnimatePresence custom={direction} mode="wait">
+            <AnimatePresence custom={flow.direction} mode="wait">
               <motion.div
-                key={currentStep}
-                custom={direction}
+                key={flow.currentStepId}
+                custom={flow.direction}
                 variants={slideVariants}
                 initial="enter"
                 animate="center"
@@ -241,35 +181,55 @@ export function MagnetBuilder() {
                   opacity: { duration: 0.2 },
                 }}
               >
-                {currentStep === 1 && (
+                {flow.currentStepId === 'category' && (
+                  <CategorySelector
+                    onSelect={flow.handleCategorySelect}
+                    selected={flow.selectedCategory}
+                  />
+                )}
+                {flow.currentStepId === 'grid' && (
                   <GridSelector
-                    onSelect={handleGridSelect}
-                    selected={selectedGrid}
+                    onSelect={flow.handleGridSelect}
+                    selected={flow.selectedGrid}
+                    allowedSizes={allowedGridSizes}
                   />
                 )}
-                {currentStep === 2 && gridConfig && (
+                {flow.currentStepId === 'upload' && flow.gridConfig && (
                   <PhotoUploader
-                    onImageSelected={handleImageSelected}
-                    gridConfig={gridConfig}
+                    onImageSelected={flow.handleImageSelected}
+                    gridConfig={flow.gridConfig}
                   />
                 )}
-                {currentStep === 3 && imageSrc && gridConfig && (
+                {flow.currentStepId === 'crop' && flow.imageSrc && flow.gridConfig && (
                   <ImageCropper
-                    imageSrc={imageSrc}
-                    gridConfig={gridConfig}
-                    onCropComplete={handleCropComplete}
-                    onCropChange={handleCropChange}
+                    imageSrc={flow.imageSrc}
+                    gridConfig={flow.gridConfig}
+                    onCropComplete={flow.handleCropComplete}
+                    onCropChange={flow.handleCropChange}
                   />
                 )}
-                {currentStep === 4 && imageSrc && cropAreaPixels && gridConfig && (
+                {flow.currentStepId === 'customize' && flow.selectedCategory && (
+                  <CustomizePlaceholder
+                    category={flow.selectedCategory}
+                    values={flow.customizationValues}
+                    onValueChange={flow.setCustomizationValue}
+                    selectedTheme={flow.selectedTheme}
+                    onThemeChange={flow.setSelectedTheme}
+                    onComplete={flow.handleCustomizeComplete}
+                  />
+                )}
+                {flow.currentStepId === 'preview' && flow.imageSrc && flow.cropAreaPixels && flow.gridConfig && (
                   <MagnetPreview
-                    imageSrc={imageSrc}
-                    cropArea={cropAreaPixels}
-                    gridConfig={gridConfig}
-                    rotation={rotation}
+                    imageSrc={flow.imageSrc}
+                    cropArea={flow.cropAreaPixels}
+                    gridConfig={flow.gridConfig}
+                    rotation={flow.rotation}
                     onAddToCart={handleAddToCart}
-                    onReset={handleReset}
-                    isUploading={isUploading}
+                    onReset={flow.handleReset}
+                    isUploading={flow.isUploading}
+                    categoryType={flow.selectedCategory ?? undefined}
+                    textFields={flow.customizationValues}
+                    filterTheme={flow.selectedTheme ?? undefined}
                   />
                 )}
               </motion.div>
@@ -280,12 +240,13 @@ export function MagnetBuilder() {
         {/* Right column: Live preview sidebar (desktop only) */}
         <aside className="hidden lg:block" aria-label="Vista previa en vivo">
           <LivePreviewSidebar
-            currentStep={currentStep}
-            selectedGrid={selectedGrid}
-            imageSrc={imageSrc}
-            gridConfig={gridConfig}
-            liveCropArea={liveCropArea}
-            liveRotation={liveRotation}
+            currentStepId={flow.currentStepId}
+            selectedGrid={flow.selectedGrid}
+            imageSrc={flow.imageSrc}
+            gridConfig={flow.gridConfig}
+            liveCropArea={flow.liveCropArea}
+            liveRotation={flow.liveRotation}
+            selectedCategory={flow.selectedCategory}
           />
         </aside>
       </div>
@@ -293,35 +254,162 @@ export function MagnetBuilder() {
   );
 }
 
+// ─── Customization Placeholder (will be replaced in Chunk 2) ─────────────────
+
+function CustomizePlaceholder({
+  category,
+  values,
+  onValueChange,
+  selectedTheme,
+  onThemeChange,
+  onComplete,
+}: {
+  category: CategoryType;
+  values: Record<string, string>;
+  onValueChange: (field: string, value: string) => void;
+  selectedTheme: string | null;
+  onThemeChange: (theme: 'calido' | 'fresco' | 'vintage' | 'pastel') => void;
+  onComplete: () => void;
+}) {
+  const t = useTranslations('builder');
+  const meta = CATEGORY_REGISTRY[category];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="text-center">
+        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+          {t('customizeTitle')}
+        </h2>
+        <p className="mt-2 text-sm text-warm-gray md:text-base">
+          {t('customizeHint')}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {meta.textFields.map((field) => {
+          const labelKey = `field${field.charAt(0).toUpperCase()}${field.slice(1)}` as string;
+          // Map field names to i18n keys
+          const i18nMap: Record<string, string> = {
+            songName: 'fieldSongName',
+            artistName: 'fieldArtistName',
+            title: 'fieldTitle',
+            artist: 'fieldArtist',
+            year: 'fieldYear',
+            japaneseText: 'fieldDecorativeText',
+            customText: 'fieldCustomText',
+            eventText: 'fieldEventText',
+            date: 'fieldDate',
+          };
+          const key = i18nMap[field] || labelKey;
+          const isDate = field === 'date';
+          const isDecorativeText = field === 'japaneseText';
+
+          return (
+            <div key={field} className="flex flex-col gap-1.5">
+              <label htmlFor={`field-${field}`} className="text-sm font-medium text-charcoal">
+                {t(key)}
+              </label>
+              {isDecorativeText && (
+                <span className="text-xs text-warm-gray">
+                  {t('fieldDecorativeTextHint')}
+                </span>
+              )}
+              <input
+                id={`field-${field}`}
+                type={isDate ? 'date' : 'text'}
+                value={values[field] || ''}
+                onChange={(e) => onValueChange(field, e.target.value)}
+                className="min-h-[48px] rounded-lg border-2 border-light-gray bg-white px-4 py-3 text-sm text-charcoal transition-colors focus:border-terracotta focus:outline-none"
+                placeholder={isDate ? '' : t(key)}
+              />
+            </div>
+          );
+        })}
+
+        {meta.hasTheme && (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-charcoal">{t('themeLabel')}</span>
+            <div className="grid grid-cols-2 gap-3">
+              {(['calido', 'fresco', 'vintage', 'pastel'] as const).map((theme) => {
+                const isActive = selectedTheme === theme;
+                const themeKey = `theme${theme.charAt(0).toUpperCase()}${theme.slice(1)}` as 'themeCalido' | 'themeFresco' | 'themeVintage' | 'themePastel';
+                const swatchColors: Record<string, string> = {
+                  calido: '#E8A87C',
+                  fresco: '#7FB5D5',
+                  vintage: '#C9B99A',
+                  pastel: '#D4C5E2',
+                };
+
+                return (
+                  <button
+                    key={theme}
+                    onClick={() => onThemeChange(theme)}
+                    className={[
+                      'flex items-center gap-3 rounded-lg border-2 p-3 transition-all cursor-pointer min-h-[48px]',
+                      isActive
+                        ? 'border-terracotta bg-terracotta/5'
+                        : 'border-light-gray bg-white hover:border-terracotta-light',
+                    ].join(' ')}
+                  >
+                    <div
+                      className="h-6 w-6 shrink-0 rounded-full border border-light-gray"
+                      style={{ backgroundColor: swatchColors[theme] }}
+                    />
+                    <span className={[
+                      'text-sm font-medium',
+                      isActive ? 'text-terracotta' : 'text-charcoal',
+                    ].join(' ')}>
+                      {t(themeKey)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={onComplete}
+        className="min-h-[48px] w-full rounded-xl bg-terracotta px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-terracotta/90 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+      >
+        {t('continue')}
+      </button>
+    </div>
+  );
+}
+
 // ─── Step Indicator Component ───────────────────────────────────────────────
 
 function StepIndicator({
-  currentStep,
+  stepSequence,
+  currentStepId,
   onStepClick,
 }: {
-  currentStep: Step;
-  onStepClick: (step: Step) => void;
+  stepSequence: StepId[];
+  currentStepId: StepId;
+  onStepClick: (stepId: StepId) => void;
 }) {
   const t = useTranslations('builder');
+  const currentIdx = stepSequence.indexOf(currentStepId);
 
   return (
-    <div className="flex items-center justify-center gap-0">
-      {STEP_KEYS.map((key, index) => {
-        const step = (index + 1) as Step;
-        const isActive = step === currentStep;
-        const isCompleted = step < currentStep;
-        const isClickable = step < currentStep;
+    <div className="flex items-center justify-center gap-0 overflow-x-auto">
+      {stepSequence.map((stepId, index) => {
+        const isActive = stepId === currentStepId;
+        const isCompleted = index < currentIdx;
+        const isClickable = index < currentIdx;
 
         return (
-          <div key={key} className="flex items-center">
+          <div key={stepId} className="flex items-center shrink-0">
             <button
-              onClick={() => isClickable && onStepClick(step)}
+              onClick={() => isClickable && onStepClick(stepId)}
               disabled={!isClickable}
               className={[
                 'flex flex-col items-center gap-1.5',
                 isClickable ? 'cursor-pointer' : 'cursor-default',
               ].join(' ')}
-              aria-label={`${t(key)} — Paso ${step}`}
+              aria-label={`${t(STEP_I18N_MAP[stepId])} — Paso ${index + 1}`}
               aria-current={isActive ? 'step' : undefined}
             >
               <div
@@ -349,7 +437,7 @@ function StepIndicator({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
-                  step
+                  index + 1
                 )}
               </div>
               <span
@@ -362,16 +450,16 @@ function StepIndicator({
                       : 'text-warm-gray',
                 ].join(' ')}
               >
-                {t(key)}
+                {t(STEP_I18N_MAP[stepId])}
               </span>
             </button>
 
             {/* Connector line */}
-            {index < STEP_KEYS.length - 1 && (
+            {index < stepSequence.length - 1 && (
               <div
                 className={[
                   'mx-2 h-0.5 w-8 rounded-full transition-colors duration-300 md:mx-3 md:w-12',
-                  step < currentStep ? 'bg-teal' : 'bg-light-gray',
+                  index < currentIdx ? 'bg-teal' : 'bg-light-gray',
                 ].join(' ')}
               />
             )}
@@ -385,19 +473,21 @@ function StepIndicator({
 // ─── Live Preview Sidebar (Desktop) ─────────────────────────────────────────
 
 function LivePreviewSidebar({
-  currentStep,
+  currentStepId,
   selectedGrid,
   imageSrc,
   gridConfig,
   liveCropArea,
   liveRotation = 0,
+  selectedCategory,
 }: {
-  currentStep: Step;
+  currentStepId: StepId;
   selectedGrid: GridSize | null;
   imageSrc: string | null;
   gridConfig: GridConfig | null;
   liveCropArea?: CropArea | null;
   liveRotation?: number;
+  selectedCategory: CategoryType | null;
 }) {
   const t = useTranslations('builder');
 
@@ -493,15 +583,22 @@ function LivePreviewSidebar({
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 flex items-center justify-between"
         >
-          <span className="text-sm text-warm-gray">
-            {t(
-              `grid${gridConfig.size}` as
-                | 'grid3'
-                | 'grid4'
-                | 'grid6'
-                | 'grid9',
+          <div className="flex flex-col">
+            <span className="text-sm text-warm-gray">
+              {t(
+                `grid${gridConfig.size}` as
+                  | 'grid3'
+                  | 'grid4'
+                  | 'grid6'
+                  | 'grid9',
+              )}
+            </span>
+            {selectedCategory && selectedCategory !== 'mosaicos' && (
+              <span className="text-xs text-warm-gray/70">
+                {CATEGORY_REGISTRY[selectedCategory].label}
+              </span>
             )}
-          </span>
+          </div>
           <span className="text-lg font-bold text-teal">
             {formatPrice(gridConfig.price)}
           </span>

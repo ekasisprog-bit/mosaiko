@@ -7,6 +7,7 @@ import { GRID_CONFIGS, formatPrice, type GridSize } from '@/lib/grid-config';
 interface GridSelectorProps {
   onSelect: (grid: GridSize) => void;
   selected: GridSize | null;
+  allowedSizes?: GridSize[];
 }
 
 const GRID_OPTIONS: GridSize[] = [3, 4, 6, 9];
@@ -77,8 +78,9 @@ const cardVariants = {
   },
 };
 
-export function GridSelector({ onSelect, selected }: GridSelectorProps) {
+export function GridSelector({ onSelect, selected, allowedSizes }: GridSelectorProps) {
   const t = useTranslations('builder');
+  const options = allowedSizes ?? GRID_OPTIONS;
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,7 +99,7 @@ export function GridSelector({ onSelect, selected }: GridSelectorProps) {
         animate="visible"
         className="grid grid-cols-2 gap-3 md:gap-4"
       >
-        {GRID_OPTIONS.map((size) => {
+        {options.map((size) => {
           const config = GRID_CONFIGS[size];
           const isSelected = selected === size;
           const label = config.label as 'grid3' | 'grid4' | 'grid6' | 'grid9';
