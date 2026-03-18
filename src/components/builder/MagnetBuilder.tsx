@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
 import { CATEGORY_REGISTRY, type CategoryType } from '@/lib/customization-types';
@@ -14,6 +15,11 @@ import { GridSelector } from './GridSelector';
 import { PhotoUploader } from './PhotoUploader';
 import { ImageCropper } from './ImageCropper';
 import { MagnetPreview } from './MagnetPreview';
+
+const CustomizationEditor = dynamic(
+  () => import('./CustomizationEditor').then((m) => m.CustomizationEditor),
+  { ssr: false },
+);
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -209,7 +215,7 @@ export function MagnetBuilder() {
                   />
                 )}
                 {flow.currentStepId === 'customize' && flow.selectedCategory && (
-                  <CustomizePlaceholder
+                  <CustomizationEditor
                     category={flow.selectedCategory}
                     values={flow.customizationValues}
                     onValueChange={flow.setCustomizationValue}
@@ -250,131 +256,6 @@ export function MagnetBuilder() {
           />
         </aside>
       </div>
-    </div>
-  );
-}
-
-// ─── Customization Placeholder (will be replaced in Chunk 2) ─────────────────
-
-function CustomizePlaceholder({
-  category,
-  values,
-  onValueChange,
-  selectedTheme,
-  onThemeChange,
-  onComplete,
-}: {
-  category: CategoryType;
-  values: Record<string, string>;
-  onValueChange: (field: string, value: string) => void;
-  selectedTheme: string | null;
-  onThemeChange: (theme: 'calido' | 'fresco' | 'vintage' | 'pastel') => void;
-  onComplete: () => void;
-}) {
-  const t = useTranslations('builder');
-  const meta = CATEGORY_REGISTRY[category];
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="text-center">
-        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
-          {t('customizeTitle')}
-        </h2>
-        <p className="mt-2 text-sm text-warm-gray md:text-base">
-          {t('customizeHint')}
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        {meta.textFields.map((field) => {
-          const labelKey = `field${field.charAt(0).toUpperCase()}${field.slice(1)}` as string;
-          // Map field names to i18n keys
-          const i18nMap: Record<string, string> = {
-            songName: 'fieldSongName',
-            artistName: 'fieldArtistName',
-            title: 'fieldTitle',
-            artist: 'fieldArtist',
-            year: 'fieldYear',
-            japaneseText: 'fieldDecorativeText',
-            customText: 'fieldCustomText',
-            eventText: 'fieldEventText',
-            date: 'fieldDate',
-          };
-          const key = i18nMap[field] || labelKey;
-          const isDate = field === 'date';
-          const isDecorativeText = field === 'japaneseText';
-
-          return (
-            <div key={field} className="flex flex-col gap-1.5">
-              <label htmlFor={`field-${field}`} className="text-sm font-medium text-charcoal">
-                {t(key)}
-              </label>
-              {isDecorativeText && (
-                <span className="text-xs text-warm-gray">
-                  {t('fieldDecorativeTextHint')}
-                </span>
-              )}
-              <input
-                id={`field-${field}`}
-                type={isDate ? 'date' : 'text'}
-                value={values[field] || ''}
-                onChange={(e) => onValueChange(field, e.target.value)}
-                className="min-h-[48px] rounded-lg border-2 border-light-gray bg-white px-4 py-3 text-sm text-charcoal transition-colors focus:border-terracotta focus:outline-none"
-                placeholder={isDate ? '' : t(key)}
-              />
-            </div>
-          );
-        })}
-
-        {meta.hasTheme && (
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-charcoal">{t('themeLabel')}</span>
-            <div className="grid grid-cols-2 gap-3">
-              {(['calido', 'fresco', 'vintage', 'pastel'] as const).map((theme) => {
-                const isActive = selectedTheme === theme;
-                const themeKey = `theme${theme.charAt(0).toUpperCase()}${theme.slice(1)}` as 'themeCalido' | 'themeFresco' | 'themeVintage' | 'themePastel';
-                const swatchColors: Record<string, string> = {
-                  calido: '#E8A87C',
-                  fresco: '#7FB5D5',
-                  vintage: '#C9B99A',
-                  pastel: '#D4C5E2',
-                };
-
-                return (
-                  <button
-                    key={theme}
-                    onClick={() => onThemeChange(theme)}
-                    className={[
-                      'flex items-center gap-3 rounded-lg border-2 p-3 transition-all cursor-pointer min-h-[48px]',
-                      isActive
-                        ? 'border-terracotta bg-terracotta/5'
-                        : 'border-light-gray bg-white hover:border-terracotta-light',
-                    ].join(' ')}
-                  >
-                    <div
-                      className="h-6 w-6 shrink-0 rounded-full border border-light-gray"
-                      style={{ backgroundColor: swatchColors[theme] }}
-                    />
-                    <span className={[
-                      'text-sm font-medium',
-                      isActive ? 'text-terracotta' : 'text-charcoal',
-                    ].join(' ')}>
-                      {t(themeKey)}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <button
-        onClick={onComplete}
-        className="min-h-[48px] w-full rounded-xl bg-terracotta px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-terracotta/90 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
-      >
-        {t('continue')}
-      </button>
     </div>
   );
 }

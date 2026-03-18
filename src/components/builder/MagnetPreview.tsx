@@ -1,13 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { splitImageIntoTiles, loadImage } from '@/lib/canvas-utils';
 import type { CropArea } from '@/lib/canvas-utils';
 import { formatPrice, type GridConfig } from '@/lib/grid-config';
-import type { CategoryType, FloresTheme } from '@/lib/customization-types';
+import {
+  getTileLayout,
+  CATEGORY_REGISTRY,
+  type CategoryType,
+  type FloresTheme,
+  type CategoryCustomization,
+} from '@/lib/customization-types';
+import { getFloresCSSFilters } from '@/lib/print-pipeline/utils/filter-presets';
 import { Button } from '@/components/ui/Button';
+import { SpotifyBarPreview } from './tile-previews/SpotifyBarPreview';
+import { ArteInfoPreview } from './tile-previews/ArteInfoPreview';
+import { GhibliPanelPreview } from './tile-previews/GhibliPanelPreview';
+import { SaveTheDateOverlay } from './tile-previews/SaveTheDateOverlay';
+import { PolaroidFrame } from './tile-previews/PolaroidFrame';
 
 interface MagnetPreviewProps {
   imageSrc: string;
@@ -30,9 +42,9 @@ export function MagnetPreview({
   onAddToCart,
   onReset,
   isUploading = false,
-  categoryType: _categoryType,
-  textFields: _textFields,
-  filterTheme: _filterTheme,
+  categoryType = 'mosaicos',
+  textFields = {},
+  filterTheme,
 }: MagnetPreviewProps) {
   const t = useTranslations('builder');
   const tc = useTranslations('common');
@@ -40,6 +52,40 @@ export function MagnetPreview({
   const [tiles, setTiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Build the CategoryCustomization for getTileLayout
+  const customizationConfig = useMemo((): CategoryCustomization => {
+    switch (categoryType) {
+      case 'spotify':
+        return { categoryType: 'spotify', gridSize: 6, songName: textFields.songName || '', artistName: textFields.artistName || '' };
+      case 'arte':
+        return { categoryType: 'arte', gridSize: 9, title: textFields.title || '', artist: textFields.artist || '', year: textFields.year || '' };
+      case 'ghibli':
+        return { categoryType: 'ghibli', gridSize: 6, year: textFields.year || '', japaneseText: textFields.japaneseText || '', customText: textFields.customText || '' };
+      case 'save-the-date':
+        return { categoryType: 'save-the-date', gridSize: gridConfig.size as 3 | 6 | 9, eventText: textFields.eventText || '', date: textFields.date || '' };
+      case 'flores':
+        return { categoryType: 'flores', gridSize: gridConfig.size as 3 | 6 | 9, theme: filterTheme || 'calido' };
+      case 'polaroid':
+        return { categoryType: 'polaroid', gridSize: 4 };
+      default:
+        return { categoryType: 'mosaicos', gridSize: gridConfig.size as 3 | 6 | 9 };
+    }
+  }, [categoryType, textFields, gridConfig.size, filterTheme]);
+
+  const tileLayout = useMemo(() => getTileLayout(customizationConfig), [customizationConfig]);
+
+  // Get Flores CSS filters if applicable
+  const floresFilters = useMemo(() => {
+    if (categoryType !== 'flores' || !filterTheme) return null;
+    return getFloresCSSFilters(filterTheme, gridConfig.size);
+  }, [categoryType, filterTheme, gridConfig.size]);
+
+  // Count how many photo tiles we need (non-special tiles)
+  const photoTileCount = useMemo(
+    () => tileLayout.filter((td) => td.role === 'photo').length,
+    [tileLayout],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +98,19 @@ export function MagnetPreview({
         const image = await loadImage(imageSrc);
         if (cancelled) return;
 
-        const tileDataUrls = splitImageIntoTiles(image, cropArea, gridConfig, rotation);
+        // For categories with special tiles, we only split the photo portion
+        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' ? 2 : gridConfig.rows;
+        const photoCols = gridConfig.cols;
+
+        // Create a modified config for splitting only photo tiles
+        const splitConfig = {
+          ...gridConfig,
+          size: photoTileCount as typeof gridConfig.size,
+          rows: photoRows,
+          cols: photoCols,
+        };
+
+        const tileDataUrls = splitImageIntoTiles(image, cropArea, splitConfig, rotation);
         if (cancelled) return;
 
         setTiles(tileDataUrls);
@@ -72,9 +130,21 @@ export function MagnetPreview({
     return () => {
       cancelled = true;
     };
-  }, [imageSrc, cropArea, gridConfig, rotation]);
+  }, [imageSrc, cropArea, gridConfig, rotation, categoryType, photoTileCount]);
 
   const priceText = t('addToCart', { price: formatPrice(gridConfig.price) });
+
+  // Precompute photo tile index mapping (layout index → photo tiles array index)
+  const photoTileIndexMap = useMemo(() => {
+    const map = new Map<number, number>();
+    let photoIdx = 0;
+    for (const td of tileLayout) {
+      if (td.role === 'photo') {
+        map.set(td.index, photoIdx++);
+      }
+    }
+    return map;
+  }, [tileLayout]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -120,7 +190,6 @@ export function MagnetPreview({
           />
 
           {isLoading ? (
-            /* Loading state */
             <div className="flex flex-col items-center justify-center py-16 gap-4">
               <div className="relative h-12 w-12">
                 <div className="absolute inset-0 animate-spin rounded-full border-4 border-light-gray border-t-terracotta" />
@@ -128,7 +197,6 @@ export function MagnetPreview({
               <p className="text-sm text-warm-gray">{tc('loading')}</p>
             </div>
           ) : error ? (
-            /* Error state */
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-error">
                 <circle cx="12" cy="12" r="10" />
@@ -141,7 +209,6 @@ export function MagnetPreview({
               </Button>
             </div>
           ) : (
-            /* Tile grid */
             <div
               className="relative mx-auto grid"
               style={{
@@ -151,49 +218,49 @@ export function MagnetPreview({
                 maxWidth: `${gridConfig.cols * 120}px`,
               }}
             >
-              {tiles.map((tileSrc, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8, rotateZ: -2 + Math.random() * 4 }}
-                  animate={{ opacity: 1, scale: 1, rotateZ: 0 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 260,
-                    damping: 20,
-                    delay: index * 0.05,
-                  }}
-                  whileHover={{
-                    scale: 1.04,
-                    rotateZ: -1 + Math.random() * 2,
-                    zIndex: 10,
-                    transition: { duration: 0.2 },
-                  }}
-                  className="group relative cursor-default"
-                >
-                  <div
-                    className="overflow-hidden rounded-md"
-                    style={{
-                      aspectRatio: '1',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
-                    }}
-                  >
-                    <img
-                      src={tileSrc}
-                      alt={`Pieza ${index + 1} de ${gridConfig.size}`}
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  </div>
-                  {/* Magnetic shadow underneath */}
-                  <div
-                    className="absolute -bottom-1 left-1/2 -z-10 h-2 w-4/5 -translate-x-1/2 rounded-full opacity-20"
-                    style={{
-                      background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)',
-                    }}
-                    aria-hidden="true"
-                  />
-                </motion.div>
-              ))}
+              {tileLayout.map((descriptor) => {
+                const { index, role, label } = descriptor;
+
+                return (
+                  <TileWrapper key={index} index={index}>
+                    {role === 'special' && categoryType === 'spotify' && (
+                      <SpotifyBarPreview
+                        label={label as 'spotify-bar-left' | 'spotify-bar-right'}
+                        songName={textFields.songName}
+                        artistName={textFields.artistName}
+                      />
+                    )}
+
+                    {role === 'special' && categoryType === 'arte' && (
+                      <ArteInfoPreview
+                        title={textFields.title}
+                        artist={textFields.artist}
+                        year={textFields.year}
+                      />
+                    )}
+
+                    {role === 'text-panel' && categoryType === 'ghibli' && (
+                      <GhibliPanelPreview
+                        label={label as 'ghibli-left' | 'ghibli-right'}
+                        year={textFields.year}
+                        japaneseText={textFields.japaneseText}
+                        customText={textFields.customText}
+                      />
+                    )}
+
+                    {role === 'photo' && (
+                      <PhotoTile
+                        tileSrc={tiles[photoTileIndexMap.get(index) ?? 0] || ''}
+                        index={index}
+                        totalTiles={gridConfig.size}
+                        categoryType={categoryType}
+                        floresFilter={floresFilters?.find((f) => f.tileIndex === index)?.filter}
+                        textFields={textFields}
+                      />
+                    )}
+                  </TileWrapper>
+                );
+              })}
             </div>
           )}
         </motion.div>
@@ -204,7 +271,7 @@ export function MagnetPreview({
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: tiles.length * 0.05 + 0.2, duration: 0.4 }}
+          transition={{ delay: tileLayout.length * 0.05 + 0.2, duration: 0.4 }}
           className="flex flex-col gap-4"
         >
           {/* Product info card */}
@@ -215,6 +282,9 @@ export function MagnetPreview({
               </span>
               <span className="text-xs text-warm-gray">
                 {gridConfig.rows} x {gridConfig.cols} — {gridConfig.size} {tc('pieces')}
+                {categoryType !== 'mosaicos' && (
+                  <> · {CATEGORY_REGISTRY[categoryType].label}</>
+                )}
               </span>
             </div>
             <span className="text-xl font-bold text-teal">
@@ -241,6 +311,133 @@ export function MagnetPreview({
           </button>
         </motion.div>
       )}
+    </div>
+  );
+}
+
+// ─── Sub-components ─────────────────────────────────────────────────────────
+
+function TileWrapper({
+  index,
+  children,
+}: {
+  index: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, rotateZ: -2 + Math.random() * 4 }}
+      animate={{ opacity: 1, scale: 1, rotateZ: 0 }}
+      transition={{
+        type: 'spring',
+        stiffness: 260,
+        damping: 20,
+        delay: index * 0.05,
+      }}
+      whileHover={{
+        scale: 1.04,
+        rotateZ: -1 + Math.random() * 2,
+        zIndex: 10,
+        transition: { duration: 0.2 },
+      }}
+      className="group relative cursor-default"
+    >
+      {children}
+      {/* Magnetic shadow */}
+      <div
+        className="absolute -bottom-1 left-1/2 -z-10 h-2 w-4/5 -translate-x-1/2 rounded-full opacity-20"
+        style={{
+          background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)',
+        }}
+        aria-hidden="true"
+      />
+    </motion.div>
+  );
+}
+
+function PhotoTile({
+  tileSrc,
+  index,
+  totalTiles,
+  categoryType,
+  floresFilter,
+  textFields,
+}: {
+  tileSrc: string;
+  index: number;
+  totalTiles: number;
+  categoryType: CategoryType;
+  floresFilter?: string;
+  textFields?: Record<string, string>;
+}) {
+  const imgElement = (
+    <img
+      src={tileSrc}
+      alt={`Pieza ${index + 1} de ${totalTiles}`}
+      className="h-full w-full object-cover"
+      draggable={false}
+    />
+  );
+
+  // Polaroid: wrap in frame
+  if (categoryType === 'polaroid') {
+    return (
+      <PolaroidFrame>
+        {imgElement}
+      </PolaroidFrame>
+    );
+  }
+
+  // Flores: apply CSS filter
+  if (categoryType === 'flores' && floresFilter) {
+    return (
+      <div
+        className="overflow-hidden rounded-md"
+        style={{
+          aspectRatio: '1',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
+          filter: floresFilter,
+        }}
+      >
+        {imgElement}
+      </div>
+    );
+  }
+
+  // Save the Date: photo + text overlay
+  if (categoryType === 'save-the-date' && textFields) {
+    // Only show overlay on center-ish tile
+    const showOverlay = index === 0;
+
+    return (
+      <div
+        className="relative overflow-hidden rounded-md"
+        style={{
+          aspectRatio: '1',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
+        }}
+      >
+        {imgElement}
+        {showOverlay && (
+          <SaveTheDateOverlay
+            eventText={textFields.eventText}
+            date={textFields.date}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Default: plain photo tile
+  return (
+    <div
+      className="overflow-hidden rounded-md"
+      style={{
+        aspectRatio: '1',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
+      }}
+    >
+      {imgElement}
     </div>
   );
 }
