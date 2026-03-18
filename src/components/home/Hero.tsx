@@ -46,19 +46,31 @@ const heroProducts: HeroProduct[] = [
     cols: 3,
     rows: 3,
     label: '9 piezas',
-    region: { x: 0.197, y: 0.092, w: 0.574, h: 0.742 },
+    region: { x: 0.1997, y: 0.0949, w: 0.5697, h: 0.7369 },
+    // Pixel-measured per-magnet regions (gaps: 16px h, 16px v)
+    tileRegions: [
+      { x: 0.1997, y: 0.0949, w: 0.1864, h: 0.2420 }, // row0 col0
+      { x: 0.3909, y: 0.0949, w: 0.1873, h: 0.2420 }, // row0 col1
+      { x: 0.5830, y: 0.0949, w: 0.1864, h: 0.2420 }, // row0 col2
+      { x: 0.1997, y: 0.3424, w: 0.1864, h: 0.2420 }, // row1 col0
+      { x: 0.3909, y: 0.3424, w: 0.1873, h: 0.2420 }, // row1 col1
+      { x: 0.5830, y: 0.3424, w: 0.1864, h: 0.2420 }, // row1 col2
+      { x: 0.1997, y: 0.5898, w: 0.1864, h: 0.2420 }, // row2 col0
+      { x: 0.3909, y: 0.5898, w: 0.1873, h: 0.2420 }, // row2 col1
+      { x: 0.5830, y: 0.5898, w: 0.1864, h: 0.2420 }, // row2 col2
+    ],
   },
   {
     src: '/products/mosaico-3-panoramic.png',
     cols: 3,
     rows: 1,
     label: '3 piezas',
-    region: { x: 0.197, y: 0.577, w: 0.573, h: 0.247 },
-    // Pixel-measured per-magnet regions (magnets are 624, 619, 631px wide)
+    region: { x: 0.1997, y: 0.5800, w: 0.5697, h: 0.2420 },
+    // Pixel-measured per-magnet regions (magnets: 615, 615, 615px wide)
     tileRegions: [
-      { x: 0.1973, y: 0.5769, w: 0.1891, h: 0.2475 }, // magnet 1
-      { x: 0.3900, y: 0.5769, w: 0.1876, h: 0.2475 }, // magnet 2
-      { x: 0.5806, y: 0.5769, w: 0.1912, h: 0.2475 }, // magnet 3
+      { x: 0.1997, y: 0.5800, w: 0.1864, h: 0.2420 }, // magnet 1
+      { x: 0.3909, y: 0.5800, w: 0.1864, h: 0.2420 }, // magnet 2
+      { x: 0.5830, y: 0.5800, w: 0.1864, h: 0.2420 }, // magnet 3
     ],
   },
   {
@@ -66,14 +78,30 @@ const heroProducts: HeroProduct[] = [
     cols: 2,
     rows: 2,
     label: '4 piezas',
-    region: { x: 0.252, y: 0.274, w: 0.496, h: 0.382 },
+    region: { x: 0.2549, y: 0.2770, w: 0.4890, h: 0.3779 },
+    // Pixel-measured per-magnet regions (gaps: 16px h, 13px v)
+    tileRegions: [
+      { x: 0.2549, y: 0.2770, w: 0.2412, h: 0.1873 }, // row0 col0
+      { x: 0.5024, y: 0.2770, w: 0.2416, h: 0.1873 }, // row0 col1
+      { x: 0.2549, y: 0.4682, w: 0.2412, h: 0.1867 }, // row1 col0
+      { x: 0.5024, y: 0.4682, w: 0.2416, h: 0.1867 }, // row1 col1
+    ],
   },
   {
     src: '/products/mosaico-6-family.png',
     cols: 2,
     rows: 3,
     label: '6 piezas',
-    region: { x: 0.197, y: 0.092, w: 0.383, h: 0.742 },
+    region: { x: 0.1997, y: 0.0953, w: 0.3788, h: 0.7361 },
+    // Pixel-measured per-magnet regions (gaps: 15-17px)
+    tileRegions: [
+      { x: 0.1997, y: 0.0953, w: 0.1864, h: 0.2412 }, // row0 col0
+      { x: 0.3912, y: 0.0953, w: 0.1873, h: 0.2412 }, // row0 col1
+      { x: 0.1997, y: 0.3424, w: 0.1864, h: 0.2416 }, // row1 col0
+      { x: 0.3912, y: 0.3424, w: 0.1873, h: 0.2416 }, // row1 col1
+      { x: 0.1997, y: 0.5898, w: 0.1864, h: 0.2416 }, // row2 col0
+      { x: 0.3912, y: 0.5898, w: 0.1873, h: 0.2416 }, // row2 col1
+    ],
   },
 ];
 
