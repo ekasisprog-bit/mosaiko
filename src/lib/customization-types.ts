@@ -102,7 +102,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
   },
   flores: {
     type: 'flores',
-    label: 'Flores',
+    label: 'Tonos',
     allowedGridSizes: [3, 6, 9],
     textFields: [],
     hasTheme: true,

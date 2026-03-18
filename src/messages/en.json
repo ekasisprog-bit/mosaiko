@@ -64,7 +64,7 @@
     "mosaicos": "Mosaics",
     "ghibli": "Studio",
     "arte": "Art",
-    "flores": "Flowers"
+    "flores": "Tones"
   },
   "carousel": {
     "title": "Our designs",
@@ -126,8 +126,8 @@
     "categoryGhibliDesc": "Film poster with text panels",
     "categorySaveTheDate": "Save the Date",
     "categorySaveTheDateDesc": "Photo with event text and date overlay",
-    "categoryFlores": "Flowers",
-    "categoryFloresDesc": "Themed color filters per tile",
+    "categoryFlores": "Tones",
+    "categoryFloresDesc": "Color palette variations per tile",
     "customizeTitle": "Customize your design",
     "customizeHint": "Add the details for your mosaic",
     "fieldSongName": "Song name",
@@ -338,7 +338,7 @@
     "ghibli": "Studio",
     "arte": "Art",
     "saveTheDate": "Save the Date",
-    "flores": "Flowers",
+    "flores": "Tones",
     "spotify": "Spotify Album",
     "polaroid": "Polaroid",
     "noResults": "No products in this category yet",

@@ -64,7 +64,7 @@
     "mosaicos": "Mosaicos",
     "ghibli": "Studio",
     "arte": "Arte",
-    "flores": "Flores"
+    "flores": "Tonos"
   },
   "carousel": {
     "title": "Nuestros diseños",
@@ -126,8 +126,8 @@
     "categoryGhibliDesc": "Póster de película con paneles de texto",
     "categorySaveTheDate": "Save the Date",
     "categorySaveTheDateDesc": "Foto con texto de evento y fecha",
-    "categoryFlores": "Flores",
-    "categoryFloresDesc": "Filtros de color temáticos por pieza",
+    "categoryFlores": "Tonos",
+    "categoryFloresDesc": "Variaciones de paleta de color por pieza",
     "customizeTitle": "Personaliza tu diseño",
     "customizeHint": "Agrega los detalles para tu mosaico",
     "fieldSongName": "Nombre de la canción",
@@ -338,7 +338,7 @@
     "ghibli": "Studio",
     "arte": "Arte",
     "saveTheDate": "Save the Date",
-    "flores": "Flores",
+    "flores": "Tonos",
     "spotify": "Álbum de Spotify",
     "polaroid": "Polaroid",
     "noResults": "No hay productos en esta categoría aún",
