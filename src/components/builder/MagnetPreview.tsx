@@ -64,7 +64,7 @@ export function MagnetPreview({
       case 'ghibli':
         return { categoryType: 'ghibli', gridSize: 6, year: textFields.year || '', japaneseText: textFields.japaneseText || '', customText: textFields.customText || '' };
       case 'save-the-date':
-        return { categoryType: 'save-the-date', gridSize: gridConfig.size as 3 | 6 | 9, eventText: textFields.eventText || '', date: textFields.date || '' };
+        return { categoryType: 'save-the-date', gridSize: 9, eventText: textFields.eventText || '', date: textFields.date || '' };
       case 'flores':
         return { categoryType: 'flores', gridSize: gridConfig.size as 3 | 6 | 9, theme: filterTheme || 'calido' };
       case 'polaroid':

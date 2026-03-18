@@ -37,7 +37,7 @@ export interface FloresCustomization {
 
 export interface SaveTheDateCustomization {
   categoryType: 'save-the-date';
-  gridSize: 3 | 6 | 9;
+  gridSize: 9;
   eventText: string;
   date: string;
 }
@@ -111,7 +111,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
   'save-the-date': {
     type: 'save-the-date',
     label: 'Save the Date',
-    allowedGridSizes: [3, 6, 9],
+    allowedGridSizes: [9],
     textFields: ['eventText', 'date'],
     hasTheme: false,
     description: 'Photo with text overlay for events',
@@ -126,7 +126,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
   },
   ghibli: {
     type: 'ghibli',
-    label: 'Studio Ghibli',
+    label: 'Studio',
     allowedGridSizes: [6],
     textFields: ['year', 'japaneseText', 'customText'],
     hasTheme: false,
