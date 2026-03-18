@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadOriginalPhoto } from '@/lib/storage';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -29,9 +30,21 @@ function detectImageType(buffer: Buffer): { type: string; extension: string } | 
 
 // ─── POST /api/upload ────────────────────────────────────────────────────────
 
-// TODO: Add rate limiting (implement with Vercel KV, Upstash, or similar)
-
 export async function POST(request: NextRequest) {
+  // ── Rate limiting (10 burst, 1 per 5s sustained) ─────────────────────
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const { allowed, retryAfterMs } = checkRateLimit(`upload:${clientIp}`);
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Demasiadas solicitudes. Intenta de nuevo en unos segundos.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) },
+      },
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get('file');

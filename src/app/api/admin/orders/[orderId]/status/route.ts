@@ -20,6 +20,14 @@ export async function PATCH(
 
   const { orderId } = await params;
 
+  // Validate orderId format (prevent path traversal / injection)
+  if (!/^[\w-]+$/.test(orderId)) {
+    return NextResponse.json(
+      { error: 'Formato de orderId inválido.' },
+      { status: 400 },
+    );
+  }
+
   try {
     const body = await request.json();
     const { status, trackingNumber, trackingCompany, customerEmail, customerName, orderNumber } = body;
