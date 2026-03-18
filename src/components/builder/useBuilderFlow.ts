@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { GRID_CONFIGS, type GridSize, type GridConfig } from '@/lib/grid-config';
+import { GRID_CONFIGS, getEffectiveGridConfig, type GridSize, type GridConfig } from '@/lib/grid-config';
 import {
   CATEGORY_REGISTRY,
   type CategoryType,
@@ -114,8 +114,8 @@ export function useBuilderFlow(): BuilderFlowState {
 
   // ─── Derived ───
   const gridConfig: GridConfig | null = useMemo(
-    () => (selectedGrid ? GRID_CONFIGS[selectedGrid] : null),
-    [selectedGrid],
+    () => (selectedGrid ? getEffectiveGridConfig(selectedGrid, selectedCategory ?? undefined) : null),
+    [selectedGrid, selectedCategory],
   );
 
   const currentStepIndex = useMemo(

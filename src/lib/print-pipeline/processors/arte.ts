@@ -8,25 +8,23 @@ const TILE = TILE_PRINT_SIZE;
 
 /**
  * Arte processor.
- * Grid is always 9 (3x3):
- *   - Tiles 0-7: photo split into 3x3 grid minus bottom-right
+ * Layout is 4×2+1 (9 magnets total):
+ *   - Tiles 0-7: photo split into 4 cols × 2 rows
  *   - Tile 8 (bottom-right): black info tile with title, artist, year
- *
- * The photo is split as a full 3x3, but tile 8 is replaced with the info panel.
  */
 export async function processArte(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as ArteCustomization;
   const { title, artist, year } = customization;
 
-  // Step 1: Crop image and split into 3x3 (we only use first 8 tiles)
+  // Step 1: Crop image to 4×2 landscape and split into 8 photo tiles
   const croppedBuffer = await cropAndResize(
     job.imageBuffer,
     job.cropArea,
-    3 * TILE,
-    3 * TILE,
+    4 * TILE,
+    2 * TILE,
   );
 
-  const allTiles = await splitIntoTiles(croppedBuffer, 3, 3);
+  const allTiles = await splitIntoTiles(croppedBuffer, 2, 4);
 
   // Step 2: Generate the info tile (tile 8, bottom-right)
   const infoTileBuffer = await renderInfoTile(title, artist, year);

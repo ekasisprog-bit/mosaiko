@@ -46,6 +46,31 @@ export const GRID_CONFIGS: Record<GridSize, GridConfig> = {
 
 export const TILE_PRINT_SIZE = 827; // 7cm at 300dpi
 
+// ─── Per-category layout overrides ──────────────────────────────────────────
+// gridSize determines pricing. The visual/print layout varies per category.
+
+export interface CategoryLayoutOverride {
+  rows: number;   // total visual rows (CSS grid)
+  cols: number;   // total visual cols
+  aspect: number; // crop aspect ratio (width / height)
+}
+
+export const CATEGORY_LAYOUT_OVERRIDES: Partial<Record<string, CategoryLayoutOverride>> = {
+  'arte:9': { rows: 3, cols: 4, aspect: 4 / 2 },
+};
+
+/**
+ * Returns the effective grid config for a category + grid size combination.
+ * Merges any layout override into the base config, preserving price.
+ */
+export function getEffectiveGridConfig(gridSize: GridSize, categoryType?: string): GridConfig {
+  const base = GRID_CONFIGS[gridSize];
+  if (!categoryType) return base;
+  const override = CATEGORY_LAYOUT_OVERRIDES[`${categoryType}:${gridSize}`];
+  if (!override) return base;
+  return { ...base, rows: override.rows, cols: override.cols, aspect: override.aspect };
+}
+
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',

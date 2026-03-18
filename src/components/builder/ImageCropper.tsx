@@ -64,6 +64,10 @@ interface ImageCropperProps {
   onCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea, rotation: number) => void;
   /** Fires during crop/zoom/rotation changes (debounced) for live preview. */
   onCropChange?: (croppedAreaPixels: CropArea, rotation: number) => void;
+  /** Override grid overlay rows (e.g. 2 for Arte's photo-only region). */
+  overlayRows?: number;
+  /** Override grid overlay cols. */
+  overlayCols?: number;
 }
 
 export function ImageCropper({
@@ -71,6 +75,8 @@ export function ImageCropper({
   gridConfig,
   onCropComplete,
   onCropChange,
+  overlayRows,
+  overlayCols,
 }: ImageCropperProps) {
   const t = useTranslations('builder');
 
@@ -217,7 +223,7 @@ export function ImageCropper({
           className="pointer-events-none absolute inset-0 z-10"
           aria-hidden="true"
         >
-          <GridOverlay rows={gridConfig.rows} cols={gridConfig.cols} />
+          <GridOverlay rows={overlayRows ?? gridConfig.rows} cols={overlayCols ?? gridConfig.cols} />
         </div>
       </div>
 

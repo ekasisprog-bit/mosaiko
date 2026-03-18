@@ -150,6 +150,8 @@ export interface TileDescriptor {
   index: number;
   role: TileRole;
   label?: string;
+  gridColumn?: number;  // grid-column-start (for non-standard placement)
+  gridRow?: number;     // grid-row-start
 }
 
 /**
@@ -193,13 +195,13 @@ export function getTileLayout(config: CategoryCustomization): TileDescriptor[] {
       }));
 
     case 'arte':
-      // 9-grid: first 8 = photo, last (bottom-right) = info tile
+      // 4×2+1 layout: 8 photo tiles in 2 rows of 4, info tile at row 3 col 4
       return [
         ...Array.from({ length: 8 }, (_, i) => ({
           index: i,
           role: 'photo' as const,
         })),
-        { index: 8, role: 'special', label: 'arte-info' },
+        { index: 8, role: 'special', label: 'arte-info', gridColumn: 4, gridRow: 3 },
       ];
 
     case 'ghibli':

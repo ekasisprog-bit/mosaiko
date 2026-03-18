@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { CATEGORY_REGISTRY, type CategoryType } from '@/lib/customization-types';
-import { GRID_CONFIGS, formatPrice, type GridSize } from '@/lib/grid-config';
+import { GRID_CONFIGS, CATEGORY_LAYOUT_OVERRIDES, formatPrice, type GridSize } from '@/lib/grid-config';
 
 interface CategorySelectorProps {
   onSelect: (category: CategoryType) => void;
@@ -146,10 +146,18 @@ const cardVariants = {
   },
 };
 
-function getGridBadge(allowedGridSizes: GridSize[]): { rows: number; cols: number; count: number } {
-  // Show the first (default) grid size info
+function getGridBadge(allowedGridSizes: GridSize[], categoryType?: CategoryType): { rows: number; cols: number; count: number; customLabel?: string } {
   const defaultSize = allowedGridSizes[0];
   const config = GRID_CONFIGS[defaultSize];
+
+  // Check for category-specific layout override
+  if (categoryType) {
+    const override = CATEGORY_LAYOUT_OVERRIDES[`${categoryType}:${defaultSize}`];
+    if (override) {
+      return { rows: override.rows, cols: override.cols, count: config.size, customLabel: '4×2+1 · 9' };
+    }
+  }
+
   return { rows: config.rows, cols: config.cols, count: config.size };
 }
 
@@ -185,7 +193,7 @@ export function CategorySelector({ onSelect, selected }: CategorySelectorProps) 
           const meta = CATEGORY_REGISTRY[cat];
           const isSelected = selected === cat;
           const keys = I18N_KEY_MAP[cat];
-          const badge = getGridBadge(meta.allowedGridSizes);
+          const badge = getGridBadge(meta.allowedGridSizes, cat);
 
           return (
             <motion.button
@@ -228,7 +236,9 @@ export function CategorySelector({ onSelect, selected }: CategorySelectorProps) 
                   {t(keys.desc)}
                 </span>
                 <span className="mt-0.5 text-[10px] text-warm-gray/70 leading-tight">
-                  {t('categoryGridBadge', { cols: badge.cols, rows: badge.rows, count: badge.count })}
+                  {badge.customLabel
+                    ? badge.customLabel
+                    : t('categoryGridBadge', { cols: badge.cols, rows: badge.rows, count: badge.count })}
                 </span>
               </div>
 

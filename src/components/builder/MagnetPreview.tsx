@@ -100,7 +100,7 @@ export function MagnetPreview({
         if (cancelled) return;
 
         // For categories with special tiles, we only split the photo portion
-        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' ? 2 : gridConfig.rows;
+        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
         const photoCols = gridConfig.cols;
 
         // Create a modified config for splitting only photo tiles
@@ -220,10 +220,14 @@ export function MagnetPreview({
               }}
             >
               {tileLayout.map((descriptor) => {
-                const { index, role, label } = descriptor;
+                const { index, role, label, gridColumn, gridRow } = descriptor;
+                const placementStyle: React.CSSProperties | undefined =
+                  gridColumn || gridRow
+                    ? { gridColumn: gridColumn, gridRow: gridRow }
+                    : undefined;
 
                 return (
-                  <TileWrapper key={index} index={index}>
+                  <TileWrapper key={index} index={index} style={placementStyle}>
                     {role === 'special' && categoryType === 'spotify' && (
                       <SpotifyBarPreview
                         label={label as 'spotify-bar-left' | 'spotify-bar-right'}
@@ -285,7 +289,9 @@ export function MagnetPreview({
                 {t(`grid${gridConfig.size}` as 'grid3' | 'grid4' | 'grid6' | 'grid9')}
               </span>
               <span className="text-xs text-warm-gray">
-                {gridConfig.rows} x {gridConfig.cols} — {gridConfig.size} {tc('pieces')}
+                {categoryType === 'arte'
+                  ? `4×2+1 — ${gridConfig.size} ${tc('pieces')}`
+                  : `${gridConfig.rows} x ${gridConfig.cols} — ${gridConfig.size} ${tc('pieces')}`}
                 {categoryType !== 'mosaicos' && (
                   <> · {CATEGORY_REGISTRY[categoryType].label}</>
                 )}
@@ -324,9 +330,11 @@ export function MagnetPreview({
 function TileWrapper({
   index,
   children,
+  style,
 }: {
   index: number;
   children: React.ReactNode;
+  style?: React.CSSProperties;
 }) {
   return (
     <motion.div
@@ -345,6 +353,7 @@ function TileWrapper({
         transition: { duration: 0.2 },
       }}
       className="group relative cursor-default"
+      style={style}
     >
       {children}
       {/* Magnetic shadow */}
