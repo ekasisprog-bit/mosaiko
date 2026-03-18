@@ -87,7 +87,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
   mosaicos: {
     type: 'mosaicos',
     label: 'Mosaicos',
-    allowedGridSizes: [3, 6, 9],
+    allowedGridSizes: [9, 6, 3],
     textFields: [],
     hasTheme: false,
     description: 'Basic photo split across tiles',
@@ -103,7 +103,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
   flores: {
     type: 'flores',
     label: 'Tonos',
-    allowedGridSizes: [3, 6, 9],
+    allowedGridSizes: [9, 6, 3],
     textFields: [],
     hasTheme: true,
     description: 'Themed color filters per tile',
