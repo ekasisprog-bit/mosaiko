@@ -22,12 +22,15 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
 
 /**
  * Gets the cropped region of the source image as a canvas.
+ * When rotation is non-zero, the image is rotated first and the crop
+ * coordinates are applied to the rotated result (matching react-easy-crop output).
  */
 export function getCroppedCanvas(
   image: HTMLImageElement,
   cropArea: CropArea,
   outputWidth: number,
   outputHeight: number,
+  rotation: number = 0,
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = outputWidth;
@@ -37,8 +40,41 @@ export function getCroppedCanvas(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
+  if (rotation === 0) {
+    ctx.drawImage(
+      image,
+      cropArea.x,
+      cropArea.y,
+      cropArea.width,
+      cropArea.height,
+      0,
+      0,
+      outputWidth,
+      outputHeight,
+    );
+    return canvas;
+  }
+
+  // Rotate the full image onto a temp canvas, then crop from it
+  const radians = (rotation * Math.PI) / 180;
+  const sin = Math.abs(Math.sin(radians));
+  const cos = Math.abs(Math.cos(radians));
+  const { naturalWidth: w, naturalHeight: h } = image;
+
+  const rotW = Math.round(w * cos + h * sin);
+  const rotH = Math.round(w * sin + h * cos);
+
+  const rotCanvas = document.createElement('canvas');
+  rotCanvas.width = rotW;
+  rotCanvas.height = rotH;
+  const rotCtx = rotCanvas.getContext('2d')!;
+
+  rotCtx.translate(rotW / 2, rotH / 2);
+  rotCtx.rotate(radians);
+  rotCtx.drawImage(image, -w / 2, -h / 2);
+
   ctx.drawImage(
-    image,
+    rotCanvas,
     cropArea.x,
     cropArea.y,
     cropArea.width,
@@ -48,6 +84,9 @@ export function getCroppedCanvas(
     outputWidth,
     outputHeight,
   );
+
+  rotCanvas.width = 0;
+  rotCanvas.height = 0;
 
   return canvas;
 }
@@ -61,12 +100,13 @@ export function splitImageIntoTiles(
   image: HTMLImageElement,
   cropArea: CropArea,
   grid: GridConfig,
+  rotation: number = 0,
 ): string[] {
   const totalWidth = grid.cols * TILE_PRINT_SIZE;
   const totalHeight = grid.rows * TILE_PRINT_SIZE;
 
   // First, get the full cropped image at print resolution
-  const fullCanvas = getCroppedCanvas(image, cropArea, totalWidth, totalHeight);
+  const fullCanvas = getCroppedCanvas(image, cropArea, totalWidth, totalHeight, rotation);
   const fullCtx = fullCanvas.getContext('2d')!;
 
   const tiles: string[] = [];
@@ -114,13 +154,14 @@ export function createPreviewCanvas(
   grid: GridConfig,
   previewTileSize: number = 120,
   gap: number = 4,
+  rotation: number = 0,
 ): HTMLCanvasElement {
   const totalWidth = grid.cols * previewTileSize + (grid.cols - 1) * gap;
   const totalHeight = grid.rows * previewTileSize + (grid.rows - 1) * gap;
 
   const croppedWidth = grid.cols * previewTileSize;
   const croppedHeight = grid.rows * previewTileSize;
-  const croppedCanvas = getCroppedCanvas(image, cropArea, croppedWidth, croppedHeight);
+  const croppedCanvas = getCroppedCanvas(image, cropArea, croppedWidth, croppedHeight, rotation);
 
   const previewCanvas = document.createElement('canvas');
   previewCanvas.width = totalWidth;

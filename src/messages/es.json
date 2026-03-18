@@ -109,7 +109,8 @@
     "fitModeStretchHint": "La imagen se estirará para llenar",
     "previewTitle": "¡Así quedará tu mosaico!",
     "previewHint": "Vista previa de cómo se verán tus imanes en el refrigerador",
-    "addToCart": "Agregar al carrito — ${price}",
+    "addToCart": "Agregar al carrito — {price}",
+    "rotate": "Rotar",
     "startOver": "Empezar de nuevo"
   },
   "cart": {

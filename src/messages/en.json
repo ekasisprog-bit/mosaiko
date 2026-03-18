@@ -109,7 +109,8 @@
     "fitModeStretchHint": "Image will be stretched to fill",
     "previewTitle": "Here's your mosaic!",
     "previewHint": "Preview of how your magnets will look on the fridge",
-    "addToCart": "Add to cart — ${price}",
+    "addToCart": "Add to cart — {price}",
+    "rotate": "Rotate",
     "startOver": "Start over"
   },
   "cart": {

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
 import type { CropArea } from '@/lib/canvas-utils';
 import { useCartStore } from '@/lib/cart-store';
-import { createPreviewCanvas, loadImage } from '@/lib/canvas-utils';
+import { createPreviewCanvas, getCroppedCanvas, loadImage } from '@/lib/canvas-utils';
 import { GridSelector } from './GridSelector';
 import { PhotoUploader } from './PhotoUploader';
 import { ImageCropper } from './ImageCropper';
@@ -44,6 +44,9 @@ export function MagnetBuilder() {
   const imageFileRef = useRef<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [cropAreaPixels, setCropAreaPixels] = useState<CropArea | null>(null);
+  const [rotation, setRotation] = useState(0);
+  const [liveCropArea, setLiveCropArea] = useState<CropArea | null>(null);
+  const [liveRotation, setLiveRotation] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
   const gridConfig: GridConfig | null = useMemo(
@@ -83,10 +86,19 @@ export function MagnetBuilder() {
   }, []);
 
   const handleCropComplete = useCallback(
-    (_croppedArea: CropArea, croppedAreaPixels: CropArea) => {
+    (_croppedArea: CropArea, croppedAreaPixels: CropArea, cropRotation: number) => {
       setCropAreaPixels(croppedAreaPixels);
+      setRotation(cropRotation);
       setDirection(1);
       setCurrentStep(4);
+    },
+    [],
+  );
+
+  const handleCropChange = useCallback(
+    (croppedAreaPixels: CropArea, cropRotation: number) => {
+      setLiveCropArea(croppedAreaPixels);
+      setLiveRotation(cropRotation);
     },
     [],
   );
@@ -99,7 +111,7 @@ export function MagnetBuilder() {
     try {
       // Generate a preview data URL for the cart
       const image = await loadImage(imageSrc);
-      const previewCanvas = createPreviewCanvas(image, cropAreaPixels, gridConfig, 120, 4);
+      const previewCanvas = createPreviewCanvas(image, cropAreaPixels, gridConfig, 120, 4, rotation);
       const previewUrl = previewCanvas.toDataURL('image/jpeg', 0.85);
 
       // Upload original photo to R2 so it survives browser close
@@ -128,6 +140,7 @@ export function MagnetBuilder() {
           categoryType: 'mosaicos',
           photoStorageUrl,
           cropArea: cropAreaPixels,
+          rotation,
         },
       });
     } catch {
@@ -144,7 +157,7 @@ export function MagnetBuilder() {
     } finally {
       setIsUploading(false);
     }
-  }, [imageSrc, cropAreaPixels, gridConfig, addItem]);
+  }, [imageSrc, cropAreaPixels, gridConfig, rotation, addItem]);
 
   const handleReset = useCallback(() => {
     if (imageSrc) URL.revokeObjectURL(imageSrc);
@@ -153,6 +166,9 @@ export function MagnetBuilder() {
     imageFileRef.current = null;
     setImageSrc(null);
     setCropAreaPixels(null);
+    setRotation(0);
+    setLiveCropArea(null);
+    setLiveRotation(0);
     setDirection(-1);
     setCurrentStep(1);
   }, [imageSrc]);
@@ -242,6 +258,7 @@ export function MagnetBuilder() {
                     imageSrc={imageSrc}
                     gridConfig={gridConfig}
                     onCropComplete={handleCropComplete}
+                    onCropChange={handleCropChange}
                   />
                 )}
                 {currentStep === 4 && imageSrc && cropAreaPixels && gridConfig && (
@@ -249,6 +266,7 @@ export function MagnetBuilder() {
                     imageSrc={imageSrc}
                     cropArea={cropAreaPixels}
                     gridConfig={gridConfig}
+                    rotation={rotation}
                     onAddToCart={handleAddToCart}
                     onReset={handleReset}
                     isUploading={isUploading}
@@ -266,6 +284,8 @@ export function MagnetBuilder() {
             selectedGrid={selectedGrid}
             imageSrc={imageSrc}
             gridConfig={gridConfig}
+            liveCropArea={liveCropArea}
+            liveRotation={liveRotation}
           />
         </aside>
       </div>
@@ -369,11 +389,15 @@ function LivePreviewSidebar({
   selectedGrid,
   imageSrc,
   gridConfig,
+  liveCropArea,
+  liveRotation = 0,
 }: {
   currentStep: Step;
   selectedGrid: GridSize | null;
   imageSrc: string | null;
   gridConfig: GridConfig | null;
+  liveCropArea?: CropArea | null;
+  liveRotation?: number;
 }) {
   const t = useTranslations('builder');
 
@@ -454,6 +478,8 @@ function LivePreviewSidebar({
                 rows={gridConfig.rows}
                 cols={gridConfig.cols}
                 imageSrc={imageSrc}
+                cropArea={liveCropArea}
+                rotation={liveRotation}
               />
             </motion.div>
           )}
@@ -521,16 +547,114 @@ function PlaceholderGrid({ rows, cols }: { rows: number; cols: number }) {
   );
 }
 
-/** Simple grid that shows the uploaded image split visually using CSS background positioning. */
+/** Grid that shows the uploaded image split visually. Uses canvas-based
+ *  rendering when a crop area is provided, otherwise falls back to CSS. */
 function ImagePreviewGrid({
   rows,
   cols,
   imageSrc,
+  cropArea,
+  rotation = 0,
 }: {
   rows: number;
   cols: number;
   imageSrc: string;
+  cropArea?: CropArea | null;
+  rotation?: number;
 }) {
+  const [tiles, setTiles] = useState<string[] | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Generate canvas-based tile previews when crop area is available
+  useEffect(() => {
+    if (!cropArea) {
+      setTiles(null);
+      return;
+    }
+
+    clearTimeout(timerRef.current);
+    let cancelled = false;
+
+    timerRef.current = setTimeout(async () => {
+      try {
+        const image = await loadImage(imageSrc);
+        if (cancelled) return;
+
+        const tileSize = 80;
+        const totalW = cols * tileSize;
+        const totalH = rows * tileSize;
+        const cropped = getCroppedCanvas(image, cropArea, totalW, totalH, rotation);
+
+        const urls: string[] = [];
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const tc = document.createElement('canvas');
+            tc.width = tileSize;
+            tc.height = tileSize;
+            const tctx = tc.getContext('2d')!;
+            tctx.drawImage(
+              cropped,
+              c * tileSize, r * tileSize, tileSize, tileSize,
+              0, 0, tileSize, tileSize,
+            );
+            urls.push(tc.toDataURL('image/jpeg', 0.7));
+            tc.width = 0;
+            tc.height = 0;
+          }
+        }
+        cropped.width = 0;
+        cropped.height = 0;
+
+        if (!cancelled) setTiles(urls);
+      } catch {
+        // Preview is non-critical; silently fall back to CSS
+      }
+    }, 150);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timerRef.current);
+    };
+  }, [imageSrc, cropArea, rotation, rows, cols]);
+
+  // Canvas-based tiles when available
+  if (tiles && tiles.length === rows * cols) {
+    return (
+      <div
+        className="grid gap-1"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+          width: `${cols * 80}px`,
+          maxWidth: '100%',
+        }}
+      >
+        {tiles.map((src, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              delay: i * 0.04,
+              type: 'spring',
+              stiffness: 300,
+              damping: 20,
+            }}
+            className="overflow-hidden rounded-md"
+            style={{
+              aspectRatio: '1',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+          </motion.div>
+        ))}
+      </div>
+    );
+  }
+
+  // CSS fallback (no crop area yet)
   return (
     <div
       className="grid gap-1"

@@ -23,6 +23,7 @@ export interface CartItem {
     filterTheme?: string;
     photoStorageUrl?: string;
     cropArea?: { x: number; y: number; width: number; height: number };
+    rotation?: number;
   };
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Cropper from 'react-easy-crop';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,22 +61,31 @@ const FIT_MODE_OPTIONS: FitModeOption[] = [
 interface ImageCropperProps {
   imageSrc: string;
   gridConfig: GridConfig;
-  onCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea) => void;
+  onCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea, rotation: number) => void;
+  /** Fires during crop/zoom/rotation changes (debounced) for live preview. */
+  onCropChange?: (croppedAreaPixels: CropArea, rotation: number) => void;
 }
 
 export function ImageCropper({
   imageSrc,
   gridConfig,
   onCropComplete,
+  onCropChange,
 }: ImageCropperProps) {
   const t = useTranslations('builder');
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
   const [fitMode, setFitMode] = useState<FitMode>('fill');
   const [finalCropArea, setFinalCropArea] = useState<CropArea | null>(null);
   const [finalCropAreaPixels, setFinalCropAreaPixels] = useState<CropArea | null>(null);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+  // Refs for debounced live preview
+  const cropChangeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const onCropChangeRef = useRef(onCropChange);
+  onCropChangeRef.current = onCropChange;
 
   // Load image dimensions for stretch mode
   useEffect(() => {
@@ -91,15 +100,41 @@ export function ImageCropper({
   useEffect(() => {
     setCrop({ x: 0, y: 0 });
     setZoom(1);
+    setRotation(0);
   }, [fitMode]);
+
+  // Clean up debounce timer
+  useEffect(() => {
+    return () => clearTimeout(cropChangeTimerRef.current);
+  }, []);
 
   const handleCropComplete = useCallback(
     (croppedArea: CropArea, croppedAreaPixels: CropArea) => {
       setFinalCropArea(croppedArea);
       setFinalCropAreaPixels(croppedAreaPixels);
+
+      // Debounced live preview callback
+      clearTimeout(cropChangeTimerRef.current);
+      cropChangeTimerRef.current = setTimeout(() => {
+        onCropChangeRef.current?.(croppedAreaPixels, rotation);
+      }, 150);
     },
-    [],
+    [rotation],
   );
+
+  function handleRotate() {
+    setRotation((prev) => (prev + 90) % 360);
+  }
+
+  // Emit live preview when rotation changes
+  useEffect(() => {
+    if (finalCropAreaPixels) {
+      clearTimeout(cropChangeTimerRef.current);
+      cropChangeTimerRef.current = setTimeout(() => {
+        onCropChangeRef.current?.(finalCropAreaPixels, rotation);
+      }, 150);
+    }
+  }, [rotation, finalCropAreaPixels]);
 
   function handleProceed() {
     if (fitMode === 'stretch' && imageSize) {
@@ -111,9 +146,9 @@ export function ImageCropper({
         width: imageSize.width,
         height: imageSize.height,
       };
-      onCropComplete(fullCropArea, fullCropAreaPixels);
+      onCropComplete(fullCropArea, fullCropAreaPixels, 0);
     } else if (finalCropArea && finalCropAreaPixels) {
-      onCropComplete(finalCropArea, finalCropAreaPixels);
+      onCropComplete(finalCropArea, finalCropAreaPixels, rotation);
     }
   }
 
@@ -162,6 +197,7 @@ export function ImageCropper({
             image={imageSrc}
             crop={crop}
             zoom={zoom}
+            rotation={rotation}
             aspect={gridConfig.aspect}
             objectFit={objectFit}
             onCropChange={setCrop}
@@ -185,7 +221,7 @@ export function ImageCropper({
         </div>
       </div>
 
-      {/* Zoom control — hidden for stretch mode since it's not applicable */}
+      {/* Controls — hidden for stretch mode */}
       <AnimatePresence>
         {fitMode !== 'stretch' && (
           <motion.div
@@ -246,6 +282,29 @@ export function ImageCropper({
                 <line x1="8" y1="11" x2="14" y2="11" />
                 <line x1="11" y1="8" x2="11" y2="14" />
               </svg>
+
+              {/* Rotate button */}
+              <button
+                type="button"
+                onClick={handleRotate}
+                className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-cream text-warm-gray ring-1 ring-light-gray transition-all duration-200 hover:bg-terracotta/10 hover:text-terracotta hover:ring-terracotta active:scale-95"
+                aria-label={t('rotate')}
+                title={t('rotate')}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21.5 2v6h-6" />
+                  <path d="M21.34 15.57a10 10 0 1 1-.57-8.38L21.5 8" />
+                </svg>
+              </button>
             </div>
           </motion.div>
         )}
