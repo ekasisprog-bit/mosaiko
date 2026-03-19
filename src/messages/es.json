@@ -343,6 +343,11 @@
     "polaroid": "Polaroid",
     "noResults": "No hay productos en esta categoría aún",
     "noResultsHint": "Pronto agregaremos más diseños. ¡Vuelve pronto!",
+    "personalizeButton": "Personalizar",
+    "createYourOwn": "Crea el tuyo",
+    "createYourOwnDesc": "Sube tu propia foto",
+    "viewAll": "Ver todo",
+    "pieces": "{count} piezas",
     "customCta": "¿Quieres algo único?",
     "customCtaText": "Sube tu propia foto y crea un mosaico personalizado",
     "customCtaButton": "Personalizar ahora"

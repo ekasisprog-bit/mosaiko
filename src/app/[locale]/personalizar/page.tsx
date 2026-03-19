@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { MagnetBuilder } from '@/components/builder/MagnetBuilder';
@@ -31,7 +32,9 @@ export default async function PersonalizarPage({
 
   return (
     <main className="min-h-screen bg-cream">
-      <MagnetBuilder />
+      <Suspense>
+        <MagnetBuilder />
+      </Suspense>
     </main>
   );
 }

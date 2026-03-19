@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
@@ -40,8 +41,12 @@ export function MagnetBuilder() {
   const t = useTranslations('builder');
   const tc = useTranslations('common');
   const addItem = useCartStore((s) => s.addItem);
+  const searchParams = useSearchParams();
 
-  const flow = useBuilderFlow();
+  const initialCategory = (searchParams.get('category') as CategoryType) || null;
+  const initialGrid = searchParams.get('grid') ? (Number(searchParams.get('grid')) as GridSize) : null;
+
+  const flow = useBuilderFlow({ initialCategory, initialGrid });
 
   // ─── Add to Cart ───
   const handleAddToCart = useCallback(async () => {

@@ -82,17 +82,55 @@ export interface BuilderFlowState {
 
 const DEFAULT_STEPS: StepId[] = ['category'];
 
-export function useBuilderFlow(): BuilderFlowState {
+export interface BuilderFlowOptions {
+  initialCategory?: CategoryType | null;
+  initialGrid?: GridSize | null;
+}
+
+export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
+  const { initialCategory = null, initialGrid = null } = options ?? {};
+
+  // Compute initial state from URL params
+  const initState = useMemo(() => {
+    if (!initialCategory || !CATEGORY_REGISTRY[initialCategory]) {
+      return { category: null, grid: null, steps: DEFAULT_STEPS, startStep: 'category' as StepId };
+    }
+
+    const meta = CATEGORY_REGISTRY[initialCategory];
+    const steps = getStepsForCategory(initialCategory);
+
+    // Determine grid: use provided if valid, else auto-set for single-grid categories
+    let grid: GridSize | null = null;
+    if (initialGrid && meta.allowedGridSizes.includes(initialGrid)) {
+      grid = initialGrid;
+    } else if (meta.allowedGridSizes.length === 1) {
+      grid = meta.allowedGridSizes[0];
+    }
+
+    // Start at the first unfilled step
+    let startStep: StepId = 'category';
+    if (grid) {
+      startStep = 'upload'; // category + grid resolved → go to upload
+    } else if (steps.includes('grid')) {
+      startStep = 'grid'; // category resolved, but grid needed
+    } else {
+      startStep = 'upload';
+    }
+
+    return { category: initialCategory, grid, steps, startStep };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only compute once on mount
+
   // ─── Step state ───
-  const [stepSequence, setStepSequence] = useState<StepId[]>(DEFAULT_STEPS);
-  const [currentStepId, setCurrentStepId] = useState<StepId>('category');
+  const [stepSequence, setStepSequence] = useState<StepId[]>(initState.steps);
+  const [currentStepId, setCurrentStepId] = useState<StepId>(initState.startStep);
   const [direction, setDirection] = useState(1);
 
   // ─── Category ───
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(initState.category);
 
   // ─── Grid ───
-  const [selectedGrid, setSelectedGrid] = useState<GridSize | null>(null);
+  const [selectedGrid, setSelectedGrid] = useState<GridSize | null>(initState.grid);
 
   // ─── Image ───
   const [, setImageFile] = useState<File | null>(null);
