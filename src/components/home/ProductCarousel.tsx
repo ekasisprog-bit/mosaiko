@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll from 'embla-carousel-auto-scroll';
-import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 /* ── Product data ── */
 type Badge = 'bestseller' | 'new' | 'limited';
@@ -170,7 +169,6 @@ export function ProductCarousel() {
         stopOnMouseEnter: true,
         stopOnFocusIn: true,
       }),
-      WheelGesturesPlugin({ forceWheelAxis: 'x' }),
     ]
   );
 

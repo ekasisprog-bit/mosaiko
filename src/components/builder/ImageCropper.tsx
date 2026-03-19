@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import Cropper from 'react-easy-crop';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -56,6 +56,29 @@ const FIT_MODE_OPTIONS: FitModeOption[] = [
   },
 ];
 
+// ─── Grid gradient helper ───────────────────────────────────────────────────
+
+function buildGridGradientStyle(rows: number, cols: number): React.CSSProperties {
+  const gradients: string[] = [];
+
+  for (let i = 1; i < cols; i++) {
+    const pct = (i / cols) * 100;
+    gradients.push(
+      `linear-gradient(to right, transparent calc(${pct}% - 1px), rgba(255,255,255,0.4) calc(${pct}% - 0.5px), rgba(255,255,255,0.4) calc(${pct}% + 0.5px), transparent calc(${pct}% + 1px))`,
+    );
+  }
+
+  for (let i = 1; i < rows; i++) {
+    const pct = (i / rows) * 100;
+    gradients.push(
+      `linear-gradient(to bottom, transparent calc(${pct}% - 1px), rgba(255,255,255,0.4) calc(${pct}% - 0.5px), rgba(255,255,255,0.4) calc(${pct}% + 0.5px), transparent calc(${pct}% + 1px))`,
+    );
+  }
+
+  if (gradients.length === 0) return {};
+  return { backgroundImage: gradients.join(', ') };
+}
+
 // ─── Props ──────────────────────────────────────────────────────────────────
 
 interface ImageCropperProps {
@@ -92,6 +115,12 @@ export function ImageCropper({
   const cropChangeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const onCropChangeRef = useRef(onCropChange);
   onCropChangeRef.current = onCropChange;
+
+  // Grid overlay as CSS gradients — renders ON the crop area, not the container
+  const gridOverlayStyle = useMemo(
+    () => buildGridGradientStyle(overlayRows ?? gridConfig.rows, overlayCols ?? gridConfig.cols),
+    [gridConfig.rows, gridConfig.cols, overlayRows, overlayCols],
+  );
 
   // Load image dimensions for stretch mode
   useEffect(() => {
@@ -141,6 +170,15 @@ export function ImageCropper({
       }, 150);
     }
   }, [rotation, finalCropAreaPixels]);
+
+  // Emit full-image crop area when entering stretch mode (Cropper is hidden)
+  useEffect(() => {
+    if (fitMode === 'stretch' && imageSize) {
+      clearTimeout(cropChangeTimerRef.current);
+      const fullArea: CropArea = { x: 0, y: 0, width: imageSize.width, height: imageSize.height };
+      onCropChangeRef.current?.(fullArea, 0);
+    }
+  }, [fitMode, imageSize]);
 
   function handleProceed() {
     if (fitMode === 'stretch' && imageSize) {
@@ -197,9 +235,11 @@ export function ImageCropper({
             imageSrc={imageSrc}
             gridConfig={gridConfig}
             hintText={t('fitModeStretchHint')}
+            gridOverlayStyle={gridOverlayStyle}
           />
         ) : (
           <Cropper
+            key={fitMode}
             image={imageSrc}
             crop={crop}
             zoom={zoom}
@@ -214,17 +254,10 @@ export function ImageCropper({
               containerStyle: {
                 borderRadius: '0.75rem',
               },
+              cropAreaStyle: gridOverlayStyle,
             }}
           />
         )}
-
-        {/* Grid overlay lines */}
-        <div
-          className="pointer-events-none absolute inset-0 z-10"
-          aria-hidden="true"
-        >
-          <GridOverlay rows={overlayRows ?? gridConfig.rows} cols={overlayCols ?? gridConfig.cols} />
-        </div>
       </div>
 
       {/* Controls — hidden for stretch mode */}
@@ -453,10 +486,12 @@ function StretchPreview({
   imageSrc,
   gridConfig,
   hintText,
+  gridOverlayStyle,
 }: {
   imageSrc: string;
   gridConfig: GridConfig;
   hintText: string;
+  gridOverlayStyle: React.CSSProperties;
 }) {
   // Calculate the crop area dimensions to match the grid aspect ratio
   // inside the 1:1 container
@@ -505,6 +540,19 @@ function StretchPreview({
         />
       </div>
 
+      {/* Grid overlay — positioned to match image */}
+      <div
+        className="pointer-events-none absolute z-10"
+        aria-hidden="true"
+        style={{
+          left: `${offsetX}%`,
+          top: `${offsetY}%`,
+          width: `${displayWidth}%`,
+          height: `${displayHeight}%`,
+          ...gridOverlayStyle,
+        }}
+      />
+
       {/* Checkerboard pattern hint for distortion */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -525,47 +573,3 @@ function StretchPreview({
   );
 }
 
-// ─── Grid Overlay ───────────────────────────────────────────────────────────
-
-/** CSS-based grid overlay that draws cut lines over the crop area. */
-function GridOverlay({ rows, cols }: { rows: number; cols: number }) {
-  const verticalLines = [];
-  const horizontalLines = [];
-
-  for (let i = 1; i < cols; i++) {
-    const pct = (i / cols) * 100;
-    verticalLines.push(
-      <div
-        key={`v-${i}`}
-        className="absolute top-0 h-full w-px"
-        style={{
-          left: `${pct}%`,
-          background: 'rgba(255, 255, 255, 0.4)',
-          boxShadow: '0 0 4px rgba(0, 0, 0, 0.2)',
-        }}
-      />,
-    );
-  }
-
-  for (let i = 1; i < rows; i++) {
-    const pct = (i / rows) * 100;
-    horizontalLines.push(
-      <div
-        key={`h-${i}`}
-        className="absolute left-0 h-px w-full"
-        style={{
-          top: `${pct}%`,
-          background: 'rgba(255, 255, 255, 0.4)',
-          boxShadow: '0 0 4px rgba(0, 0, 0, 0.2)',
-        }}
-      />,
-    );
-  }
-
-  return (
-    <>
-      {verticalLines}
-      {horizontalLines}
-    </>
-  );
-}
