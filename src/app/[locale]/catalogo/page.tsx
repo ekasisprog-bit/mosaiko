@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CatalogContent } from '@/components/catalog/CatalogContent';
+import { getAllProducts } from '@/lib/catalog-data';
 
 export async function generateMetadata({
   params,
@@ -24,5 +25,7 @@ export default async function CatalogPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <CatalogContent />;
+  const allProducts = await getAllProducts();
+
+  return <CatalogContent products={allProducts} />;
 }

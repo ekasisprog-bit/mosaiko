@@ -4,7 +4,8 @@ import { useRef, useMemo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { CATALOG_CATEGORIES, getProductsByCategory } from '@/lib/catalog-data';
+import { CATALOG_CATEGORIES, getProductsByCategory, type CatalogProduct } from '@/lib/catalog-data';
+import type { CategoryType } from '@/lib/customization-types';
 import { CategoryQuickNav } from './CategoryQuickNav';
 import { CategoryRow } from './CategoryRow';
 
@@ -28,12 +29,26 @@ const fadeUp = {
 };
 
 /* ── Component ── */
-export function CatalogContent() {
+interface CatalogContentProps {
+  products?: CatalogProduct[]; // merged static + dynamic, passed from server
+}
+
+export function CatalogContent({ products }: CatalogContentProps) {
   const t = useTranslations('catalogPage');
   const headerRef = useRef<HTMLDivElement>(null);
   const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
 
-  const productsByCategory = useMemo(() => getProductsByCategory(), []);
+  const productsByCategory = useMemo(() => {
+    if (!products) return getProductsByCategory();
+    // Build map from pre-fetched merged products
+    const map = new Map<CategoryType, CatalogProduct[]>();
+    for (const cat of CATALOG_CATEGORIES) map.set(cat.type, []);
+    for (const product of products) {
+      const list = map.get(product.category);
+      if (list) list.push(product);
+    }
+    return map;
+  }, [products]);
 
   return (
     <div className="bg-cream">

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin/pedidos': 'Pedidos',
+  '/admin/productos': 'Productos',
   '/admin/configuracion': 'Configuración',
 };
 

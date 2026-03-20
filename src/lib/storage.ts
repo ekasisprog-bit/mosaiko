@@ -4,6 +4,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3';
 import crypto from 'node:crypto';
 
@@ -250,6 +251,97 @@ export async function deleteFile(
     new DeleteObjectCommand({
       Bucket: bucketName,
       Key: key,
+    }),
+  );
+}
+
+// ─── JSON helpers ────────────────────────────────────────────────────────────
+
+export async function putJsonObject<T>(
+  bucket: 'uploads' | 'print-files',
+  key: string,
+  data: T,
+): Promise<void> {
+  const client = getClient();
+  const bucketName =
+    bucket === 'uploads' ? R2_BUCKET_UPLOADS : R2_BUCKET_PRINT_FILES;
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: JSON.stringify(data),
+      ContentType: 'application/json',
+    }),
+  );
+}
+
+export async function getJsonObject<T>(
+  bucket: 'uploads' | 'print-files',
+  key: string,
+): Promise<T | null> {
+  const client = getClient();
+  const bucketName =
+    bucket === 'uploads' ? R2_BUCKET_UPLOADS : R2_BUCKET_PRINT_FILES;
+
+  try {
+    const response = await client.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    const body = await response.Body?.transformToString();
+    if (!body) return null;
+    return JSON.parse(body) as T;
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'name' in err && err.name === 'NoSuchKey') {
+      return null;
+    }
+    throw err;
+  }
+}
+
+// ─── Upload raw buffer ──────────────────────────────────────────────────────
+
+export async function uploadBuffer(
+  bucket: 'uploads' | 'print-files',
+  key: string,
+  buffer: Buffer,
+  contentType: string,
+): Promise<{ key: string; publicUrl: string }> {
+  const client = getClient();
+  const bucketName =
+    bucket === 'uploads' ? R2_BUCKET_UPLOADS : R2_BUCKET_PRINT_FILES;
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  );
+
+  return { key, publicUrl: getPublicUrl(key) };
+}
+
+// ─── Copy object ────────────────────────────────────────────────────────────
+
+export async function copyObject(
+  bucket: 'uploads' | 'print-files',
+  sourceKey: string,
+  destKey: string,
+): Promise<void> {
+  const client = getClient();
+  const bucketName =
+    bucket === 'uploads' ? R2_BUCKET_UPLOADS : R2_BUCKET_PRINT_FILES;
+
+  await client.send(
+    new CopyObjectCommand({
+      Bucket: bucketName,
+      CopySource: `${bucketName}/${sourceKey}`,
+      Key: destKey,
     }),
   );
 }
