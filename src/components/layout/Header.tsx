@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useCartStore, selectCartCount } from '@/lib/cart-store';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +27,7 @@ export function Header() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
   const cartCount = useCartStore(selectCartCount);
 
   const [scrolled, setScrolled] = useState(false);
@@ -54,7 +56,11 @@ export function Header() {
 
   function handleLanguageSwitch() {
     const nextLocale = locale === 'es' ? 'en' : 'es';
-    router.replace(pathname, { locale: nextLocale });
+    router.replace(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { pathname, params: params as any },
+      { locale: nextLocale },
+    );
   }
 
   function closeMobileMenu() {

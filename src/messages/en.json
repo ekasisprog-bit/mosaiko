@@ -351,7 +351,11 @@
     "pieces": "{count} pieces",
     "customCta": "Want something unique?",
     "customCtaText": "Upload your own photo and create a custom mosaic",
-    "customCtaButton": "Customize now"
+    "customCtaButton": "Customize now",
+    "viewDesign": "View design",
+    "backToCatalog": "Back to catalog",
+    "previewSubtitle": "This is how your magnets will look on the fridge",
+    "addToCartPrice": "Add to cart — {price}"
   },
   "orderConfirmation": {
     "metaTitle": "Order Confirmed — Mosaiko",

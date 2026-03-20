@@ -14,12 +14,13 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
   const accent = CATEGORY_ACCENT[product.category];
   const categoryLabel = t(getCategoryI18nKey(product.category));
 
+  const href = product.isPredesigned
+    ? { pathname: '/catalogo/[productId]' as const, params: { productId: product.id } }
+    : { pathname: '/personalizar' as const, query: { category: product.category, grid: String(product.gridSize) } };
+
   return (
     <Link
-      href={{
-        pathname: '/personalizar',
-        query: { category: product.category, grid: String(product.gridSize) },
-      }}
+      href={href}
       className="group flex h-full flex-col overflow-hidden rounded-xl bg-warm-white shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-charcoal/5"
     >
       {/* Product image */}
@@ -81,7 +82,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
         {/* CTA button */}
         <div className="mt-3">
           <span className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-terracotta px-4 py-2 text-sm font-semibold text-white transition-all duration-200 group-hover:bg-terracotta-dark sm:min-h-[48px]">
-            {t('personalizeButton')}
+            {product.isPredesigned ? t('viewDesign') : t('personalizeButton')}
           </span>
         </div>
       </div>

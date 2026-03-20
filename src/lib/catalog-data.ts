@@ -12,49 +12,51 @@ export interface CatalogProduct {
   pieces: number;
   grid: string;       // display: "3x3", "2x3"
   gridSize: GridSize;  // numeric: 3, 4, 6, 9
+  originalImage: string;   // path to high-res source in _originals/
+  isPredesigned: boolean;  // true = direct to preview, false = builder flow
 }
 
 // ─── Products ────────────────────────────────────────────────────────────────
 
 export const PRODUCTS: CatalogProduct[] = [
-  // Mosaicos
-  { id: 'mos-1', category: 'mosaicos', name: 'Mosaico Familiar 3x3', price: 480, image: '/products/mosaicos/familiar-9.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'mos-2', category: 'mosaicos', name: 'Mosaico Pareja 2x3', price: 360, image: '/products/mosaicos/pareja-6.png', pieces: 6, grid: '2x3', gridSize: 6 },
-  { id: 'mos-3', category: 'mosaicos', name: 'Mosaico Panoramico', price: 200, image: '/products/mosaicos/panoramico-3.png', pieces: 3, grid: '1x3', gridSize: 3 },
-  { id: 'mos-4', category: 'mosaicos', name: 'Mosaico Mascota', price: 360, image: '/products/mosaicos/mascota-6.png', pieces: 6, grid: '2x3', gridSize: 6 },
-  { id: 'mos-5', category: 'mosaicos', name: 'Mosaico Recuerdo', price: 480, image: '/products/mosaicos/familiar-9-2.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'mos-6', category: 'mosaicos', name: 'Mosaico Tira', price: 200, image: '/products/mosaicos/panoramico-3-2.png', pieces: 3, grid: '1x3', gridSize: 3 },
+  // Mosaicos — builder-only (user uploads their own photo)
+  { id: 'mos-1', category: 'mosaicos', name: 'Mosaico Familiar 3x3', price: 480, image: '/products/mosaicos/familiar-9.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/mosaicos/familiar-9.png', isPredesigned: false },
+  { id: 'mos-2', category: 'mosaicos', name: 'Mosaico Pareja 2x3', price: 360, image: '/products/mosaicos/pareja-6.png', pieces: 6, grid: '2x3', gridSize: 6, originalImage: '/products/_originals/mosaicos/pareja-6.png', isPredesigned: false },
+  { id: 'mos-3', category: 'mosaicos', name: 'Mosaico Panoramico', price: 200, image: '/products/mosaicos/panoramico-3.png', pieces: 3, grid: '1x3', gridSize: 3, originalImage: '/products/_originals/mosaicos/panoramico-3.png', isPredesigned: false },
+  { id: 'mos-4', category: 'mosaicos', name: 'Mosaico Mascota', price: 360, image: '/products/mosaicos/mascota-6.png', pieces: 6, grid: '2x3', gridSize: 6, originalImage: '/products/_originals/mosaicos/mascota-6.png', isPredesigned: false },
+  { id: 'mos-5', category: 'mosaicos', name: 'Mosaico Recuerdo', price: 480, image: '/products/mosaicos/familiar-9-2.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/mosaicos/familiar-9-2.png', isPredesigned: false },
+  { id: 'mos-6', category: 'mosaicos', name: 'Mosaico Tira', price: 200, image: '/products/mosaicos/panoramico-3-2.png', pieces: 3, grid: '1x3', gridSize: 3, originalImage: '/products/_originals/mosaicos/panoramico-3-2.png', isPredesigned: false },
   // Studio / Ghibli
-  { id: 'ghi-1', category: 'ghibli', name: 'El Viaje de Chihiro', price: 480, image: '/products/ghibli/chihiro.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-2', category: 'ghibli', name: 'Mi Vecino Totoro', price: 480, image: '/products/ghibli/totoro.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-3', category: 'ghibli', name: 'Princesa Mononoke', price: 480, image: '/products/ghibli/mononoke.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-4', category: 'ghibli', name: 'El Castillo Vagabundo', price: 480, image: '/products/ghibli/howl.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-5', category: 'ghibli', name: 'El Viaje de Chihiro II', price: 480, image: '/products/ghibli/chihiro-2.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-6', category: 'ghibli', name: 'Kiki Entregas a Domicilio', price: 480, image: '/products/ghibli/kiki.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-7', category: 'ghibli', name: 'Ponyo', price: 480, image: '/products/ghibli/ponyo.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'ghi-8', category: 'ghibli', name: 'El Nino y la Garza', price: 480, image: '/products/ghibli/garza.png', pieces: 9, grid: '3x3', gridSize: 9 },
+  { id: 'ghi-1', category: 'ghibli', name: 'El Viaje de Chihiro', price: 480, image: '/products/ghibli/chihiro.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/chihiro.png', isPredesigned: true },
+  { id: 'ghi-2', category: 'ghibli', name: 'Mi Vecino Totoro', price: 480, image: '/products/ghibli/totoro.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/totoro.png', isPredesigned: true },
+  { id: 'ghi-3', category: 'ghibli', name: 'Princesa Mononoke', price: 480, image: '/products/ghibli/mononoke.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/mononoke.png', isPredesigned: true },
+  { id: 'ghi-4', category: 'ghibli', name: 'El Castillo Vagabundo', price: 480, image: '/products/ghibli/howl.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/howl.png', isPredesigned: true },
+  { id: 'ghi-5', category: 'ghibli', name: 'El Viaje de Chihiro II', price: 480, image: '/products/ghibli/chihiro-2.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/chihiro-2.png', isPredesigned: true },
+  { id: 'ghi-6', category: 'ghibli', name: 'Kiki Entregas a Domicilio', price: 480, image: '/products/ghibli/kiki.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/kiki.png', isPredesigned: true },
+  { id: 'ghi-7', category: 'ghibli', name: 'Ponyo', price: 480, image: '/products/ghibli/ponyo.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/ponyo.png', isPredesigned: true },
+  { id: 'ghi-8', category: 'ghibli', name: 'El Nino y la Garza', price: 480, image: '/products/ghibli/garza.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/ghibli/garza.png', isPredesigned: true },
   // Arte
-  { id: 'art-1', category: 'arte', name: 'La Noche Estrellada', price: 480, image: '/products/arte/noche-estrellada.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-2', category: 'arte', name: 'La Mona Lisa', price: 480, image: '/products/arte/mona-lisa.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-3', category: 'arte', name: 'El Beso — Klimt', price: 480, image: '/products/arte/el-beso.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-4', category: 'arte', name: 'La Gran Ola', price: 480, image: '/products/arte/gran-ola.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-5', category: 'arte', name: 'La Joven de la Perla', price: 480, image: '/products/arte/joven-perla.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-6', category: 'arte', name: 'Las Dos Fridas', price: 480, image: '/products/arte/dos-fridas.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-7', category: 'arte', name: 'Nenufares — Monet', price: 480, image: '/products/arte/nenufares.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'art-8', category: 'arte', name: 'El Nacimiento de Venus', price: 480, image: '/products/arte/venus.png', pieces: 9, grid: '3x3', gridSize: 9 },
+  { id: 'art-1', category: 'arte', name: 'La Noche Estrellada', price: 480, image: '/products/arte/noche-estrellada.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/noche-estrellada.png', isPredesigned: true },
+  { id: 'art-2', category: 'arte', name: 'La Mona Lisa', price: 480, image: '/products/arte/mona-lisa.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/mona-lisa.png', isPredesigned: true },
+  { id: 'art-3', category: 'arte', name: 'El Beso — Klimt', price: 480, image: '/products/arte/el-beso.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/el-beso.png', isPredesigned: true },
+  { id: 'art-4', category: 'arte', name: 'La Gran Ola', price: 480, image: '/products/arte/gran-ola.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/gran-ola.png', isPredesigned: true },
+  { id: 'art-5', category: 'arte', name: 'La Joven de la Perla', price: 480, image: '/products/arte/joven-perla.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/joven-perla.png', isPredesigned: true },
+  { id: 'art-6', category: 'arte', name: 'Las Dos Fridas', price: 480, image: '/products/arte/dos-fridas.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/dos-fridas.png', isPredesigned: true },
+  { id: 'art-7', category: 'arte', name: 'Nenufares — Monet', price: 480, image: '/products/arte/nenufares.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/nenufares.png', isPredesigned: true },
+  { id: 'art-8', category: 'arte', name: 'El Nacimiento de Venus', price: 480, image: '/products/arte/venus.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/arte/venus.png', isPredesigned: true },
   // Save the Date
-  { id: 'std-1', category: 'save-the-date', name: 'Boda Elegante', price: 480, image: '/products/save-the-date/boda-9.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'std-2', category: 'save-the-date', name: 'Compromiso', price: 360, image: '/products/save-the-date/compromiso-6.png', pieces: 6, grid: '2x3', gridSize: 6 },
-  { id: 'std-3', category: 'save-the-date', name: 'Baby Shower', price: 200, image: '/products/save-the-date/baby-3.png', pieces: 3, grid: '1x3', gridSize: 3 },
+  { id: 'std-1', category: 'save-the-date', name: 'Boda Elegante', price: 480, image: '/products/save-the-date/boda-9.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/save-the-date/boda-9.png', isPredesigned: true },
+  { id: 'std-2', category: 'save-the-date', name: 'Compromiso', price: 360, image: '/products/save-the-date/compromiso-6.png', pieces: 6, grid: '2x3', gridSize: 6, originalImage: '/products/_originals/save-the-date/compromiso-6.png', isPredesigned: true },
+  { id: 'std-3', category: 'save-the-date', name: 'Baby Shower', price: 200, image: '/products/save-the-date/baby-3.png', pieces: 3, grid: '1x3', gridSize: 3, originalImage: '/products/_originals/save-the-date/baby-3.png', isPredesigned: true },
   // Tonos / Flores
-  { id: 'flo-1', category: 'flores', name: 'Ramo de Rosas', price: 480, image: '/products/flores/rosas-9.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'flo-2', category: 'flores', name: 'Girasoles', price: 200, image: '/products/flores/girasoles-3.png', pieces: 3, grid: '1x3', gridSize: 3 },
+  { id: 'flo-1', category: 'flores', name: 'Ramo de Rosas', price: 480, image: '/products/flores/rosas-9.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/flores/rosas-9.png', isPredesigned: true },
+  { id: 'flo-2', category: 'flores', name: 'Girasoles', price: 200, image: '/products/flores/girasoles-3.png', pieces: 3, grid: '1x3', gridSize: 3, originalImage: '/products/_originals/flores/girasoles-3.png', isPredesigned: true },
   // Spotify
-  { id: 'spo-1', category: 'spotify', name: 'Album Cover Custom', price: 480, image: '/products/spotify/album-1.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'spo-2', category: 'spotify', name: 'Personalizado', price: 480, image: '/products/spotify/personalizado.png', pieces: 9, grid: '3x3', gridSize: 9 },
+  { id: 'spo-1', category: 'spotify', name: 'Album Cover Custom', price: 480, image: '/products/spotify/album-1.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/spotify/album-1.png', isPredesigned: true },
+  { id: 'spo-2', category: 'spotify', name: 'Personalizado', price: 480, image: '/products/spotify/personalizado.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/spotify/personalizado.png', isPredesigned: true },
   // Polaroid
-  { id: 'pol-1', category: 'polaroid', name: 'Tu Foto Polaroid', price: 480, image: '/products/polaroid/clasico.png', pieces: 9, grid: '3x3', gridSize: 9 },
-  { id: 'pol-2', category: 'polaroid', name: 'Polaroid Vintage', price: 480, image: '/products/polaroid/vintage.png', pieces: 9, grid: '3x3', gridSize: 9 },
+  { id: 'pol-1', category: 'polaroid', name: 'Tu Foto Polaroid', price: 480, image: '/products/polaroid/clasico.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/polaroid/clasico.png', isPredesigned: true },
+  { id: 'pol-2', category: 'polaroid', name: 'Polaroid Vintage', price: 480, image: '/products/polaroid/vintage.png', pieces: 9, grid: '3x3', gridSize: 9, originalImage: '/products/_originals/polaroid/vintage.png', isPredesigned: true },
 ];
 
 // ─── Category display metadata ───────────────────────────────────────────────
@@ -99,6 +101,10 @@ export const CATALOG_CATEGORIES: CatalogCategory[] = [
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+export function getProductById(id: string): CatalogProduct | undefined {
+  return PRODUCTS.find((p) => p.id === id);
+}
 
 export function getProductsByCategory(): Map<CategoryType, CatalogProduct[]> {
   const map = new Map<CategoryType, CatalogProduct[]>();

@@ -18,6 +18,10 @@ export const routing = defineRouting({
       es: '/catalogo',
       en: '/catalog',
     },
+    '/catalogo/[productId]': {
+      es: '/catalogo/[productId]',
+      en: '/catalog/[productId]',
+    },
     '/nosotros': {
       es: '/nosotros',
       en: '/about',
