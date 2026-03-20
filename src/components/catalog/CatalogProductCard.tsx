@@ -76,7 +76,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
             {formatPrice(product.price)}
           </span>
           <span className="text-[11px] text-warm-gray sm:text-xs">
-            {product.pieces} {t('pieces', { count: product.pieces })}
+            {t('pieces', { count: product.pieces })}
           </span>
         </div>
 
