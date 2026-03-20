@@ -26,7 +26,6 @@ interface MagnetPreviewProps {
   imageSrc: string;
   cropArea: CropArea;
   gridConfig: GridConfig;
-  rotation?: number;
   onAddToCart: () => void;
   onReset: () => void;
   isUploading?: boolean;
@@ -39,7 +38,6 @@ export function MagnetPreview({
   imageSrc,
   cropArea,
   gridConfig,
-  rotation = 0,
   onAddToCart,
   onReset,
   isUploading = false,
@@ -111,7 +109,7 @@ export function MagnetPreview({
           cols: photoCols,
         };
 
-        const tileDataUrls = splitImageIntoTiles(image, cropArea, splitConfig, rotation);
+        const tileDataUrls = splitImageIntoTiles(image, cropArea, splitConfig, 0);
         if (cancelled) return;
 
         setTiles(tileDataUrls);
@@ -131,7 +129,7 @@ export function MagnetPreview({
     return () => {
       cancelled = true;
     };
-  }, [imageSrc, cropArea, gridConfig, rotation, categoryType, photoTileCount]);
+  }, [imageSrc, cropArea, gridConfig, categoryType, photoTileCount]);
 
   const priceText = t('addToCart', { price: formatPrice(gridConfig.price) });
 

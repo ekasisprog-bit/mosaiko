@@ -84,13 +84,17 @@ function buildGridGradientStyle(rows: number, cols: number): React.CSSProperties
 interface ImageCropperProps {
   imageSrc: string;
   gridConfig: GridConfig;
-  onCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea, rotation: number) => void;
+  onCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea) => void;
   /** Fires during crop/zoom/rotation changes (debounced) for live preview. */
-  onCropChange?: (croppedAreaPixels: CropArea, rotation: number) => void;
+  onCropChange?: (croppedAreaPixels: CropArea) => void;
   /** Override grid overlay rows (e.g. 2 for Arte's photo-only region). */
   overlayRows?: number;
   /** Override grid overlay cols. */
   overlayCols?: number;
+  /** Layout rotation controls */
+  onLayoutRotate?: () => void;
+  canRotateLayout?: boolean;
+  layoutRotated?: boolean;
 }
 
 export function ImageCropper({
@@ -100,12 +104,14 @@ export function ImageCropper({
   onCropChange,
   overlayRows,
   overlayCols,
+  onLayoutRotate,
+  canRotateLayout = false,
+  layoutRotated = false,
 }: ImageCropperProps) {
   const t = useTranslations('builder');
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
   const [fitMode, setFitMode] = useState<FitMode>('fill');
   const [finalCropArea, setFinalCropArea] = useState<CropArea | null>(null);
   const [finalCropAreaPixels, setFinalCropAreaPixels] = useState<CropArea | null>(null);
@@ -135,7 +141,6 @@ export function ImageCropper({
   useEffect(() => {
     setCrop({ x: 0, y: 0 });
     setZoom(1);
-    setRotation(0);
   }, [fitMode]);
 
   // Clean up debounce timer
@@ -151,34 +156,26 @@ export function ImageCropper({
       // Debounced live preview callback
       clearTimeout(cropChangeTimerRef.current);
       cropChangeTimerRef.current = setTimeout(() => {
-        onCropChangeRef.current?.(croppedAreaPixels, rotation);
+        onCropChangeRef.current?.(croppedAreaPixels);
       }, 150);
     },
-    [rotation],
+    [],
   );
-
-  function handleRotate() {
-    setRotation((prev) => (prev + 90) % 360);
-  }
-
-  // Emit live preview when rotation changes
-  useEffect(() => {
-    if (finalCropAreaPixels) {
-      clearTimeout(cropChangeTimerRef.current);
-      cropChangeTimerRef.current = setTimeout(() => {
-        onCropChangeRef.current?.(finalCropAreaPixels, rotation);
-      }, 150);
-    }
-  }, [rotation, finalCropAreaPixels]);
 
   // Emit full-image crop area when entering stretch mode (Cropper is hidden)
   useEffect(() => {
     if (fitMode === 'stretch' && imageSize) {
       clearTimeout(cropChangeTimerRef.current);
       const fullArea: CropArea = { x: 0, y: 0, width: imageSize.width, height: imageSize.height };
-      onCropChangeRef.current?.(fullArea, 0);
+      onCropChangeRef.current?.(fullArea);
     }
   }, [fitMode, imageSize]);
+
+  const handleRotateLayout = useCallback(() => {
+    onLayoutRotate?.();
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+  }, [onLayoutRotate]);
 
   function handleProceed() {
     if (fitMode === 'stretch' && imageSize) {
@@ -190,9 +187,9 @@ export function ImageCropper({
         width: imageSize.width,
         height: imageSize.height,
       };
-      onCropComplete(fullCropArea, fullCropAreaPixels, 0);
+      onCropComplete(fullCropArea, fullCropAreaPixels);
     } else if (finalCropArea && finalCropAreaPixels) {
-      onCropComplete(finalCropArea, finalCropAreaPixels, rotation);
+      onCropComplete(finalCropArea, finalCropAreaPixels);
     }
   }
 
@@ -225,6 +222,61 @@ export function ImageCropper({
         onChange={setFitMode}
       />
 
+      {/* Layout rotate button */}
+      <AnimatePresence>
+        {canRotateLayout && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mx-auto w-full max-w-[500px] overflow-hidden"
+          >
+            <button
+              type="button"
+              onClick={handleRotateLayout}
+              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-terracotta/30 bg-terracotta/5 px-4 py-2.5 text-terracotta transition-all duration-200 hover:border-terracotta hover:bg-terracotta/10 active:scale-[0.98]"
+            >
+              {/* Rotate icon */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0"
+              >
+                <path d="M7.5 3.5L4 7l3.5 3.5" />
+                <path d="M4 7h11a4 4 0 0 1 4 4v1" />
+                <path d="M16.5 20.5L20 17l-3.5-3.5" />
+                <path d="M20 17H9a4 4 0 0 1-4-4v-1" />
+              </svg>
+              <span className="text-sm font-semibold">{t('rotate')}</span>
+              {/* Mini orientation indicator */}
+              <div className="flex items-center gap-1.5 text-terracotta/60">
+                <motion.div
+                  animate={{ opacity: layoutRotated ? 0.4 : 1 }}
+                  className="rounded-sm border border-current"
+                  style={{ width: 12, height: 16 }}
+                />
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+                <motion.div
+                  animate={{ opacity: layoutRotated ? 1 : 0.4 }}
+                  className="rounded-sm border border-current"
+                  style={{ width: 16, height: 12 }}
+                />
+              </div>
+            </button>
+            <p className="mt-1.5 text-center text-xs text-warm-gray">{t('rotateHint')}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Cropper container */}
       <div
         className="relative mx-auto w-full overflow-hidden rounded-xl bg-charcoal"
@@ -243,7 +295,7 @@ export function ImageCropper({
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            rotation={rotation}
+            rotation={0}
             aspect={gridConfig.aspect}
             objectFit={objectFit}
             onCropChange={setCrop}
@@ -322,28 +374,6 @@ export function ImageCropper({
                 <line x1="11" y1="8" x2="11" y2="14" />
               </svg>
 
-              {/* Rotate button */}
-              <button
-                type="button"
-                onClick={handleRotate}
-                className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-cream text-warm-gray ring-1 ring-light-gray transition-all duration-200 hover:bg-terracotta/10 hover:text-terracotta hover:ring-terracotta active:scale-95"
-                aria-label={t('rotate')}
-                title={t('rotate')}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21.5 2v6h-6" />
-                  <path d="M21.34 15.57a10 10 0 1 1-.57-8.38L21.5 8" />
-                </svg>
-              </button>
             </div>
           </motion.div>
         )}
@@ -403,6 +433,10 @@ export function ImageCropper({
           background: var(--terracotta);
           border-radius: 9999px;
           height: 8px;
+        }
+        .reactEasyCrop_CropArea {
+          transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                      height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </motion.div>

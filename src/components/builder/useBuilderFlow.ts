@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { GRID_CONFIGS, getEffectiveGridConfig, type GridSize, type GridConfig } from '@/lib/grid-config';
+import { GRID_CONFIGS, getEffectiveGridConfig, CATEGORY_LAYOUT_OVERRIDES, type GridSize, type GridConfig } from '@/lib/grid-config';
 import {
   CATEGORY_REGISTRY,
   type CategoryType,
@@ -59,11 +59,14 @@ export interface BuilderFlowState {
 
   // Crop
   cropAreaPixels: CropArea | null;
-  rotation: number;
   liveCropArea: CropArea | null;
-  liveRotation: number;
-  handleCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea, cropRotation: number) => void;
-  handleCropChange: (croppedAreaPixels: CropArea, cropRotation: number) => void;
+  handleCropComplete: (croppedArea: CropArea, croppedAreaPixels: CropArea) => void;
+  handleCropChange: (croppedAreaPixels: CropArea) => void;
+
+  // Layout rotation
+  layoutRotated: boolean;
+  canRotateLayout: boolean;
+  handleLayoutRotate: () => void;
 
   // Customization
   customizationValues: Record<string, string>;
@@ -139,9 +142,10 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
 
   // ─── Crop ───
   const [cropAreaPixels, setCropAreaPixels] = useState<CropArea | null>(null);
-  const [rotation, setRotation] = useState(0);
   const [liveCropArea, setLiveCropArea] = useState<CropArea | null>(null);
-  const [liveRotation, setLiveRotation] = useState(0);
+
+  // ─── Layout rotation ───
+  const [layoutRotated, setLayoutRotated] = useState(false);
 
   // ─── Customization ───
   const [customizationValues, setCustomizationValues] = useState<Record<string, string>>({});
@@ -151,10 +155,28 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
   const [isUploading, setIsUploading] = useState(false);
 
   // ─── Derived ───
-  const gridConfig: GridConfig | null = useMemo(
+  const baseGridConfig: GridConfig | null = useMemo(
     () => (selectedGrid ? getEffectiveGridConfig(selectedGrid, selectedCategory ?? undefined) : null),
     [selectedGrid, selectedCategory],
   );
+
+  // Apply layout rotation: swap rows/cols and invert aspect
+  const gridConfig: GridConfig | null = useMemo(() => {
+    if (!baseGridConfig || !layoutRotated) return baseGridConfig;
+    return {
+      ...baseGridConfig,
+      rows: baseGridConfig.cols,
+      cols: baseGridConfig.rows,
+      aspect: 1 / baseGridConfig.aspect,
+    };
+  }, [baseGridConfig, layoutRotated]);
+
+  // Can rotate only when grid is non-square AND no category layout override
+  const canRotateLayout = useMemo(() => {
+    if (!baseGridConfig || !selectedCategory) return false;
+    const hasOverride = !!CATEGORY_LAYOUT_OVERRIDES[`${selectedCategory}:${selectedGrid}`];
+    return baseGridConfig.rows !== baseGridConfig.cols && !hasOverride;
+  }, [baseGridConfig, selectedCategory, selectedGrid]);
 
   const currentStepIndex = useMemo(
     () => stepSequence.indexOf(currentStepId),
@@ -207,6 +229,7 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
     // Reset downstream state
     setCustomizationValues({});
     setSelectedTheme(null);
+    setLayoutRotated(false);
 
     // Auto-advance after selection animation
     const nextStep = newSteps[1]; // grid or upload
@@ -219,6 +242,7 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
   // ─── Grid select ───
   const handleGridSelect = useCallback((grid: GridSize) => {
     setSelectedGrid(grid);
+    setLayoutRotated(false);
     setTimeout(() => {
       setDirection(1);
       // Next step after grid is always 'upload'
@@ -238,9 +262,8 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
 
   // ─── Crop handlers ───
   const handleCropComplete = useCallback(
-    (_croppedArea: CropArea, croppedAreaPixels: CropArea, cropRotation: number) => {
+    (_croppedArea: CropArea, croppedAreaPixels: CropArea) => {
       setCropAreaPixels(croppedAreaPixels);
-      setRotation(cropRotation);
       setDirection(1);
       // Next step: customize or preview
       const nextStep = stepSequence.includes('customize') ? 'customize' : 'preview';
@@ -250,12 +273,16 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
   );
 
   const handleCropChange = useCallback(
-    (croppedAreaPixels: CropArea, cropRotation: number) => {
+    (croppedAreaPixels: CropArea) => {
       setLiveCropArea(croppedAreaPixels);
-      setLiveRotation(cropRotation);
     },
     [],
   );
+
+  // ─── Layout rotation ───
+  const handleLayoutRotate = useCallback(() => {
+    setLayoutRotated((prev) => !prev);
+  }, []);
 
   // ─── Customization handlers ───
   const setCustomizationValue = useCallback((field: string, value: string) => {
@@ -276,9 +303,8 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
     imageFileRef.current = null;
     setImageSrc(null);
     setCropAreaPixels(null);
-    setRotation(0);
     setLiveCropArea(null);
-    setLiveRotation(0);
+    setLayoutRotated(false);
     setCustomizationValues({});
     setSelectedTheme(null);
     setStepSequence(DEFAULT_STEPS);
@@ -307,11 +333,13 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
     handleImageSelected,
 
     cropAreaPixels,
-    rotation,
     liveCropArea,
-    liveRotation,
     handleCropComplete,
     handleCropChange,
+
+    layoutRotated,
+    canRotateLayout,
+    handleLayoutRotate,
 
     customizationValues,
     selectedTheme,

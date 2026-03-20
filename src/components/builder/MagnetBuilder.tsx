@@ -57,7 +57,7 @@ export function MagnetBuilder() {
     try {
       const image = await loadImage(flow.imageSrc);
       const previewCanvas = createPreviewCanvas(
-        image, flow.cropAreaPixels, flow.gridConfig, 120, 4, flow.rotation,
+        image, flow.cropAreaPixels, flow.gridConfig, 120, 4, 0,
       );
       const previewUrl = previewCanvas.toDataURL('image/jpeg', 0.85);
 
@@ -94,7 +94,7 @@ export function MagnetBuilder() {
           filterTheme: flow.selectedTheme ?? undefined,
           photoStorageUrl,
           cropArea: flow.cropAreaPixels,
-          rotation: flow.rotation,
+          layoutRotated: flow.layoutRotated,
         },
       });
     } catch {
@@ -219,6 +219,9 @@ export function MagnetBuilder() {
                     onCropChange={flow.handleCropChange}
                     overlayRows={flow.selectedCategory === 'arte' ? 2 : undefined}
                     overlayCols={flow.selectedCategory === 'arte' ? 4 : undefined}
+                    onLayoutRotate={flow.handleLayoutRotate}
+                    canRotateLayout={flow.canRotateLayout}
+                    layoutRotated={flow.layoutRotated}
                   />
                 )}
                 {flow.currentStepId === 'customize' && flow.selectedCategory && (
@@ -236,7 +239,6 @@ export function MagnetBuilder() {
                     imageSrc={flow.imageSrc}
                     cropArea={flow.cropAreaPixels}
                     gridConfig={flow.gridConfig}
-                    rotation={flow.rotation}
                     onAddToCart={handleAddToCart}
                     onReset={flow.handleReset}
                     isUploading={flow.isUploading}
@@ -258,7 +260,6 @@ export function MagnetBuilder() {
             imageSrc={flow.imageSrc}
             gridConfig={flow.gridConfig}
             liveCropArea={flow.liveCropArea}
-            liveRotation={flow.liveRotation}
             selectedCategory={flow.selectedCategory}
           />
         </aside>
@@ -366,7 +367,6 @@ function LivePreviewSidebar({
   imageSrc,
   gridConfig,
   liveCropArea,
-  liveRotation = 0,
   selectedCategory,
 }: {
   currentStepId: StepId;
@@ -374,7 +374,6 @@ function LivePreviewSidebar({
   imageSrc: string | null;
   gridConfig: GridConfig | null;
   liveCropArea?: CropArea | null;
-  liveRotation?: number;
   selectedCategory: CategoryType | null;
 }) {
   const t = useTranslations('builder');
@@ -457,7 +456,6 @@ function LivePreviewSidebar({
                 cols={gridConfig.cols}
                 imageSrc={imageSrc}
                 cropArea={liveCropArea}
-                rotation={liveRotation}
               />
               {/* Mosaiko watermark */}
               <div
@@ -550,13 +548,11 @@ function ImagePreviewGrid({
   cols,
   imageSrc,
   cropArea,
-  rotation = 0,
 }: {
   rows: number;
   cols: number;
   imageSrc: string;
   cropArea?: CropArea | null;
-  rotation?: number;
 }) {
   const [tiles, setTiles] = useState<string[] | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -579,7 +575,7 @@ function ImagePreviewGrid({
         const tileSize = 80;
         const totalW = cols * tileSize;
         const totalH = rows * tileSize;
-        const cropped = getCroppedCanvas(image, cropArea, totalW, totalH, rotation);
+        const cropped = getCroppedCanvas(image, cropArea, totalW, totalH, 0);
 
         const urls: string[] = [];
         for (let r = 0; r < rows; r++) {
@@ -611,7 +607,7 @@ function ImagePreviewGrid({
       cancelled = true;
       clearTimeout(timerRef.current);
     };
-  }, [imageSrc, cropArea, rotation, rows, cols]);
+  }, [imageSrc, cropArea, rows, cols]);
 
   // Canvas-based tiles when available
   if (tiles && tiles.length === rows * cols) {
