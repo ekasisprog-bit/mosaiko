@@ -277,7 +277,7 @@ export function Hero() {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 40%, #F5E6D3 70%, var(--cream) 100%)',
+              'linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 40%, #e0d5c5 70%, var(--cream) 100%)',
           }}
         />
         <div
@@ -286,7 +286,7 @@ export function Hero() {
             width: '800px',
             height: '800px',
             background:
-              'radial-gradient(circle, rgba(232,168,56,0.08) 0%, transparent 60%)',
+              'radial-gradient(circle, rgba(204,160,121,0.08) 0%, transparent 60%)',
           }}
         />
         <div
@@ -346,7 +346,7 @@ export function Hero() {
           >
             <Link
               href="/personalizar"
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-terracotta px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-terracotta/25 transition-all duration-300 hover:bg-terracotta-dark hover:shadow-xl hover:shadow-terracotta/30 active:scale-[0.98]"
+              className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-cta px-7 py-3.5 text-base font-semibold text-[var(--cta-text)] shadow-lg shadow-cta/25 transition-all duration-300 hover:bg-[var(--cta-hover)] hover:shadow-xl hover:shadow-cta/30 active:scale-[0.98]"
             >
               {t('cta')}
               <svg
@@ -458,14 +458,14 @@ export function Hero() {
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
               transition={{ delay: 1.2, duration: 0.5 }}
               className="absolute -right-4 top-8 hidden h-10 w-10 rounded-lg bg-gold/20 backdrop-blur-sm lg:block"
-              style={{ boxShadow: '0 4px 12px -2px rgba(232,168,56,0.2)' }}
+              style={{ boxShadow: '0 4px 12px -2px rgba(204,160,121,0.2)' }}
             />
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
               transition={{ delay: 1.4, duration: 0.5 }}
               className="absolute -left-6 bottom-12 hidden h-8 w-8 rounded-md bg-terracotta/15 backdrop-blur-sm lg:block"
-              style={{ boxShadow: '0 4px 12px -2px rgba(196,101,58,0.15)' }}
+              style={{ boxShadow: '0 4px 12px -2px rgba(123,63,30,0.15)' }}
             />
           </div>
         </div>

@@ -22,7 +22,7 @@ export function AnnouncementBar() {
   if (dismissed) return null;
 
   return (
-    <div className="relative z-50 flex h-[var(--announcement-height)] items-center justify-center overflow-hidden bg-teal">
+    <div className="relative z-50 flex h-[var(--announcement-height)] items-center justify-center overflow-hidden bg-terracotta">
       <div className="announcement-scroll flex items-center whitespace-nowrap px-4 text-sm font-medium text-gold sm:whitespace-normal sm:text-center">
         <span>{t('text')}</span>
       </div>

@@ -148,7 +148,7 @@ export function CartDrawer() {
                 <Link
                   href="/personalizar"
                   onClick={closeDrawer}
-                  className="mt-6 inline-flex h-12 items-center justify-center rounded-lg bg-terracotta px-6 text-sm font-medium text-white transition-colors hover:bg-terracotta-dark"
+                  className="mt-6 inline-flex h-12 items-center justify-center rounded-lg bg-cta px-6 text-sm font-medium text-[var(--cta-text)] transition-colors hover:bg-[var(--cta-hover)]"
                 >
                   {t('continueShopping')}
                 </Link>

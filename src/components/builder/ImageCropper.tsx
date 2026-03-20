@@ -208,7 +208,7 @@ export function ImageCropper({
       className="flex flex-col gap-5"
     >
       <div className="text-center">
-        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+        <h2 className="font-serif text-2xl font-bold text-charcoal md:text-3xl">
           {t('cropTitle')}
         </h2>
         <p className="mt-2 text-sm text-warm-gray">

@@ -40,7 +40,7 @@ const COOKIE_TYPES = [
     titleKey: 'essentialTitle' as const,
     textKey: 'essentialText' as const,
     icon: ShieldIcon,
-    accent: 'teal' as const,
+    accent: 'dark' as const,
   },
   {
     titleKey: 'analyticsTitle' as const,
@@ -140,12 +140,12 @@ function CookieIcon() {
 
 /* ── Accent color map ── */
 const accentMap = {
-  teal: {
-    bg: 'bg-teal/5',
-    border: 'border-teal/20',
-    iconBg: 'bg-teal/10',
-    iconText: 'text-teal',
-    dot: 'bg-teal',
+  dark: {
+    bg: 'bg-charcoal/5',
+    border: 'border-charcoal/20',
+    iconBg: 'bg-charcoal/10',
+    iconText: 'text-charcoal',
+    dot: 'bg-charcoal',
   },
   gold: {
     bg: 'bg-gold/5',
@@ -172,7 +172,7 @@ export function CookiePolicyContent() {
   return (
     <article className="bg-warm-white">
       {/* ── Decorative Header Banner ── */}
-      <div className="relative overflow-hidden bg-teal py-16 sm:py-20 lg:py-24">
+      <div className="relative overflow-hidden bg-terracotta py-16 sm:py-20 lg:py-24">
         {/* Background pattern — diagonal lines */}
         <div
           className="absolute inset-0 opacity-[0.04]"

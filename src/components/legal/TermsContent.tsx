@@ -44,7 +44,7 @@ export function TermsContent() {
       {/* ── Hero banner ── */}
       <div
         ref={headerRef}
-        className="relative overflow-hidden bg-teal py-16 sm:py-20 lg:py-24"
+        className="relative overflow-hidden bg-terracotta py-16 sm:py-20 lg:py-24"
       >
         {/* Decorative background pattern */}
         <div className="absolute inset-0 opacity-[0.04]">

@@ -152,7 +152,7 @@ export function MagnetPreview({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="font-serif text-2xl font-bold text-teal md:text-3xl"
+          className="font-serif text-2xl font-bold text-charcoal md:text-3xl"
         >
           {t('previewTitle')}
         </motion.h2>
@@ -295,18 +295,19 @@ export function MagnetPreview({
                 )}
               </span>
             </div>
-            <span className="text-xl font-bold text-teal">
+            <span className="text-xl font-bold text-charcoal">
               {formatPrice(gridConfig.price)}
             </span>
           </div>
 
           {/* Action buttons */}
           <Button
-            variant="primary"
+            variant="cta"
             size="lg"
             fullWidth
             onClick={onAddToCart}
             disabled={isUploading}
+            className="font-serif font-bold"
           >
             {isUploading ? 'Subiendo foto...' : priceText}
           </Button>

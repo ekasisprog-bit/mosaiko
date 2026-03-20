@@ -15,7 +15,7 @@ const GRID_OPTIONS: GridSize[] = [3, 4, 6, 9];
 /** Visual SVG icon for each grid layout — all tiles are square (like real magnets). */
 function GridIcon({ size, isSelected }: { size: GridSize; isSelected: boolean }) {
   const config = GRID_CONFIGS[size];
-  const fillColor = isSelected ? '#C4653A' : '#1B4D4F';
+  const fillColor = isSelected ? '#7b3f1e' : '#422102';
   const gap = 2;
   const cell = 12;
   const vw = config.cols * cell + (config.cols - 1) * gap;
@@ -85,7 +85,7 @@ export function GridSelector({ onSelect, selected, allowedSizes }: GridSelectorP
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+        <h2 className="font-serif text-2xl font-bold text-charcoal md:text-3xl">
           {t('stepGrid')}
         </h2>
         <p className="mt-2 text-sm text-warm-gray md:text-base">
@@ -118,7 +118,7 @@ export function GridSelector({ onSelect, selected, allowedSizes }: GridSelectorP
                 'border-2 bg-white',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta',
                 isSelected
-                  ? 'border-terracotta shadow-[0_0_0_1px_var(--terracotta),0_4px_20px_rgba(196,101,58,0.15)]'
+                  ? 'border-terracotta shadow-[0_0_0_1px_var(--terracotta),0_4px_20px_rgba(123,63,30,0.15)]'
                   : 'border-light-gray hover:border-terracotta-light hover:shadow-md',
               ].join(' ')}
             >
@@ -155,7 +155,7 @@ export function GridSelector({ onSelect, selected, allowedSizes }: GridSelectorP
                   'mt-auto rounded-full px-3 py-1 text-sm font-bold',
                   isSelected
                     ? 'bg-terracotta text-white'
-                    : 'bg-cream text-teal',
+                    : 'bg-cream text-charcoal',
                 ].join(' ')}
               >
                 {formatPrice(config.price)}

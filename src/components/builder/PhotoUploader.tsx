@@ -135,7 +135,7 @@ export function PhotoUploader({ onImageSelected, gridConfig }: PhotoUploaderProp
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+        <h2 className="font-serif text-2xl font-bold text-charcoal md:text-3xl">
           {t('uploadTitle')}
         </h2>
       </div>
@@ -189,7 +189,7 @@ export function PhotoUploader({ onImageSelected, gridConfig }: PhotoUploaderProp
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-teal"
+                className="text-charcoal"
                 aria-hidden="true"
               >
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
@@ -203,8 +203,8 @@ export function PhotoUploader({ onImageSelected, gridConfig }: PhotoUploaderProp
                 onClick={() => cameraInputRef.current?.click()}
                 className={[
                   'flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-6 py-3',
-                  'bg-teal text-white font-medium text-base',
-                  'transition-colors duration-200 hover:bg-teal-light active:bg-teal-dark',
+                  'bg-terracotta text-[#efebe0] font-medium text-base',
+                  'transition-colors duration-200 hover:bg-terracotta-light active:bg-terracotta-dark',
                   'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta',
                   'sm:flex-1 sm:max-w-[200px]',
                 ].join(' ')}
@@ -302,7 +302,7 @@ export function PhotoUploader({ onImageSelected, gridConfig }: PhotoUploaderProp
             <div className="flex items-center justify-between rounded-lg bg-white px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cream">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-teal">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-charcoal">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <polyline points="21 15 16 10 5 21" />

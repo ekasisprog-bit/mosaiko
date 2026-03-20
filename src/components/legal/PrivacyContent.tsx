@@ -46,7 +46,7 @@ export function PrivacyContent() {
   return (
     <article className="bg-warm-white">
       {/* ── Decorative Header Banner ── */}
-      <div className="relative overflow-hidden bg-teal py-16 sm:py-20 lg:py-24">
+      <div className="relative overflow-hidden bg-terracotta py-16 sm:py-20 lg:py-24">
         {/* Background pattern */}
         <div
           className="absolute inset-0 opacity-[0.04]"

@@ -39,10 +39,10 @@ export function AdminSidebar() {
       <button
         onClick={() => setIsMobileOpen(true)}
         className="fixed left-4 top-4 z-40 flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white shadow-sm lg:hidden"
-        style={{ border: '1px solid #f0ebe5' }}
+        style={{ border: '1px solid #e5e0d4' }}
         aria-label="Abrir menú"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d2926" strokeWidth="2" strokeLinecap="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#422102" strokeWidth="2" strokeLinecap="round">
           <line x1="3" y1="6" x2="21" y2="6" />
           <line x1="3" y1="12" x2="21" y2="12" />
           <line x1="3" y1="18" x2="21" y2="18" />
@@ -68,18 +68,18 @@ export function AdminSidebar() {
           'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white transition-transform duration-300 lg:translate-x-0',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
-        style={{ borderRight: '1px solid #f0ebe5' }}
+        style={{ borderRight: '1px solid #e5e0d4' }}
       >
         {/* Brand */}
-        <div className="flex h-16 items-center justify-between px-6" style={{ borderBottom: '1px solid #f0ebe5' }}>
+        <div className="flex h-16 items-center justify-between px-6" style={{ borderBottom: '1px solid #e5e0d4' }}>
           <Link href="/admin" className="flex items-center gap-2">
             <span
               className="text-xl font-bold tracking-tight"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", color: '#1B4D4F' }}
+              style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', color: '#422102' }}
             >
               Mosaiko
             </span>
-            <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ backgroundColor: '#f0ebe5', color: '#8a7e74' }}>
+            <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ backgroundColor: '#e5e0d4', color: '#7a6b5a' }}>
               Admin
             </span>
           </Link>
@@ -88,7 +88,7 @@ export function AdminSidebar() {
             className="cursor-pointer lg:hidden"
             aria-label="Cerrar menú"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d2926" strokeWidth="2" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#422102" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -122,7 +122,7 @@ export function AdminSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-3 text-center text-[11px] text-warm-gray/50" style={{ borderTop: '1px solid #f0ebe5' }}>
+        <div className="px-4 py-3 text-center text-[11px] text-warm-gray/50" style={{ borderTop: '1px solid #e5e0d4' }}>
           Mosaiko v1.0
         </div>
       </aside>

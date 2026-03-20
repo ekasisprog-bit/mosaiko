@@ -24,12 +24,12 @@ export function AdminHeader() {
   return (
     <header
       className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8"
-      style={{ borderBottom: '1px solid #f0ebe5', backgroundColor: 'white' }}
+      style={{ borderBottom: '1px solid #e5e0d4', backgroundColor: 'white' }}
     >
       {/* Page title — offset left on mobile to account for hamburger */}
       <h1
         className="pl-12 text-lg font-semibold text-charcoal lg:pl-0"
-        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+        style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}
       >
         {title}
       </h1>

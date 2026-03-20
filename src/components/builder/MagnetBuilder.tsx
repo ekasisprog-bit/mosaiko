@@ -125,7 +125,7 @@ export function MagnetBuilder() {
     <div className="container-mosaiko py-6 md:py-10">
       {/* ── Header ── */}
       <div className="mb-6 text-center md:mb-8">
-        <h1 className="font-serif text-3xl font-bold text-teal md:text-4xl">
+        <h1 className="font-serif text-3xl font-bold text-charcoal md:text-4xl">
           {t('title')}
         </h1>
         <p className="mt-1 text-sm text-warm-gray md:text-base">
@@ -308,7 +308,7 @@ function StepIndicator({
                   isActive
                     ? 'bg-terracotta text-white shadow-md shadow-terracotta/30'
                     : isCompleted
-                      ? 'bg-teal text-white'
+                      ? 'bg-terracotta text-[#efebe0]'
                       : 'bg-light-gray text-warm-gray',
                 ].join(' ')}
               >
@@ -335,7 +335,7 @@ function StepIndicator({
                   isActive
                     ? 'text-terracotta'
                     : isCompleted
-                      ? 'text-teal'
+                      ? 'text-terracotta'
                       : 'text-warm-gray',
                 ].join(' ')}
               >
@@ -348,7 +348,7 @@ function StepIndicator({
               <div
                 className={[
                   'mx-2 h-0.5 w-8 rounded-full transition-colors duration-300 md:mx-3 md:w-12',
-                  index < currentIdx ? 'bg-teal' : 'bg-light-gray',
+                  index < currentIdx ? 'bg-terracotta' : 'bg-light-gray',
                 ].join(' ')}
               />
             )}
@@ -380,7 +380,7 @@ function LivePreviewSidebar({
 
   return (
     <div className="sticky top-[calc(var(--header-height)+2rem)] rounded-2xl bg-white p-6 shadow-sm border border-light-gray">
-      <h3 className="mb-4 text-center font-serif text-lg font-semibold text-teal">
+      <h3 className="mb-4 text-center font-serif text-lg font-semibold text-charcoal">
         {t('stepPreview')}
       </h3>
 
@@ -496,7 +496,7 @@ function LivePreviewSidebar({
               </span>
             )}
           </div>
-          <span className="text-lg font-bold text-teal">
+          <span className="text-lg font-bold text-charcoal">
             {formatPrice(gridConfig.price)}
           </span>
         </motion.div>

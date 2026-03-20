@@ -45,13 +45,13 @@ export function OrderCard({ order }: OrderCardProps) {
     <Link
       href={`/admin/pedidos/${order.id.replace('gid://shopify/Order/', '')}`}
       className="group block rounded-xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-      style={{ border: '1px solid #f0ebe5' }}
+      style={{ border: '1px solid #e5e0d4' }}
     >
       <div className="flex items-start gap-4">
         {/* Preview thumbnail */}
         <div
           className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-cream"
-          style={{ border: '1px solid #f0ebe5' }}
+          style={{ border: '1px solid #e5e0d4' }}
         >
           {previewUrl ? (
             <img
@@ -61,7 +61,7 @@ export function OrderCard({ order }: OrderCardProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a7e74" strokeWidth="1.5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a6b5a" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />

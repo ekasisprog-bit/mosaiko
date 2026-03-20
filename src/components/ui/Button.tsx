@@ -3,7 +3,7 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { motion, type HTMLMotionProps } from 'framer-motion';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'cta';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps
@@ -17,12 +17,14 @@ interface ButtonProps
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-terracotta text-white hover:bg-terracotta-dark active:bg-terracotta-dark',
-  secondary: 'bg-teal text-white hover:bg-teal-light active:bg-teal-dark',
+    'bg-terracotta text-[#efebe0] hover:bg-terracotta-dark active:bg-terracotta-dark',
+  secondary: 'bg-terracotta-dark text-cream hover:bg-terracotta active:bg-terracotta-dark',
   outline:
-    'border-2 border-terracotta text-terracotta bg-transparent hover:bg-terracotta hover:text-white',
+    'border-2 border-terracotta text-terracotta bg-transparent hover:bg-terracotta hover:text-[#efebe0]',
   ghost:
     'text-terracotta bg-transparent hover:bg-terracotta/10',
+  cta:
+    'bg-cta text-[var(--cta-text)] hover:bg-[var(--cta-hover)] active:bg-[var(--cta-hover)]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

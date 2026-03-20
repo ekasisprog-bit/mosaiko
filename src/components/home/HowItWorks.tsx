@@ -192,7 +192,7 @@ export function HowItWorks() {
                         {step.number}
                       </span>
                       {/* Icon circle */}
-                      <div className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl bg-cream text-teal shadow-sm ring-1 ring-light-gray/50 transition-all duration-300 lg:h-[96px] lg:w-[96px]">
+                      <div className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl bg-cream text-charcoal shadow-sm ring-1 ring-light-gray/50 transition-all duration-300 lg:h-[96px] lg:w-[96px]">
                         <Icon />
                       </div>
                     </div>

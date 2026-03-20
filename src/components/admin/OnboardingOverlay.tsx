@@ -10,7 +10,7 @@ const STEPS = [
     title: 'Tus pedidos aparecen aquí',
     description: 'Cuando un cliente compra, su pedido aparece automáticamente en esta lista con todos los detalles.',
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4653A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7b3f1e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
         <line x1="3" y1="6" x2="21" y2="6" />
         <path d="M16 10a4 4 0 01-8 0" />
@@ -21,7 +21,7 @@ const STEPS = [
     title: 'Haz clic para ver detalles',
     description: 'Cada tarjeta de pedido te muestra la vista previa, el tipo de mosaico y el estado. Haz clic para ver todo.',
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4653A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7b3f1e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
         <circle cx="12" cy="12" r="3" />
       </svg>
@@ -31,7 +31,7 @@ const STEPS = [
     title: 'Descarga archivos de impresión',
     description: 'En cada pedido encontrarás las piezas listas para imprimir. Descárgalas individualmente o todas en un ZIP.',
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4653A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7b3f1e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
@@ -42,7 +42,7 @@ const STEPS = [
     title: 'Actualiza el estado del pedido',
     description: 'Marca como "Imprimiendo" cuando empieces, "Enviado" cuando lo mandes (ingresa la guía), y "Entregado" cuando confirmes.',
     icon: (
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4653A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7b3f1e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
         <polyline points="22 4 12 14.01 9 11.01" />
       </svg>
@@ -117,7 +117,7 @@ export function OnboardingOverlay() {
 
             <h3
               className="text-xl font-semibold text-charcoal"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}
             >
               {step.title}
             </h3>
@@ -131,7 +131,7 @@ export function OnboardingOverlay() {
             <button
               onClick={handleNext}
               className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg font-semibold text-white transition-colors"
-              style={{ backgroundColor: '#C4653A' }}
+              style={{ backgroundColor: '#7b3f1e' }}
             >
               {currentStep < STEPS.length - 1 ? 'Siguiente' : 'Entendido'}
             </button>

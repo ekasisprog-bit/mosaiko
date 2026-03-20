@@ -180,8 +180,8 @@ const values = [
     icon: SatisfactionIcon,
     titleKey: 'value3Title' as const,
     textKey: 'value3Text' as const,
-    accentColor: 'var(--teal)',
-    accentBg: 'var(--teal)',
+    accentColor: 'var(--terracotta)',
+    accentBg: 'var(--terracotta)',
   },
   {
     icon: AccessibilityIcon,
@@ -201,14 +201,14 @@ function HeroSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-teal py-24 sm:py-32 lg:py-40"
+      className="relative overflow-hidden bg-terracotta py-24 sm:py-32 lg:py-40"
     >
       {/* Background layers */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(160deg, var(--teal-dark) 0%, var(--teal) 40%, var(--teal-light) 100%)',
+            'linear-gradient(160deg, var(--terracotta-dark) 0%, var(--terracotta) 40%, var(--terracotta-light) 100%)',
         }}
       />
 
@@ -461,7 +461,7 @@ function ValuesSection() {
         >
           {/* Section heading */}
           <motion.div variants={fadeUp} className="text-center">
-            <span className="font-brand text-sm font-semibold uppercase tracking-[0.2em] text-teal">
+            <span className="font-brand text-sm font-semibold uppercase tracking-[0.2em] text-charcoal">
               {t('valuesTitle').split(' ')[0]}
             </span>
             <h2 className="mt-3 font-serif text-3xl font-bold text-charcoal sm:text-4xl lg:text-5xl">
@@ -531,14 +531,14 @@ function PromiseSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-teal py-20 sm:py-28 lg:py-32"
+      className="relative overflow-hidden bg-terracotta py-20 sm:py-28 lg:py-32"
     >
       {/* Background layers */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 50%, var(--teal-light) 100%)',
+            'linear-gradient(135deg, var(--terracotta-dark) 0%, var(--terracotta) 50%, var(--terracotta-light) 100%)',
         }}
       />
 

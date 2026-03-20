@@ -126,7 +126,7 @@ const products: Product[] = [
 
 const badgeStyles: Record<Badge, { label: string; bg: string }> = {
   bestseller: { label: 'Mas vendido', bg: 'bg-gold text-charcoal' },
-  new: { label: 'Nuevo', bg: 'bg-teal text-white' },
+  new: { label: 'Nuevo', bg: 'bg-charcoal text-cream' },
   limited: { label: 'Edicion limitada', bg: 'bg-terracotta text-white' },
 };
 

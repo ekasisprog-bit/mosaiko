@@ -116,7 +116,7 @@ export function PredesignedPreview({ productId }: PredesignedPreviewProps) {
           <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium text-white ${accentClass}`}>
             {categoryLabel}
           </span>
-          <h1 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+          <h1 className="font-serif text-2xl font-bold text-charcoal md:text-3xl">
             {product.name}
           </h1>
         </motion.div>
@@ -202,7 +202,7 @@ export function PredesignedPreview({ productId }: PredesignedPreviewProps) {
               {' · '}{categoryLabel}
             </span>
           </div>
-          <span className="text-xl font-bold text-teal">
+          <span className="text-xl font-bold text-charcoal">
             {priceFormatted}
           </span>
         </div>

@@ -33,7 +33,7 @@ export function CtaBanner() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-terracotta py-20 sm:py-24 lg:py-28"
+      className="relative overflow-hidden bg-cta py-20 sm:py-24 lg:py-28"
     >
       {/* ── Background layers ── */}
 
@@ -124,7 +124,7 @@ export function CtaBanner() {
           <motion.div variants={fadeUp} className="mt-8 sm:mt-10">
             <Link
               href="/personalizar"
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-white px-8 py-3.5 text-base font-bold text-terracotta shadow-xl shadow-black/10 transition-all duration-300 hover:bg-cream hover:shadow-2xl hover:shadow-black/15 active:scale-[0.98] sm:px-10 sm:text-lg"
+              className="group inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-[var(--cta-text)] px-8 py-3.5 text-base font-bold text-cta shadow-xl shadow-black/10 transition-all duration-300 hover:bg-cream hover:shadow-2xl hover:shadow-black/15 active:scale-[0.98] sm:px-10 sm:text-lg"
             >
               {t('cta')}
               <svg

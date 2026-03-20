@@ -50,8 +50,8 @@ export default function AdminLoginPage() {
           <h1
             className="text-4xl font-bold tracking-tight"
             style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              color: '#1B4D4F',
+              fontFamily: 'var(--font-cormorant), Georgia, serif',
+              color: '#422102',
             }}
           >
             Mosaiko
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Login card */}
-        <div className="rounded-2xl bg-white p-8 shadow-sm" style={{ border: '1px solid #f0ebe5' }}>
+        <div className="rounded-2xl bg-white p-8 shadow-sm" style={{ border: '1px solid #e5e0d4' }}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {/* Email (decorative, for future use) */}
             <div>
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
                 id="admin-email"
                 type="email"
                 placeholder="admin@mosaiko.mx"
-                className="h-11 w-full rounded-lg border border-light-gray bg-cream px-3.5 text-sm text-charcoal placeholder:text-warm-gray/60 focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
+                className="h-11 w-full rounded-lg border border-light-gray bg-cream px-3.5 text-sm text-charcoal placeholder:text-warm-gray/60 focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/20"
                 autoComplete="email"
               />
             </div>
@@ -93,7 +93,7 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 w-full rounded-lg border border-light-gray bg-cream px-3.5 text-sm text-charcoal placeholder:text-warm-gray/60 focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20"
+                className="h-11 w-full rounded-lg border border-light-gray bg-cream px-3.5 text-sm text-charcoal placeholder:text-warm-gray/60 focus:border-terracotta focus:outline-none focus:ring-2 focus:ring-terracotta/20"
                 autoComplete="current-password"
                 required
               />
@@ -115,7 +115,7 @@ export default function AdminLoginPage() {
               type="submit"
               disabled={isLoading || !password}
               className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ backgroundColor: '#C4653A' }}
+              style={{ backgroundColor: '#7b3f1e' }}
             >
               {isLoading ? (
                 <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">

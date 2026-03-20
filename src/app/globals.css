@@ -2,22 +2,24 @@
 
 /* ── Mosaiko Design Tokens ── */
 :root {
-  /* Brand Colors */
-  --terracotta: #C4653A;
-  --terracotta-light: #D4845F;
-  --terracotta-dark: #A3502C;
-  --teal: #1B4D4F;
-  --teal-light: #2A6B6E;
-  --teal-dark: #143A3C;
-  --gold: #E8A838;
-  --gold-light: #F0C060;
-  --gold-dark: #C48A20;
-  --cream: #FAF6F1;
-  --cream-dark: #F0E8DD;
-  --warm-white: #FDFCFA;
-  --charcoal: #2C2C2C;
-  --warm-gray: #6B6560;
-  --light-gray: #E8E2DA;
+  /* Brand Colors — 60/30/10 palette */
+  --terracotta: #7b3f1e;
+  --terracotta-light: #8b5533;
+  --terracotta-dark: #6a3318;
+  --gold: #cca079;
+  --gold-light: #dbb899;
+  --gold-dark: #b77833;
+  --cream: #efebe0;
+  --cream-dark: #e5e0d4;
+  --warm-white: #f5f2ea;
+  --charcoal: #422102;
+  --warm-gray: #7a6b5a;
+  --light-gray: #d6d0c5;
+
+  /* CTA — 10% purchase tier */
+  --cta: #422102;
+  --cta-hover: #351a00;
+  --cta-text: #efebe0;
 
   /* Semantic */
   --background: var(--cream);
@@ -29,9 +31,9 @@
   --warning: var(--gold);
 
   /* Typography */
-  --font-heading: var(--font-playfair);
+  --font-heading: var(--font-cormorant);
   --font-body: var(--font-dm-sans);
-  --font-brand: var(--font-montserrat);
+  --font-brand: var(--font-cormorant);
 
   /* Spacing */
   --container-max: 1280px;
@@ -49,9 +51,6 @@
   --color-terracotta: var(--terracotta);
   --color-terracotta-light: var(--terracotta-light);
   --color-terracotta-dark: var(--terracotta-dark);
-  --color-teal: var(--teal);
-  --color-teal-light: var(--teal-light);
-  --color-teal-dark: var(--teal-dark);
   --color-gold: var(--gold);
   --color-gold-light: var(--gold-light);
   --color-gold-dark: var(--gold-dark);
@@ -66,6 +65,9 @@
   --color-success: var(--success);
   --color-error: var(--error);
   --color-warning: var(--warning);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-cta-text: var(--cta-text);
   --font-sans: var(--font-body);
   --font-serif: var(--font-heading);
   --font-brand: var(--font-brand);
@@ -100,8 +102,8 @@ body {
 
 /* ── Selection ── */
 ::selection {
-  background: var(--terracotta);
-  color: white;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 /* ── Focus ── */

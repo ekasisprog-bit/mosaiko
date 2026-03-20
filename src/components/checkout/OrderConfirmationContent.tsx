@@ -56,7 +56,7 @@ export function OrderConfirmationContent({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className="font-serif text-3xl font-bold text-teal md:text-4xl"
+        className="font-serif text-3xl font-bold text-charcoal md:text-4xl"
       >
         {title}
       </motion.h1>
@@ -91,7 +91,7 @@ export function OrderConfirmationContent({
         className="mt-8 w-full max-w-sm rounded-2xl border border-light-gray bg-white p-6 shadow-sm"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-charcoal/10">
             <svg
               width="20"
               height="20"
@@ -99,7 +99,7 @@ export function OrderConfirmationContent({
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="text-teal"
+              className="text-charcoal"
             >
               <rect x="1" y="3" width="15" height="13" />
               <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />

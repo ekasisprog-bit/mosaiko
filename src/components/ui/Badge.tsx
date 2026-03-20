@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-type BadgeVariant = 'gold' | 'teal' | 'terracotta' | 'outline';
+type BadgeVariant = 'gold' | 'dark' | 'terracotta' | 'outline';
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -10,7 +10,7 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
   gold: 'bg-gold text-charcoal',
-  teal: 'bg-teal text-white',
+  dark: 'bg-charcoal text-cream',
   terracotta: 'bg-terracotta text-white',
   outline: 'border border-terracotta text-terracotta bg-transparent',
 };

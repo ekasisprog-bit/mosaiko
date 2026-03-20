@@ -42,7 +42,7 @@ export function CartPage() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/personalizar"
-            className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-terracotta px-8 py-3 font-semibold text-white transition-colors hover:bg-terracotta-dark"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-cta px-8 py-3 font-semibold text-[var(--cta-text)] transition-colors hover:bg-[var(--cta-hover)]"
           >
             Personalizar
           </Link>

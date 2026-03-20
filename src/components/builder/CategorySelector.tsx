@@ -32,8 +32,8 @@ const I18N_KEY_MAP: Record<CategoryType, { name: string; desc: string }> = {
 
 /** SVG icons representing each category's visual style */
 function CategoryIcon({ category, isSelected }: { category: CategoryType; isSelected: boolean }) {
-  const fill = isSelected ? '#C4653A' : '#1B4D4F';
-  const accent = isSelected ? '#E8855A' : '#2D7577';
+  const fill = isSelected ? '#7b3f1e' : '#422102';
+  const accent = isSelected ? '#8b5533' : '#5a3010';
 
   switch (category) {
     case 'mosaicos':
@@ -175,7 +175,7 @@ export function CategorySelector({ onSelect, selected }: CategorySelectorProps) 
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h2 className="font-serif text-2xl font-bold text-teal md:text-3xl">
+        <h2 className="font-serif text-2xl font-bold text-charcoal md:text-3xl">
           {t('stepCategory')}
         </h2>
         <p className="mt-2 text-sm text-warm-gray md:text-base">
@@ -208,7 +208,7 @@ export function CategorySelector({ onSelect, selected }: CategorySelectorProps) 
                 'border-2 bg-white',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta',
                 isSelected
-                  ? 'border-terracotta shadow-[0_0_0_1px_var(--terracotta),0_4px_20px_rgba(196,101,58,0.15)]'
+                  ? 'border-terracotta shadow-[0_0_0_1px_var(--terracotta),0_4px_20px_rgba(123,63,30,0.15)]'
                   : 'border-light-gray hover:border-terracotta-light hover:shadow-md',
               ].join(' ')}
             >
@@ -247,7 +247,7 @@ export function CategorySelector({ onSelect, selected }: CategorySelectorProps) 
                   'mt-auto rounded-full px-3 py-1 text-xs font-bold',
                   isSelected
                     ? 'bg-terracotta text-white'
-                    : 'bg-cream text-teal',
+                    : 'bg-cream text-charcoal',
                 ].join(' ')}
               >
                 {getCategoryPrice(meta.allowedGridSizes)}

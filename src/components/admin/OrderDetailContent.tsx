@@ -112,7 +112,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
 
   if (!order) {
     return (
-      <div className="rounded-xl bg-white p-8 text-center shadow-sm" style={{ border: '1px solid #f0ebe5' }}>
+      <div className="rounded-xl bg-white p-8 text-center shadow-sm" style={{ border: '1px solid #e5e0d4' }}>
         <p className="text-warm-gray">Pedido no encontrado.</p>
         <Link href="/admin/pedidos" className="mt-4 inline-block text-sm text-terracotta hover:underline">
           Volver a pedidos
@@ -155,11 +155,11 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className="rounded-xl bg-white p-6 shadow-sm"
-            style={{ border: '1px solid #f0ebe5' }}
+            style={{ border: '1px solid #e5e0d4' }}
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-charcoal" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                <h2 className="text-xl font-semibold text-charcoal" style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
                   {order.name}
                 </h2>
                 <p className="mt-1 text-sm text-warm-gray">{formatDate(order.createdAt)}</p>
@@ -176,7 +176,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
               <div>
                 <span className="text-xs font-medium uppercase tracking-wider text-warm-gray">Pago</span>
                 <p className="mt-0.5 text-sm text-charcoal">{order.displayFinancialStatus}</p>
-                <p className="text-lg font-bold text-teal">
+                <p className="text-lg font-bold text-charcoal">
                   {formatMXN(order.totalPriceSet.shopMoney.amount)}
                 </p>
               </div>
@@ -207,9 +207,9 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="rounded-xl bg-white p-6 shadow-sm"
-            style={{ border: '1px solid #f0ebe5' }}
+            style={{ border: '1px solid #e5e0d4' }}
           >
-            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
               Productos
             </h3>
             <div className="flex flex-col gap-4">
@@ -220,14 +220,14 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
 
                 return (
                   <div key={item.id} className="flex gap-4 rounded-lg bg-cream p-3">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg" style={{ border: '1px solid #f0ebe5' }}>
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg" style={{ border: '1px solid #e5e0d4' }}>
                       {previewUrl ? (
                         <img src={previewUrl} alt={item.title} className="h-full w-full object-cover" />
                       ) : item.image ? (
                         <img src={item.image.url} alt={item.title} className="h-full w-full object-cover" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-white">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a7e74" strokeWidth="1.5">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7a6b5a" strokeWidth="1.5">
                             <rect x="3" y="3" width="18" height="18" rx="2" />
                           </svg>
                         </div>
@@ -241,7 +241,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                         <span>x{item.quantity}</span>
                       </div>
                       {item.variant && (
-                        <p className="mt-1 text-sm font-semibold text-teal">
+                        <p className="mt-1 text-sm font-semibold text-charcoal">
                           {formatMXN(item.variant.price)}
                         </p>
                       )}
@@ -261,9 +261,9 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="rounded-xl bg-white p-6 shadow-sm"
-            style={{ border: '1px solid #f0ebe5' }}
+            style={{ border: '1px solid #e5e0d4' }}
           >
-            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
               Estado del pedido
             </h3>
 
@@ -305,14 +305,14 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                       placeholder="Número de guía"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
-                      className="h-9 rounded-lg border border-light-gray bg-cream px-3 text-sm focus:border-teal focus:outline-none"
+                      className="h-9 rounded-lg border border-light-gray bg-cream px-3 text-sm focus:border-terracotta focus:outline-none"
                     />
                     <input
                       type="text"
                       placeholder="Paquetería (ej. Estafeta, DHL)"
                       value={trackingCompany}
                       onChange={(e) => setTrackingCompany(e.target.value)}
-                      className="h-9 rounded-lg border border-light-gray bg-cream px-3 text-sm focus:border-teal focus:outline-none"
+                      className="h-9 rounded-lg border border-light-gray bg-cream px-3 text-sm focus:border-terracotta focus:outline-none"
                     />
                   </div>
                 )}
@@ -321,7 +321,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                   onClick={() => handleStatusUpdate(STATUS_FLOW[currentStatusIndex + 1])}
                   disabled={isUpdating || (showTrackingInput && !trackingNumber)}
                   className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg font-medium text-white transition-colors disabled:opacity-60"
-                  style={{ backgroundColor: '#C4653A' }}
+                  style={{ backgroundColor: '#7b3f1e' }}
                 >
                   {isUpdating ? (
                     <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -347,9 +347,9 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="rounded-xl bg-white p-6 shadow-sm"
-            style={{ border: '1px solid #f0ebe5' }}
+            style={{ border: '1px solid #e5e0d4' }}
           >
-            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h3 className="mb-4 font-semibold text-charcoal" style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
               Archivos de impresión
             </h3>
             {printJobId ? (

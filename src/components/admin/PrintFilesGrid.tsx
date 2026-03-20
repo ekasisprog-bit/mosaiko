@@ -84,7 +84,7 @@ export function PrintFilesGrid({ orderId }: PrintFilesGridProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.04 }}
             className="group relative overflow-hidden rounded-lg"
-            style={{ border: '1px solid #f0ebe5' }}
+            style={{ border: '1px solid #e5e0d4' }}
           >
             <img
               src={file.downloadUrl}
@@ -112,7 +112,7 @@ export function PrintFilesGrid({ orderId }: PrintFilesGridProps) {
         href={`/api/admin/print-files?orderId=${encodeURIComponent(orderId)}&format=zip`}
         download
         className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-lg font-medium text-white transition-colors"
-        style={{ backgroundColor: '#1B4D4F' }}
+        style={{ backgroundColor: '#422102' }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />

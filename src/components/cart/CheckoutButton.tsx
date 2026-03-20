@@ -52,7 +52,7 @@ export function CheckoutButton() {
         transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         onClick={handleCheckout}
         disabled={isLoading || items.length === 0}
-        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-terracotta text-base font-semibold text-white transition-colors hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-cta text-base font-bold font-serif text-[var(--cta-text)] transition-colors hover:bg-[var(--cta-hover)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? (
           <>

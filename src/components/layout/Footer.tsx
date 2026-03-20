@@ -26,7 +26,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-teal text-cream">
+    <footer className="mt-auto bg-terracotta text-cream">
       {/* Main Footer */}
       <div className="container-mosaiko py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">

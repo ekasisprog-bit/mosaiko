@@ -82,21 +82,21 @@ const CATEGORY_I18N_MAP: Record<CategoryType, string> = {
 
 export const CATEGORY_ACCENT: Record<CategoryType, string> = {
   mosaicos: 'bg-terracotta',
-  ghibli: 'bg-teal',
+  ghibli: 'bg-charcoal',
   arte: 'bg-gold',
   'save-the-date': 'bg-terracotta-light',
   flores: 'bg-terracotta',
-  spotify: 'bg-teal-light',
+  spotify: 'bg-gold-dark',
   polaroid: 'bg-warm-gray',
 };
 
 export const CATALOG_CATEGORIES: CatalogCategory[] = [
   { type: 'mosaicos', i18nKey: 'mosaicos', accentColor: 'bg-terracotta', order: 1, showPersonalizeCard: true },
-  { type: 'ghibli', i18nKey: 'ghibli', accentColor: 'bg-teal', order: 2, showPersonalizeCard: true },
+  { type: 'ghibli', i18nKey: 'ghibli', accentColor: 'bg-charcoal', order: 2, showPersonalizeCard: true },
   { type: 'arte', i18nKey: 'arte', accentColor: 'bg-gold', order: 3, showPersonalizeCard: true },
   { type: 'save-the-date', i18nKey: 'saveTheDate', accentColor: 'bg-terracotta-light', order: 4, showPersonalizeCard: true },
   { type: 'flores', i18nKey: 'flores', accentColor: 'bg-terracotta', order: 5, showPersonalizeCard: true },
-  { type: 'spotify', i18nKey: 'spotify', accentColor: 'bg-teal-light', order: 6, showPersonalizeCard: false },
+  { type: 'spotify', i18nKey: 'spotify', accentColor: 'bg-gold-dark', order: 6, showPersonalizeCard: false },
   { type: 'polaroid', i18nKey: 'polaroid', accentColor: 'bg-warm-gray', order: 7, showPersonalizeCard: false },
 ];
 

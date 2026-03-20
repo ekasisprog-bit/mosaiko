@@ -62,7 +62,7 @@ export function CustomizationEditor({
         <motion.h2
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-serif text-2xl font-bold text-teal md:text-3xl"
+          className="font-serif text-2xl font-bold text-charcoal md:text-3xl"
         >
           {t('customizeTitle')}
         </motion.h2>
@@ -273,7 +273,7 @@ function FloresThemeSelector({
                 className="h-8 w-8 shrink-0 rounded-full border-2 transition-colors"
                 style={{
                   backgroundColor: THEME_SWATCHES[theme],
-                  borderColor: isActive ? '#C4653A' : '#E5E5E5',
+                  borderColor: isActive ? '#7b3f1e' : '#E5E5E5',
                 }}
               />
               <span

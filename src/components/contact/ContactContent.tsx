@@ -251,7 +251,7 @@ export function ContactContent() {
       {/* ── Hero header ── */}
       <div
         ref={headerRef}
-        className="relative overflow-hidden bg-teal py-16 sm:py-20 lg:py-24"
+        className="relative overflow-hidden bg-terracotta py-16 sm:py-20 lg:py-24"
       >
         {/* Decorative background pattern */}
         <div className="absolute inset-0 opacity-[0.04]">
@@ -536,7 +536,7 @@ export function ContactContent() {
               <div className="mt-5 space-y-4">
                 {/* Response time */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-teal">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-charcoal">
                     <ClockIcon />
                   </div>
                   <p className="pt-1 text-sm leading-relaxed text-warm-gray">
@@ -546,7 +546,7 @@ export function ContactContent() {
 
                 {/* Schedule */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-teal">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-charcoal">
                     <CalendarIcon />
                   </div>
                   <p className="pt-1 text-sm leading-relaxed text-warm-gray">
@@ -556,7 +556,7 @@ export function ContactContent() {
 
                 {/* Location */}
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-teal">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream text-charcoal">
                     <MapPinIcon />
                   </div>
                   <p className="pt-1 text-sm leading-relaxed text-warm-gray">

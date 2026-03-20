@@ -227,7 +227,7 @@ export function FaqContent() {
             variants={ctaVariants}
             initial="hidden"
             animate={ctaInView ? 'visible' : 'hidden'}
-            className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl bg-teal shadow-lg"
+            className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl bg-terracotta shadow-lg"
           >
             {/* Subtle pattern overlay */}
             <div
@@ -248,7 +248,7 @@ export function FaqContent() {
               <div className="mt-8">
                 <Link
                   href="/contacto"
-                  className="group inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-white px-8 py-3.5 text-base font-bold text-teal shadow-xl shadow-black/10 transition-all duration-300 hover:bg-cream hover:shadow-2xl hover:shadow-black/15 active:scale-[0.98] sm:px-10 sm:text-lg"
+                  className="group inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl bg-white px-8 py-3.5 text-base font-bold text-terracotta shadow-xl shadow-black/10 transition-all duration-300 hover:bg-cream hover:shadow-2xl hover:shadow-black/15 active:scale-[0.98] sm:px-10 sm:text-lg"
                 >
                   {t('contactCta')}
                   <svg

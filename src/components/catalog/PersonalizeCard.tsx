@@ -48,7 +48,7 @@ export function PersonalizeCard({ category, accentColor }: PersonalizeCardProps)
       </p>
 
       {/* CTA hint */}
-      <div className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-terracotta/30 px-4 py-2 text-sm font-medium text-terracotta transition-all duration-200 group-hover:bg-terracotta group-hover:text-white sm:min-h-[48px]">
+      <div className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-cta/30 px-4 py-2 text-sm font-medium text-cta transition-all duration-200 group-hover:bg-cta group-hover:text-[var(--cta-text)] sm:min-h-[48px]">
         {t('personalizeButton')}
         <svg
           width="14"
