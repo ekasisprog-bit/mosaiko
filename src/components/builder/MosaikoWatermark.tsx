@@ -21,6 +21,7 @@ export function MosaikoWatermark() {
         height={14}
         className="shrink-0"
         style={{ width: '14px', height: '14px' }}
+        unoptimized
       />
       <span
         className="font-bold font-brand leading-none text-charcoal"

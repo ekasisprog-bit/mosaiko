@@ -30,6 +30,7 @@ export function MosaikoLogo({ variant = 'dark', size = 28, className }: MosaikoL
         className="shrink-0"
         style={{ width: `${size}px`, height: `${size}px` }}
         priority
+        unoptimized
       />
       <span
         className={`font-bold font-brand tracking-tight leading-none ${textColor}`}

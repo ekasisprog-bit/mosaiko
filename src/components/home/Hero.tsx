@@ -219,6 +219,7 @@ function MosaicGrid({
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 300px, (max-width: 1024px) 350px, 440px"
+                quality={90}
                 priority
               />
             </div>
@@ -424,6 +425,7 @@ export function Hero() {
                   width={16}
                   height={16}
                   style={{ width: '16px', height: '16px' }}
+                  unoptimized
                 />
                 <span
                   className="font-bold font-brand leading-none text-charcoal"

@@ -274,6 +274,7 @@ export function ProductCarousel() {
                       fill
                       className="object-contain object-center drop-shadow-lg"
                       sizes="(max-width: 640px) 320px, (max-width: 1024px) 380px, 420px"
+                      quality={90}
                     />
                   </div>
 

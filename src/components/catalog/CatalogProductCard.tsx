@@ -30,6 +30,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
           alt={product.name}
           fill
           sizes="(max-width: 640px) 72vw, 280px"
+          quality={90}
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-105"
         />
 

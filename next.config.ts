@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   serverExternalPackages: ['sharp'],
   images: {
+    qualities: [75, 90],
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
