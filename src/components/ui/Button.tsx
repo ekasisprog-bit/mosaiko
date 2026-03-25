@@ -17,12 +17,12 @@ interface ButtonProps
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-terracotta text-[#efebe0] hover:bg-terracotta-dark active:bg-terracotta-dark',
-  secondary: 'bg-terracotta-dark text-cream hover:bg-terracotta active:bg-terracotta-dark',
+    'bg-btn-primary text-btn-text hover:bg-btn-primary-hover active:bg-btn-primary-active',
+  secondary: 'bg-btn-primary-hover text-btn-text hover:bg-btn-primary active:bg-btn-primary-active',
   outline:
-    'border-2 border-terracotta text-terracotta bg-transparent hover:bg-terracotta hover:text-[#efebe0]',
+    'border-2 border-btn-primary text-btn-primary bg-transparent hover:bg-btn-primary hover:text-btn-text',
   ghost:
-    'text-terracotta bg-transparent hover:bg-terracotta/10',
+    'text-btn-primary bg-transparent hover:bg-btn-primary/10',
   cta:
     'bg-cta text-[var(--cta-text)] hover:bg-[var(--cta-hover)] active:bg-[var(--cta-hover)]',
 };
@@ -58,7 +58,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={[
           'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
           'transition-colors duration-200 ease-out',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-btn-primary',
           'disabled:pointer-events-none disabled:opacity-50',
           'cursor-pointer',
           variantStyles[variant],

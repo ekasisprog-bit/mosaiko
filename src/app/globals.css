@@ -16,10 +16,16 @@
   --warm-gray: #7a6b5a;
   --light-gray: #d6d0c5;
 
-  /* CTA — 10% purchase tier */
-  --cta: #422102;
-  --cta-hover: #351a00;
-  --cta-text: #efebe0;
+  /* Button — golden primary (WCAG AA 4.85:1 with white) */
+  --btn-primary: #9b662b;
+  --btn-primary-hover: #895a26;
+  --btn-primary-active: #805423;
+  --btn-text: #ffffff;
+
+  /* CTA — 10% purchase tier (golden) */
+  --cta: #9b662b;
+  --cta-hover: #895a26;
+  --cta-text: #ffffff;
 
   /* Semantic */
   --background: var(--cream);
@@ -65,6 +71,10 @@
   --color-success: var(--success);
   --color-error: var(--error);
   --color-warning: var(--warning);
+  --color-btn-primary: var(--btn-primary);
+  --color-btn-primary-hover: var(--btn-primary-hover);
+  --color-btn-primary-active: var(--btn-primary-active);
+  --color-btn-text: var(--btn-text);
   --color-cta: var(--cta);
   --color-cta-hover: var(--cta-hover);
   --color-cta-text: var(--cta-text);

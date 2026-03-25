@@ -66,6 +66,7 @@ These must meet Google publishing requirements (Google Ads, Analytics compliance
 ## Design Direction
 - Warm, Mexican-inspired but modern aesthetic
 - Terracotta + deep teal + marigold gold palette
+- **Buttons use golden `--btn-primary` tokens (#9b662b)**, NOT terracotta. Terracotta remains for non-button elements (footer, announcement bar, badges, decorative elements). Admin panel buttons still use terracotta.
 - Playfair Display (headings) + DM Sans (body) typography
 - Purposeful animations: staggered reveals, spring-based interactions, smooth transitions
 - NOT generic AI slop — every design choice must be intentional

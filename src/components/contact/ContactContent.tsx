@@ -419,7 +419,7 @@ export function ContactContent() {
                     type="submit"
                     disabled={isSending}
                     aria-busy={isSending}
-                    className="group inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-xl bg-terracotta px-8 py-3.5 text-base font-bold text-cream shadow-md shadow-terracotta/20 transition-all duration-300 hover:bg-terracotta-dark hover:shadow-lg hover:shadow-terracotta/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-terracotta sm:w-auto sm:px-10"
+                    className="group inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-xl bg-btn-primary px-8 py-3.5 text-base font-bold text-btn-text shadow-md shadow-btn-primary/20 transition-all duration-300 hover:bg-btn-primary-hover hover:shadow-lg hover:shadow-btn-primary/30 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-btn-primary sm:w-auto sm:px-10"
                   >
                     {isSending ? (
                       <>

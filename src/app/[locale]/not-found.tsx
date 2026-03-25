@@ -27,7 +27,7 @@ export default function LocaleNotFound() {
         <div className="mt-8">
           <Link
             href="/"
-            className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-terracotta px-6 py-3 text-base font-semibold text-white shadow-lg shadow-terracotta/25 transition-all duration-300 hover:bg-terracotta-dark hover:shadow-xl active:scale-[0.98]"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-btn-primary px-6 py-3 text-base font-semibold text-btn-text shadow-lg shadow-btn-primary/25 transition-all duration-300 hover:bg-btn-primary-hover hover:shadow-xl active:scale-[0.98]"
           >
             Volver al inicio
           </Link>

@@ -125,7 +125,7 @@ export function TermsContent() {
             </p>
             <Link
               href="/contacto"
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-terracotta-dark"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-btn-primary px-6 py-2.5 text-sm font-medium text-btn-text transition-colors duration-200 hover:bg-btn-primary-hover"
             >
               <svg
                 width="16"

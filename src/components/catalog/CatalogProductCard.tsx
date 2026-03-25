@@ -82,7 +82,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
 
         {/* CTA button */}
         <div className="mt-3">
-          <span className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-terracotta px-4 py-2 text-sm font-semibold text-white transition-all duration-200 group-hover:bg-terracotta-dark sm:min-h-[48px]">
+          <span className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-btn-primary px-4 py-2 text-sm font-semibold text-btn-text transition-all duration-200 group-hover:bg-btn-primary-hover sm:min-h-[48px]">
             {product.isPredesigned ? t('viewDesign') : t('personalizeButton')}
           </span>
         </div>

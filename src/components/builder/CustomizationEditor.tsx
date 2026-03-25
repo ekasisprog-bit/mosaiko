@@ -106,7 +106,7 @@ export function CustomizationEditor({
         <motion.div variants={itemVariants}>
           <button
             onClick={onComplete}
-            className="min-h-[48px] w-full rounded-xl bg-terracotta px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-terracotta/90 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+            className="min-h-[48px] w-full rounded-xl bg-btn-primary px-6 py-3 text-base font-semibold text-btn-text transition-colors hover:bg-btn-primary-hover cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-btn-primary"
           >
             {t('continue')}
           </button>

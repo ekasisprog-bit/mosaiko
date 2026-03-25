@@ -200,7 +200,7 @@ export function CookieBanner() {
               <button
                 type="button"
                 onClick={acceptAll}
-                className="min-h-[48px] cursor-pointer rounded-lg bg-terracotta px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-terracotta-dark active:bg-terracotta-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+                className="min-h-[48px] cursor-pointer rounded-lg bg-btn-primary px-6 py-2.5 text-sm font-medium text-btn-text transition-colors hover:bg-btn-primary-hover active:bg-btn-primary-active focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-btn-primary"
               >
                 {t('accept')}
               </button>

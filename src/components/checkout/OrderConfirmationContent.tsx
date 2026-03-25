@@ -120,7 +120,7 @@ export function OrderConfirmationContent({
       >
         <Link
           href="/"
-          className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-terracotta px-8 py-3 font-semibold text-white transition-colors hover:bg-terracotta-dark"
+          className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-btn-primary px-8 py-3 font-semibold text-btn-text transition-colors hover:bg-btn-primary-hover"
         >
           {backToStore}
         </Link>

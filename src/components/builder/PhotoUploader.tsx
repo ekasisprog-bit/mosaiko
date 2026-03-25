@@ -203,9 +203,9 @@ export function PhotoUploader({ onImageSelected, gridConfig }: PhotoUploaderProp
                 onClick={() => cameraInputRef.current?.click()}
                 className={[
                   'flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-6 py-3',
-                  'bg-terracotta text-[#efebe0] font-medium text-base',
-                  'transition-colors duration-200 hover:bg-terracotta-light active:bg-terracotta-dark',
-                  'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta',
+                  'bg-btn-primary text-btn-text font-medium text-base',
+                  'transition-colors duration-200 hover:bg-btn-primary-hover active:bg-btn-primary-active',
+                  'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-btn-primary',
                   'sm:flex-1 sm:max-w-[200px]',
                 ].join(' ')}
               >

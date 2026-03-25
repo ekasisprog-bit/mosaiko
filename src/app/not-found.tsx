@@ -17,7 +17,7 @@ export default function GlobalNotFound() {
               href="/"
               style={{
                 display: 'inline-block',
-                background: '#422102',
+                background: '#9b662b',
                 color: 'white',
                 textDecoration: 'none',
                 padding: '12px 32px',
