@@ -20,10 +20,13 @@ export function PolaroidFrame({ children, className }: PolaroidFrameProps) {
         aspectRatio: '1',
         backgroundColor: '#FFFFFF',
         padding: '6% 6% 17% 6%',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.04)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.1)',
       }}
     >
-      <div className="h-full w-full overflow-hidden">
+      <div
+        className="h-full w-full overflow-hidden"
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.08)' }}
+      >
         {children}
       </div>
     </div>

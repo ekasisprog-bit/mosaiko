@@ -96,35 +96,36 @@ function GhibliRightPanel({
       style={{ backgroundColor: GHIBLI_BG, aspectRatio: '1' }}
     >
       <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-        {/* Japanese text — top, left-aligned */}
+        {/* Japanese text — top, right-aligned */}
         <text
-          x="12"
+          x="88"
           y="38"
           fill={GHIBLI_TEXT}
           fontSize="9"
           fontFamily="system-ui, 'Helvetica Neue', sans-serif"
-          textAnchor="start"
+          textAnchor="end"
         >
           {japaneseText.length > 10 ? japaneseText.slice(0, 10) + '\u2026' : japaneseText || ''}
         </text>
 
-        {/* Custom text / movie title — below Japanese text, left-aligned */}
+        {/* Custom text / movie title — below Japanese text, right-aligned */}
         <text
-          x="12"
-          y="54"
+          x="88"
+          y="56"
           fill={GHIBLI_TEXT}
-          fontSize="8"
-          fontWeight="500"
-          fontFamily="Georgia, 'Times New Roman', serif"
-          textAnchor="start"
+          fontSize="7.5"
+          fontWeight="600"
+          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
+          textAnchor="end"
+          letterSpacing="0.3"
         >
-          {customText.length > 14 ? customText.slice(0, 14) + '\u2026' : customText || ''}
+          {customText.length > 16 ? customText.slice(0, 16) + '\u2026' : customText || ''}
         </text>
 
         {/* Mosaiko — small, bottom-right */}
         <text
           x="88"
-          y="90"
+          y="92"
           fill={GHIBLI_TEXT}
           fontSize="5"
           fontFamily="system-ui, 'Helvetica Neue', sans-serif"

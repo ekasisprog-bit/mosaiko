@@ -53,17 +53,17 @@ function SpotifyBarLeft({
           className="truncate font-bold leading-tight"
           style={{
             color: SPOTIFY_WHITE,
-            fontSize: 'clamp(10px, 9%, 22px)',
+            fontSize: 'clamp(14px, 14%, 32px)',
             fontFamily: 'system-ui, sans-serif',
           }}
         >
           {songName || '\u2014'}
         </span>
         <span
-          className="mt-[3%] truncate leading-tight"
+          className="mt-[4%] truncate leading-tight"
           style={{
             color: SPOTIFY_GRAY,
-            fontSize: 'clamp(7px, 6.5%, 16px)',
+            fontSize: 'clamp(9px, 9%, 20px)',
             fontFamily: 'system-ui, sans-serif',
           }}
         >
@@ -79,7 +79,7 @@ function SpotifyBarLeft({
         {/* Spotify green circle with wave lines */}
         <svg
           viewBox="0 0 24 24"
-          style={{ width: 'clamp(10px, 10%, 20px)', height: 'clamp(10px, 10%, 20px)' }}
+          style={{ width: 'clamp(12px, 12%, 24px)', height: 'clamp(12px, 12%, 24px)' }}
           fill="none"
         >
           <circle cx="12" cy="12" r="12" fill={SPOTIFY_GREEN} />
@@ -110,7 +110,7 @@ function SpotifyBarLeft({
           className="font-bold leading-none"
           style={{
             color: SPOTIFY_WHITE,
-            fontSize: 'clamp(6px, 5.5%, 12px)',
+            fontSize: 'clamp(8px, 7%, 14px)',
             fontFamily: 'system-ui, sans-serif',
           }}
         >

@@ -226,8 +226,13 @@ export function MagnetPreview({
               style={{
                 gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                 gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                gap: '4px',
+                gap: categoryType === 'spotify' ? '2px' : '4px',
                 maxWidth: `${gridConfig.cols * 120}px`,
+                ...(categoryType === 'spotify' ? {
+                  backgroundColor: '#191414',
+                  borderRadius: '8px 8px 4px 4px',
+                  padding: '3px',
+                } : {}),
               }}
             >
               {tileLayout.map((descriptor) => {
@@ -279,8 +284,10 @@ export function MagnetPreview({
                 );
               })}
 
-              {/* Mosaiko logo watermark — bottom-right corner */}
-              <MosaikoWatermark />
+              {/* Mosaiko logo watermark — skip for categories that have their own logo in special tiles */}
+              {categoryType !== 'spotify' && categoryType !== 'arte' && (
+                <MosaikoWatermark />
+              )}
             </div>
           )}
         </motion.div>
@@ -434,7 +441,7 @@ function PhotoTile({
     );
   }
 
-  // Ghibli: wrap photo in cream border frame
+  // Ghibli: wrap photo in cream border frame (matches reference product images)
   if (categoryType === 'ghibli') {
     return (
       <div
@@ -442,13 +449,15 @@ function PhotoTile({
         style={{
           aspectRatio: '1',
           backgroundColor: '#EDE8E0',
-          padding: '3.5%',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.04)',
+          padding: '5.5%',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.06)',
         }}
       >
         <div
           className="h-full w-full overflow-hidden"
-          style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.12)' }}
+          style={{
+            border: '1.5px solid rgba(0,0,0,0.2)',
+          }}
         >
           {imgElement}
         </div>
