@@ -57,6 +57,8 @@ export interface CategoryLayoutOverride {
 
 export const CATEGORY_LAYOUT_OVERRIDES: Partial<Record<string, CategoryLayoutOverride>> = {
   'arte:9': { rows: 3, cols: 4, aspect: 4 / 2 },
+  'spotify:6': { rows: 3, cols: 2, aspect: 1 },   // photo area is 2×2 (top 4 tiles)
+  'ghibli:6': { rows: 3, cols: 2, aspect: 1 },     // photo area is 2×2 (top 4 tiles)
 };
 
 /**

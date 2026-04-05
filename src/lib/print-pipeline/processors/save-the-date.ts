@@ -8,9 +8,15 @@ const TILE = TILE_PRINT_SIZE;
 
 /**
  * Save the Date processor.
- * All tiles are the photo split normally, with text overlays
- * (eventText + date) composited onto specific tiles.
- * A semi-transparent background behind the text ensures readability.
+ *
+ * All tiles are the photo split normally. Specific tiles receive a light
+ * semi-transparent white wash with elegant white text + drop shadow,
+ * matching the romantic/wedding aesthetic of the reference designs.
+ *
+ * Tile placement per grid:
+ *  - 9-piece (3x3): tile 0 = "Save", tile 1 = "The" + date, tile 2 = "Date"
+ *  - 6-piece (3x2): tile 0 = "Save The Date", tile 1 = date
+ *  - 3-piece (1x3): tile 2 = date only
  */
 export async function processSaveTheDate(
   job: PrintJob,
@@ -29,11 +35,15 @@ export async function processSaveTheDate(
   const tileBuffers = await splitIntoTiles(croppedBuffer, grid.rows, grid.cols);
 
   // Step 2: Determine which tiles get text overlays
-  const textTileIndices = getTextTileIndices(customization.gridSize);
+  const textTileConfigs = getTextTileConfigs(
+    customization.gridSize,
+    customization.eventText,
+    customization.date,
+  );
 
-  // Step 3: Group overlays by tile index and apply sequentially
+  // Step 3: Build a map of tile index -> overlay configs
   const overlaysByTile = new Map<number, TextTileConfig[]>();
-  for (const config of textTileIndices) {
+  for (const config of textTileConfigs) {
     const existing = overlaysByTile.get(config.index) ?? [];
     existing.push(config);
     overlaysByTile.set(config.index, existing);
@@ -47,15 +57,8 @@ export async function processSaveTheDate(
 
       // Apply each overlay sequentially to this tile
       let result = buffer;
-      for (const textConfig of overlays) {
-        result = await applyTextOverlay(
-          result,
-          textConfig.text === 'event'
-            ? customization.eventText
-            : customization.date,
-          textConfig.fontSize,
-          textConfig.y,
-        );
+      for (const config of overlays) {
+        result = await applyTextOverlay(result, config);
       }
       return result;
     }),
@@ -70,70 +73,145 @@ export async function processSaveTheDate(
 
 interface TextTileConfig {
   index: number;
-  text: 'event' | 'date';
+  /** Lines of text to render, each with its own style */
+  lines: TextLine[];
+}
+
+interface TextLine {
+  text: string;
   fontSize: number;
-  y: number; // vertical position within the tile
+  fontStyle: 'italic' | 'normal';
+  /** Vertical center offset from tile center (negative = above, positive = below) */
+  yOffset: number;
 }
 
 /**
- * Returns which tiles get text overlays based on grid size.
- * Places event text on an upper tile and date on a lower tile.
+ * Returns tile overlay configurations based on grid size.
+ *
+ *  9-piece (3x3 top row):
+ *    tile 0: "Save" in script
+ *    tile 1: "The" in script + date below
+ *    tile 2: "Date" in script
+ *
+ *  6-piece (3x2 top row):
+ *    tile 0: "Save The Date" in script
+ *    tile 1: date in serif
+ *
+ *  3-piece (1x3):
+ *    tile 2: date in serif
  */
-function getTextTileIndices(gridSize: 3 | 6 | 9): TextTileConfig[] {
+function getTextTileConfigs(
+  gridSize: 3 | 6 | 9,
+  _eventText: string,
+  date: string,
+): TextTileConfig[] {
   switch (gridSize) {
-    case 3:
-      // 1x3 grid: event text on center tile, date below it
-      return [
-        { index: 1, text: 'event', fontSize: 56, y: TILE / 2 - 40 },
-        { index: 1, text: 'date', fontSize: 44, y: TILE / 2 + 60 },
-      ];
-    case 6:
-      // 3x2 grid: event text on tile 2 (row 1 left), date on tile 3 (row 1 right)
-      return [
-        { index: 2, text: 'event', fontSize: 52, y: TILE / 2 },
-        { index: 3, text: 'date', fontSize: 44, y: TILE / 2 },
-      ];
     case 9:
-      // 3x3 grid: event text on center tile (4), date on bottom center (7)
       return [
-        { index: 4, text: 'event', fontSize: 56, y: TILE / 2 },
-        { index: 7, text: 'date', fontSize: 44, y: TILE / 2 },
+        {
+          index: 0,
+          lines: [
+            { text: 'Save', fontSize: 100, fontStyle: 'italic', yOffset: 0 },
+          ],
+        },
+        {
+          index: 1,
+          lines: [
+            { text: 'The', fontSize: 100, fontStyle: 'italic', yOffset: -50 },
+            { text: date, fontSize: 52, fontStyle: 'normal', yOffset: 70 },
+          ],
+        },
+        {
+          index: 2,
+          lines: [
+            { text: 'Date', fontSize: 100, fontStyle: 'italic', yOffset: 0 },
+          ],
+        },
       ];
+
+    case 6:
+      return [
+        {
+          index: 0,
+          lines: [
+            { text: 'Save The Date', fontSize: 72, fontStyle: 'italic', yOffset: 0 },
+          ],
+        },
+        {
+          index: 1,
+          lines: [
+            { text: date, fontSize: 56, fontStyle: 'normal', yOffset: 0 },
+          ],
+        },
+      ];
+
+    case 3:
+      return [
+        {
+          index: 2,
+          lines: [
+            { text: date, fontSize: 56, fontStyle: 'normal', yOffset: 0 },
+          ],
+        },
+      ];
+
     default:
       return [];
   }
 }
 
 /**
- * Composites text with a semi-transparent background onto a tile.
+ * Composites a light semi-transparent wash with elegant white text
+ * onto a tile. Uses white text (#FFFFFF) with a dark drop shadow
+ * over a subtle rgba(255,255,255,0.2) full-tile wash.
  */
 async function applyTextOverlay(
   tileBuffer: Buffer,
-  text: string,
-  fontSize: number,
-  yPosition: number,
+  config: TextTileConfig,
 ): Promise<Buffer> {
-  const escapedText = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+  const centerY = TILE / 2;
 
-  // Estimate text dimensions for background box
-  const textWidth = Math.min(TILE - 60, escapedText.length * fontSize * 0.55);
-  const textHeight = fontSize * 1.8;
-  const bgX = (TILE - textWidth) / 2 - 20;
-  const bgY = yPosition - fontSize - 10;
-  const bgWidth = textWidth + 40;
-  const bgHeight = textHeight + 20;
+  const textElements = config.lines
+    .map((line) => {
+      const escapedText = line.text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
 
+      const y = centerY + line.yOffset;
+      const style = line.fontStyle === 'italic' ? 'italic' : 'normal';
+
+      return `<text
+        x="${TILE / 2}" y="${y}"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="${line.fontSize}"
+        font-style="${style}"
+        font-weight="${line.fontStyle === 'italic' ? '400' : '400'}"
+        fill="#FFFFFF"
+        text-anchor="middle"
+        dominant-baseline="central"
+        letter-spacing="${line.fontStyle === 'italic' ? '0.04em' : '0.12em'}"
+      >${escapedText}</text>`;
+    })
+    .join('\n');
+
+  // Drop shadow filter for text readability over photos
   const overlaySvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <!-- Semi-transparent background -->
-    <rect x="${bgX}" y="${bgY}" width="${bgWidth}" height="${bgHeight}" rx="12" fill="rgba(0,0,0,0.55)" />
+    <defs>
+      <filter id="textShadow" x="-10%" y="-10%" width="120%" height="120%">
+        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.5)" />
+      </filter>
+    </defs>
 
-    <!-- Text -->
-    <text x="${TILE / 2}" y="${yPosition}" font-family="serif" font-size="${fontSize}" font-weight="bold" fill="#FFFFFF" text-anchor="middle" dominant-baseline="auto">${escapedText}</text>
+    <!-- Light semi-transparent wash over entire tile -->
+    <rect x="0" y="0" width="${TILE}" height="${TILE}" fill="rgba(255,255,255,0.2)" />
+
+    <!-- Text with drop shadow -->
+    <g filter="url(#textShadow)">
+      ${textElements}
+    </g>
   </svg>`;
 
   const overlayBuffer = await sharp(Buffer.from(overlaySvg))

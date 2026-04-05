@@ -228,7 +228,8 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
 
     // Reset downstream state
     setCustomizationValues({});
-    setSelectedTheme(null);
+    // Default flores theme to 'calido' so filters are always applied
+    setSelectedTheme(cat === 'flores' ? ('calido' as FloresTheme) : null);
     setLayoutRotated(false);
 
     // Auto-advance after selection animation

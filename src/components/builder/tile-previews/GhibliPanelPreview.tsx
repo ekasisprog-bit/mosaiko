@@ -1,9 +1,7 @@
 'use client';
 
-const GHIBLI_DARK = '#1a1a2e';
-const GHIBLI_ACCENT = '#e94560';
-const GHIBLI_CREAM = '#f5e6d3';
-const GHIBLI_GOLD = '#d4a373';
+const GHIBLI_BG = '#EDE8E0';
+const GHIBLI_TEXT = '#2a2a2a';
 
 interface GhibliPanelPreviewProps {
   label: 'ghibli-left' | 'ghibli-right';
@@ -15,6 +13,7 @@ interface GhibliPanelPreviewProps {
 
 /**
  * Client-side SVG preview of the Ghibli text panels.
+ * Cream background with dark text — clean, museum-like aesthetic.
  * Mirrors the print pipeline output from processors/ghibli.ts.
  */
 export function GhibliPanelPreview({
@@ -25,114 +24,114 @@ export function GhibliPanelPreview({
   className,
 }: GhibliPanelPreviewProps) {
   if (label === 'ghibli-left') {
-    return <GhibliLeftPanel year={year} japaneseText={japaneseText} className={className} />;
+    return <GhibliLeftPanel year={year} className={className} />;
   }
-  return <GhibliRightPanel customText={customText} className={className} />;
+  return <GhibliRightPanel japaneseText={japaneseText} customText={customText} className={className} />;
 }
 
+/**
+ * Bottom-left panel: Year (large) + "STUDIO GHIBLI" (smaller).
+ * Left-aligned, cream background.
+ */
 function GhibliLeftPanel({
   year,
-  japaneseText,
   className,
 }: {
   year: string;
-  japaneseText: string;
   className?: string;
 }) {
   return (
     <div
       className={['flex h-full w-full items-center overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: GHIBLI_DARK, aspectRatio: '1' }}
+      style={{ backgroundColor: GHIBLI_BG, aspectRatio: '1' }}
     >
       <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-        {/* Year */}
+        {/* Year — large, left-aligned */}
         <text
-          x="50"
-          y="38"
-          fill={GHIBLI_CREAM}
-          fontSize="18"
+          x="12"
+          y="42"
+          fill={GHIBLI_TEXT}
+          fontSize="22"
           fontWeight="bold"
-          fontFamily="Georgia, serif"
-          textAnchor="middle"
+          fontFamily="Georgia, 'Times New Roman', serif"
+          textAnchor="start"
         >
-          {year || '—'}
+          {year || ''}
         </text>
 
-        {/* Decorative line */}
+        {/* STUDIO GHIBLI — smaller, left-aligned below year */}
         <text
-          x="50"
-          y="52"
-          fill={GHIBLI_ACCENT}
+          x="12"
+          y="58"
+          fill={GHIBLI_TEXT}
           fontSize="8"
-          fontFamily="serif"
-          textAnchor="middle"
+          fontWeight="500"
+          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
+          textAnchor="start"
+          letterSpacing="0.5"
         >
-          ———
-        </text>
-
-        {/* Decorative text */}
-        <text
-          x="50"
-          y="70"
-          fill={GHIBLI_GOLD}
-          fontSize="9"
-          fontFamily="system-ui, sans-serif"
-          textAnchor="middle"
-        >
-          {japaneseText.length > 10 ? japaneseText.slice(0, 10) + '…' : japaneseText || '—'}
+          STUDIO GHIBLI
         </text>
       </svg>
     </div>
   );
 }
 
+/**
+ * Bottom-right panel: japaneseText (top) + customText (below) + Mosaiko logo (bottom-right).
+ * Left-aligned, cream background.
+ */
 function GhibliRightPanel({
+  japaneseText,
   customText,
   className,
 }: {
+  japaneseText: string;
   customText: string;
   className?: string;
 }) {
   return (
     <div
       className={['flex h-full w-full items-center overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: GHIBLI_DARK, aspectRatio: '1' }}
+      style={{ backgroundColor: GHIBLI_BG, aspectRatio: '1' }}
     >
       <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-        {/* Star */}
+        {/* Japanese text — top, left-aligned */}
         <text
-          x="50"
-          y="30"
-          fill={GHIBLI_ACCENT}
-          fontSize="10"
-          fontFamily="sans-serif"
-          textAnchor="middle"
+          x="12"
+          y="38"
+          fill={GHIBLI_TEXT}
+          fontSize="9"
+          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
+          textAnchor="start"
         >
-          ★
+          {japaneseText.length > 10 ? japaneseText.slice(0, 10) + '\u2026' : japaneseText || ''}
         </text>
 
-        {/* Custom text */}
+        {/* Custom text / movie title — below Japanese text, left-aligned */}
         <text
-          x="50"
-          y="55"
-          fill={GHIBLI_CREAM}
+          x="12"
+          y="54"
+          fill={GHIBLI_TEXT}
           fontSize="8"
-          fontFamily="Georgia, serif"
-          textAnchor="middle"
+          fontWeight="500"
+          fontFamily="Georgia, 'Times New Roman', serif"
+          textAnchor="start"
         >
-          {customText.length > 12 ? customText.slice(0, 12) + '…' : customText || '—'}
+          {customText.length > 14 ? customText.slice(0, 14) + '\u2026' : customText || ''}
         </text>
 
-        {/* Decorative line */}
+        {/* Mosaiko — small, bottom-right */}
         <text
-          x="50"
-          y="72"
-          fill={GHIBLI_ACCENT}
-          fontSize="8"
-          fontFamily="serif"
-          textAnchor="middle"
+          x="88"
+          y="90"
+          fill={GHIBLI_TEXT}
+          fontSize="5"
+          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
+          textAnchor="end"
+          opacity="0.5"
         >
-          ———
+          Mosaiko
         </text>
       </svg>
     </div>

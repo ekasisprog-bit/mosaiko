@@ -15,8 +15,8 @@ const TILE = TILE_PRINT_SIZE;
  * Grid is always 6 (3 rows x 2 cols):
  *   - Top 4 tiles (rows 0-1): 2x2 photo split
  *   - Bottom 2 tiles (row 2): Spotify-style black bar with song info
- *     - Left: play button area + song/artist text
- *     - Right: waveform/progress area
+ *     - Left: song name + artist name centered, Spotify logo at bottom-left
+ *     - Right: solid black, Mosaiko logo at bottom-right
  */
 export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as SpotifyCustomization;
@@ -32,11 +32,11 @@ export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
 
   const photoTiles = await splitIntoTiles(croppedBuffer, 2, 2);
 
-  // Step 2: Generate bottom-left tile (play button + song info)
+  // Step 2: Generate bottom-left tile (song info + Spotify logo)
   const bottomLeftBuffer = await renderBottomLeftTile(songName, artistName);
 
-  // Step 3: Generate bottom-right tile (waveform/progress bar)
-  const bottomRightBuffer = await renderBottomRightTile(songName);
+  // Step 3: Generate bottom-right tile (black + Mosaiko logo)
+  const bottomRightBuffer = await renderBottomRightTile();
 
   // Step 4: Assemble all tiles
   const tiles: TileOutput[] = [
@@ -62,39 +62,46 @@ export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
 
 /**
  * Renders the bottom-left Spotify bar tile:
- * - Play button circle
- * - Song name
- * - Artist name (smaller, gray)
+ * - Song name (large, white, bold) centered vertically in left area
+ * - Artist name (smaller, gray) below song name
+ * - Spotify green circle icon + "Spotify" text at bottom-left
  */
 async function renderBottomLeftTile(
   songName: string,
   artistName: string,
 ): Promise<Buffer> {
-  // Build SVG with play button and text
-  const playButtonCx = 120;
-  const playButtonCy = TILE / 2;
-  const playRadius = 60;
+  const textX = Math.round(TILE * 0.12);
+  const songY = Math.round(TILE * 0.45);
+  const artistY = Math.round(TILE * 0.55);
 
-  // Triangle points for play button (pointing right)
-  const triX = playButtonCx - 15;
-  const triY1 = playButtonCy - 30;
-  const triY2 = playButtonCy + 30;
-  const triRight = playButtonCx + 25;
+  // Spotify icon at bottom-left
+  const iconSize = 28;
+  const iconX = textX;
+  const iconY = Math.round(TILE * 0.88);
+  const iconCx = iconX + iconSize / 2;
+  const iconCy = iconY + iconSize / 2;
+  const iconR = iconSize / 2;
+
+  const spotifyTextX = iconX + iconSize + 6;
+  const spotifyTextY = iconY + iconSize - 4;
 
   const svg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
     <rect width="${TILE}" height="${TILE}" fill="${SPOTIFY_BLACK}" />
 
-    <!-- Play button circle -->
-    <circle cx="${playButtonCx}" cy="${playButtonCy}" r="${playRadius}" fill="${SPOTIFY_GREEN}" />
-
-    <!-- Play triangle -->
-    <polygon points="${triX},${triY1} ${triRight},${playButtonCy} ${triX},${triY2}" fill="${SPOTIFY_BLACK}" />
-
     <!-- Song name -->
-    <text x="250" y="${TILE / 2 - 20}" font-family="sans-serif" font-size="48" font-weight="bold" fill="${SPOTIFY_WHITE}" text-anchor="start" dominant-baseline="auto">${escapeXml(songName)}</text>
+    <text x="${textX}" y="${songY}" font-family="sans-serif" font-size="52" font-weight="bold" fill="${SPOTIFY_WHITE}" dominant-baseline="auto">${escapeXml(songName)}</text>
 
     <!-- Artist name -->
-    <text x="250" y="${TILE / 2 + 40}" font-family="sans-serif" font-size="36" fill="${SPOTIFY_GRAY}" text-anchor="start" dominant-baseline="auto">${escapeXml(artistName)}</text>
+    <text x="${textX}" y="${artistY}" font-family="sans-serif" font-size="36" fill="${SPOTIFY_GRAY}" dominant-baseline="auto">${escapeXml(artistName)}</text>
+
+    <!-- Spotify green circle icon -->
+    <circle cx="${iconCx}" cy="${iconCy}" r="${iconR}" fill="${SPOTIFY_GREEN}" />
+    <path d="M${iconCx - 7} ${iconCy - 4} Q${iconCx} ${iconCy - 7} ${iconCx + 8} ${iconCy - 3}" stroke="${SPOTIFY_BLACK}" stroke-width="2" stroke-linecap="round" fill="none" />
+    <path d="M${iconCx - 6} ${iconCy} Q${iconCx} ${iconCy - 2.5} ${iconCx + 6} ${iconCy + 1}" stroke="${SPOTIFY_BLACK}" stroke-width="2" stroke-linecap="round" fill="none" />
+    <path d="M${iconCx - 4.5} ${iconCy + 3.5} Q${iconCx} ${iconCy + 2} ${iconCx + 5} ${iconCy + 4.5}" stroke="${SPOTIFY_BLACK}" stroke-width="1.5" stroke-linecap="round" fill="none" />
+
+    <!-- "Spotify" text -->
+    <text x="${spotifyTextX}" y="${spotifyTextY}" font-family="sans-serif" font-size="24" font-weight="bold" fill="${SPOTIFY_WHITE}">${escapeXml('Spotify')}</text>
   </svg>`;
 
   return sharp(Buffer.from(svg))
@@ -105,57 +112,18 @@ async function renderBottomLeftTile(
 
 /**
  * Renders the bottom-right Spotify bar tile:
- * - Waveform visualization (decorative bars)
- * - Progress bar at bottom
- * - Timestamp text
+ * - Solid black background
+ * - "Mosaiko" text logo at bottom-right corner
  */
-async function renderBottomRightTile(songName: string): Promise<Buffer> {
-  // Generate decorative waveform bars
-  const barCount = 40;
-  const barWidth = 12;
-  const barGap = 6;
-  const barStartX = 40;
-  const barBaseY = TILE / 2 + 40;
-  const maxBarHeight = 180;
-
-  let waveBars = '';
-  for (let i = 0; i < barCount; i++) {
-    // Pseudo-random bar heights based on position
-    const seed = Math.sin(i * 0.7 + songName.length) * 0.5 + 0.5;
-    const height = 20 + seed * maxBarHeight;
-    const x = barStartX + i * (barWidth + barGap);
-    const y = barBaseY - height;
-
-    // Bars before "playhead" are green, after are gray
-    const isPlayed = i < barCount * 0.6;
-    const color = isPlayed ? SPOTIFY_GREEN : '#535353';
-
-    waveBars += `<rect x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="3" fill="${color}" />`;
-  }
-
-  // Progress bar
-  const progressY = TILE - 120;
-  const progressWidth = TILE - 80;
-  const progressFill = progressWidth * 0.6;
+async function renderBottomRightTile(): Promise<Buffer> {
+  const logoX = Math.round(TILE * 0.92);
+  const logoY = Math.round(TILE * 0.92);
 
   const svg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
     <rect width="${TILE}" height="${TILE}" fill="${SPOTIFY_BLACK}" />
 
-    <!-- Waveform bars -->
-    ${waveBars}
-
-    <!-- Progress bar background -->
-    <rect x="40" y="${progressY}" width="${progressWidth}" height="8" rx="4" fill="#535353" />
-
-    <!-- Progress bar fill -->
-    <rect x="40" y="${progressY}" width="${progressFill}" height="8" rx="4" fill="${SPOTIFY_GREEN}" />
-
-    <!-- Progress dot -->
-    <circle cx="${40 + progressFill}" cy="${progressY + 4}" r="12" fill="${SPOTIFY_GREEN}" />
-
-    <!-- Timestamps -->
-    <text x="40" y="${progressY + 50}" font-family="sans-serif" font-size="28" fill="${SPOTIFY_GRAY}">2:14</text>
-    <text x="${TILE - 40}" y="${progressY + 50}" font-family="sans-serif" font-size="28" fill="${SPOTIFY_GRAY}" text-anchor="end">3:45</text>
+    <!-- Mosaiko logo text at bottom-right -->
+    <text x="${logoX}" y="${logoY}" font-family="sans-serif" font-size="22" font-weight="bold" fill="${SPOTIFY_WHITE}" text-anchor="end" opacity="0.7">Mosaiko</text>
   </svg>`;
 
   return sharp(Buffer.from(svg))

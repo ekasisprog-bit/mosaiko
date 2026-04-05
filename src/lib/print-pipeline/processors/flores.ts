@@ -2,28 +2,30 @@ import sharp from 'sharp';
 import { GRID_CONFIGS, TILE_PRINT_SIZE } from '../../grid-config';
 import type { FloresCustomization } from '../../customization-types';
 import type { PrintJob, TileOutput, SharpFilterConfig } from '../types';
-import { cropAndResize, splitIntoTiles } from '../utils/tile-splitter';
+import { cropAndResize } from '../utils/tile-splitter';
 import { getFloresFilters } from '../utils/filter-presets';
 
 /**
  * Flores processor.
- * All tiles contain the photo, but each tile gets different color filters
- * based on the selected theme. The center tile keeps the original image.
+ * Every tile shows the SAME full image (not split). Each tile gets a different
+ * color filter based on the selected theme. The center tile keeps the original.
  */
 export async function processFlores(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as FloresCustomization;
   const grid = GRID_CONFIGS[customization.gridSize];
+  const totalTiles = grid.rows * grid.cols;
 
-  // Step 1: Crop the image to the user's selected area
-  const croppedBuffer = await cropAndResize(
+  // Step 1: Crop the image to the user's selected area at SINGLE tile size.
+  // Flores shows the same full image on every tile (not split across tiles).
+  const singleTileBuffer = await cropAndResize(
     job.imageBuffer,
     job.cropArea,
-    grid.cols * TILE_PRINT_SIZE,
-    grid.rows * TILE_PRINT_SIZE,
+    TILE_PRINT_SIZE,
+    TILE_PRINT_SIZE,
   );
 
-  // Step 2: Split into tiles (all tiles get the photo)
-  const tileBuffers = await splitIntoTiles(croppedBuffer, grid.rows, grid.cols);
+  // Step 2: Duplicate the same buffer for every tile
+  const tileBuffers = Array.from({ length: totalTiles }, () => singleTileBuffer);
 
   // Step 3: Get filter configs for the selected theme
   const filters = getFloresFilters(customization.theme, customization.gridSize);

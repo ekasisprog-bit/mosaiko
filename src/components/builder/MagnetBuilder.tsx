@@ -217,7 +217,11 @@ export function MagnetBuilder() {
                     gridConfig={flow.gridConfig}
                     onCropComplete={flow.handleCropComplete}
                     onCropChange={flow.handleCropChange}
-                    overlayRows={flow.selectedCategory === 'arte' ? 2 : undefined}
+                    overlayRows={
+                      flow.selectedCategory === 'arte' ? 2
+                        : flow.selectedCategory === 'spotify' || flow.selectedCategory === 'ghibli' ? 2
+                          : undefined
+                    }
                     overlayCols={flow.selectedCategory === 'arte' ? 4 : undefined}
                     onLayoutRotate={flow.handleLayoutRotate}
                     canRotateLayout={flow.canRotateLayout}

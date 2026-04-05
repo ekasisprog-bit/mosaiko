@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { splitImageIntoTiles, loadImage } from '@/lib/canvas-utils';
+import { splitImageIntoTiles, getCroppedCanvas, loadImage } from '@/lib/canvas-utils';
 import type { CropArea } from '@/lib/canvas-utils';
 import { formatPrice, type GridConfig } from '@/lib/grid-config';
 import {
@@ -96,6 +96,19 @@ export function MagnetPreview({
 
         const image = await loadImage(imageSrc);
         if (cancelled) return;
+
+        // Flores/Tonos: same image duplicated on every tile (NOT split)
+        if (categoryType === 'flores') {
+          const tileSize = 200; // preview resolution per tile
+          const singleCanvas = getCroppedCanvas(image, cropArea, tileSize, tileSize, 0);
+          const singleUrl = singleCanvas.toDataURL('image/jpeg', 0.9);
+          singleCanvas.width = 0;
+          singleCanvas.height = 0;
+          if (cancelled) return;
+          // Duplicate same image for all tiles
+          setTiles(Array.from({ length: photoTileCount }, () => singleUrl));
+          return;
+        }
 
         // For categories with special tiles, we only split the photo portion
         const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
@@ -259,6 +272,7 @@ export function MagnetPreview({
                         categoryType={categoryType}
                         floresFilter={floresFilters?.find((f) => f.tileIndex === index)?.filter}
                         textFields={textFields}
+                        gridSize={gridConfig.size}
                       />
                     )}
                   </TileWrapper>
@@ -367,6 +381,24 @@ function TileWrapper({
   );
 }
 
+/** Determine which Save the Date overlay text to show per tile */
+function getSaveTheDateOverlay(
+  index: number,
+  gridSize: number,
+): { textPortion: 'save' | 'the' | 'date' | 'full' | 'date-only'; showDate: boolean } | null {
+  if (gridSize === 9) {
+    if (index === 0) return { textPortion: 'save', showDate: false };
+    if (index === 1) return { textPortion: 'the', showDate: true };
+    if (index === 2) return { textPortion: 'date', showDate: false };
+  } else if (gridSize === 6) {
+    if (index === 0) return { textPortion: 'full', showDate: false };
+    if (index === 1) return { textPortion: 'date-only', showDate: true };
+  } else if (gridSize === 3) {
+    if (index === 2) return { textPortion: 'date-only', showDate: true };
+  }
+  return null;
+}
+
 function PhotoTile({
   tileSrc,
   index,
@@ -374,6 +406,7 @@ function PhotoTile({
   categoryType,
   floresFilter,
   textFields,
+  gridSize,
 }: {
   tileSrc: string;
   index: number;
@@ -381,6 +414,7 @@ function PhotoTile({
   categoryType: CategoryType;
   floresFilter?: string;
   textFields?: Record<string, string>;
+  gridSize?: number;
 }) {
   const imgElement = (
     <img
@@ -400,15 +434,37 @@ function PhotoTile({
     );
   }
 
-  // Flores: apply CSS filter
-  if (categoryType === 'flores' && floresFilter) {
+  // Ghibli: wrap photo in cream border frame
+  if (categoryType === 'ghibli') {
+    return (
+      <div
+        className="overflow-hidden rounded-md"
+        style={{
+          aspectRatio: '1',
+          backgroundColor: '#EDE8E0',
+          padding: '3.5%',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.04)',
+        }}
+      >
+        <div
+          className="h-full w-full overflow-hidden"
+          style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.12)' }}
+        >
+          {imgElement}
+        </div>
+      </div>
+    );
+  }
+
+  // Flores: apply CSS filter (same image on each tile, different filter)
+  if (categoryType === 'flores') {
     return (
       <div
         className="overflow-hidden rounded-md"
         style={{
           aspectRatio: '1',
           boxShadow: '0 2px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
-          filter: floresFilter,
+          filter: floresFilter || 'none',
         }}
       >
         {imgElement}
@@ -416,10 +472,9 @@ function PhotoTile({
     );
   }
 
-  // Save the Date: photo + text overlay
+  // Save the Date: photo + text overlay on correct tiles
   if (categoryType === 'save-the-date' && textFields) {
-    // Only show overlay on center-ish tile
-    const showOverlay = index === 0;
+    const overlay = getSaveTheDateOverlay(index, gridSize || totalTiles);
 
     return (
       <div
@@ -430,10 +485,11 @@ function PhotoTile({
         }}
       >
         {imgElement}
-        {showOverlay && (
+        {overlay && (
           <SaveTheDateOverlay
+            textPortion={overlay.textPortion}
+            dateText={overlay.showDate ? textFields.date : undefined}
             eventText={textFields.eventText}
-            date={textFields.date}
           />
         )}
       </div>
