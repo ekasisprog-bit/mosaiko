@@ -36,9 +36,10 @@ export async function processGhibli(job: PrintJob): Promise<TileOutput[]> {
   const colRightW = 527;
   const rowTopH = 614 - 88;   // 526
   const rowBotH = 615;
+  const stripH = 63;           // photo extends 63px into text panel tiles (5-6)
 
   const printPhotoW = Math.round((colLeftW + colRightW) * scale);
-  const printPhotoH = Math.round((rowTopH + rowBotH) * scale);
+  const printPhotoH = Math.round((rowTopH + rowBotH + stripH) * scale);
 
   // Crop user photo to match visible area
   const croppedBuffer = await cropAndResize(
@@ -114,8 +115,8 @@ async function renderLeftPanel(year: string): Promise<Buffer> {
     .toBuffer();
 
   const textX = Math.round(TILE * 0.05);
-  const yearY = Math.round(TILE * 0.62);
-  const studioY = Math.round(TILE * 0.75);
+  const yearY = Math.round(TILE * 0.81);
+  const studioY = Math.round(TILE * 0.90);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
     <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="48" fill="#2a2a2a">${escapeXml(year)}</text>
@@ -135,8 +136,8 @@ async function renderRightPanel(japaneseText: string, customText: string): Promi
     .toBuffer();
 
   const textRight = Math.round(TILE * 0.95);
-  const jpY = Math.round(TILE * 0.55);
-  const titleY = Math.round(TILE * 0.70);
+  const jpY = Math.round(TILE * 0.78);
+  const titleY = Math.round(TILE * 0.90);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
     <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="38" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>

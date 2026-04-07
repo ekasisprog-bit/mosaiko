@@ -49,29 +49,28 @@ function GhibliLeftPanel({
         draggable={false}
       />
 
-      {/* Text: year + "STUDIO GHIBLI" — left-aligned, in lower area */}
+      {/* Text: year + "STUDIO GHIBLI" — left-aligned, positioned at bottom of tile */}
       <div
         className="absolute flex flex-col justify-end"
         style={{
           left: '5%',
-          bottom: '8%',
+          bottom: '5%',
           right: '10%',
-          top: '30%',
+          top: '68%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}
       >
         <span
           className="leading-tight"
-          style={{ fontSize: 'clamp(12px, 13%, 28px)', fontWeight: 400 }}
+          style={{ fontSize: 'clamp(11px, 12%, 26px)', fontWeight: 400 }}
         >
           {year || '(Año)'}
         </span>
         <span
-          className="mt-[3%] leading-tight tracking-wide"
-          style={{ fontSize: 'clamp(8px, 8%, 18px)', fontWeight: 400 }}
+          className="mt-[2%] leading-tight tracking-wide"
+          style={{ fontSize: 'clamp(7px, 7.5%, 16px)', fontWeight: 500 }}
         >
-          {/* User-editable, defaults to STUDIO GHIBLI */}
           STUDIO GHIBLI
         </span>
       </div>
@@ -101,14 +100,14 @@ function GhibliRightPanel({
         draggable={false}
       />
 
-      {/* Text: Japanese + title — right-aligned, in lower area */}
+      {/* Text: Japanese + title — right-aligned, positioned at bottom of tile */}
       <div
         className="absolute flex flex-col items-end justify-end"
         style={{
           right: '5%',
-          bottom: '8%',
+          bottom: '5%',
           left: '10%',
-          top: '30%',
+          top: '62%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}
