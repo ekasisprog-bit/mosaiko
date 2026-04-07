@@ -3,50 +3,123 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { TILE_PRINT_SIZE } from '../../grid-config';
 import type { PrintJob, TileOutput } from '../types';
-import { cropAndResize, splitIntoTiles } from '../utils/tile-splitter';
+import { cropAndResize } from '../utils/tile-splitter';
 
 const TILE = TILE_PRINT_SIZE;
 
-// Path to the template PNGs (relative to project root)
 const TEMPLATE_DIR = join(process.cwd(), 'mosaic-categories/polaroid/polaroid-template-PNGs');
+const LOGO_DIR = join(process.cwd(), 'MOSAIKO-logos');
+
+// Transparent area bounds per tile (measured from PNGs, in pixels at 615px tile size)
+// Scaled to TILE_PRINT_SIZE (827px) at runtime
+const PHOTO_AREAS = [
+  { left: 61, top: 64, right: 615, bottom: 615 },  // tile 1: frame on top+left
+  { left: 0, top: 64, right: 554, bottom: 615 },    // tile 2: frame on top+right
+  { left: 61, top: 0, right: 615, bottom: 433 },    // tile 3: frame on left+bottom
+  { left: 0, top: 0, right: 554, bottom: 433 },     // tile 4: frame on right+bottom
+] as const;
+
+const SRC_SIZE = 615; // template PNG source size
 
 /**
- * Polaroid processor — uses actual PNG templates from the client.
+ * Polaroid processor — photo positioned within frame opening, frame PNG on top.
  *
- * Grid is always 4 (2x2):
- *   - Each tile: photo with PNG frame overlay composited on top
- *   - PNG has off-white Polaroid frame with transparent center
- *   - Tile 4 includes Mosaiko white logo in bottom-right thick border area
+ * Grid is always 4 (2x2). Each tile: photo sized to fit the transparent
+ * area of the frame PNG, then frame composited on top.
  */
 export async function processPolaroid(job: PrintJob): Promise<TileOutput[]> {
-  // Step 1: Crop and split photo into 2x2 tiles at full TILE size
+  // Calculate the combined visible photo area across all 4 tiles
+  // Top row visible height = SRC_SIZE - 64 (top frame) = 551px per tile
+  // Bottom row visible height = 433px per tile (thick bottom frame)
+  // Left col visible width = SRC_SIZE - 61 (left frame) = 554px per tile
+  // Right col visible width = 554px per tile (right frame)
+  const photoW = 554 + 554; // total visible width across 2 cols
+  const photoH = 551 + 433; // total visible height across 2 rows
+
+  // Crop user's photo to match the visible area aspect ratio
+  const scale = TILE / SRC_SIZE;
+  const printPhotoW = Math.round(photoW * scale);
+  const printPhotoH = Math.round(photoH * scale);
+
   const croppedBuffer = await cropAndResize(
     job.imageBuffer,
     job.cropArea,
-    2 * TILE,
-    2 * TILE,
+    printPhotoW,
+    printPhotoH,
   );
 
-  const photoTiles = await splitIntoTiles(croppedBuffer, 2, 2);
+  // Split the cropped photo into 4 portions matching each tile's visible area
+  const tilePhotos = await Promise.all(
+    PHOTO_AREAS.map(async (area, index) => {
+      const areaW = area.right - area.left;
+      const areaH = area.bottom - area.top;
+      const printAreaW = Math.round(areaW * scale);
+      const printAreaH = Math.round(areaH * scale);
 
-  // Step 2: Overlay PNG template frames on each photo tile
-  const framedTiles = await Promise.all(
-    photoTiles.map(async (photoBuffer, index) => {
-      const templatePath = join(TEMPLATE_DIR, `${index + 1}.png`);
-      const templateBuffer = await readFile(templatePath);
-      const resizedTemplate = await sharp(templateBuffer)
-        .resize(TILE, TILE, { fit: 'fill' })
-        .png()
-        .toBuffer();
+      // Calculate extract position from the cropped photo
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const extractLeft = col === 0 ? 0 : Math.round(554 * scale);
+      const extractTop = row === 0 ? 0 : Math.round(551 * scale);
 
-      return sharp(photoBuffer)
-        .composite([{ input: resizedTemplate }])
+      return sharp(croppedBuffer)
+        .extract({
+          left: extractLeft,
+          top: extractTop,
+          width: printAreaW,
+          height: printAreaH,
+        })
         .png()
         .toBuffer();
     }),
   );
 
-  // Step 3: Map to TileOutput
+  // Load, resize, and composite frame templates + position photos
+  const framedTiles = await Promise.all(
+    PHOTO_AREAS.map(async (area, index) => {
+      // Create blank tile
+      const blankTile = await sharp({
+        create: { width: TILE, height: TILE, channels: 4, background: { r: 237, g: 237, b: 237, alpha: 255 } },
+      }).png().toBuffer();
+
+      // Position photo within the frame opening
+      const photoLeft = Math.round(area.left * scale);
+      const photoTop = Math.round(area.top * scale);
+
+      // Load frame template
+      const templateBuffer = await readFile(join(TEMPLATE_DIR, `${index + 1}.png`));
+      const resizedTemplate = await sharp(templateBuffer)
+        .resize(TILE, TILE, { fit: 'fill' })
+        .png()
+        .toBuffer();
+
+      const composites: sharp.OverlayOptions[] = [
+        { input: tilePhotos[index], left: photoLeft, top: photoTop },
+        { input: resizedTemplate },
+      ];
+
+      // Add black Mosaiko logo on tile 4
+      if (index === 3) {
+        const logoBuffer = await readFile(join(LOGO_DIR, 'LOGO NEGRO.png'));
+        const logoResized = await sharp(logoBuffer)
+          .resize({ height: Math.round(TILE * 0.06) })
+          .png()
+          .toBuffer();
+        const logoMeta = await sharp(logoResized).metadata();
+        composites.push({
+          input: logoResized,
+          left: TILE - Math.round(TILE * 0.06) - (logoMeta.width || 80),
+          top: Math.round(TILE * 0.90),
+        });
+      }
+
+      return sharp(blankTile)
+        .composite(composites)
+        .png()
+        .toBuffer();
+    }),
+  );
+
   return framedTiles.map((buffer, index) => ({
     index,
     buffer,

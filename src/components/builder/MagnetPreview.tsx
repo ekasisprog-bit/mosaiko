@@ -443,18 +443,44 @@ function PhotoTile({
     );
   }
 
-  // Polaroid: photo with PNG template overlay (off-white frame with transparent center)
+  // Polaroid: photo positioned inside frame transparent opening, frame PNG on top
   if (categoryType === 'polaroid') {
     const tileNumber = index + 1;
+    // Exact transparent area bounds measured from PNGs (% of tile)
+    const insets: Record<number, { left: string; top: string; width: string; height: string }> = {
+      1: { left: '9.9%', top: '10.4%', width: '90.1%', height: '89.6%' },
+      2: { left: '0%', top: '10.4%', width: '90.1%', height: '89.6%' },
+      3: { left: '9.9%', top: '0%', width: '90.1%', height: '70.5%' },
+      4: { left: '0%', top: '0%', width: '90.1%', height: '70.5%' },
+    };
+    const area = insets[tileNumber];
     return (
       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-        {imgElement}
+        {/* Photo sized to fit within the transparent opening */}
+        <img
+          src={tileSrc}
+          alt={`Pieza ${index + 1} de ${totalTiles}`}
+          className="absolute object-cover"
+          style={{ left: area.left, top: area.top, width: area.width, height: area.height }}
+          draggable={false}
+        />
+        {/* Frame PNG on top */}
         <img
           src={`/templates/polaroid/${tileNumber}.png`}
           alt=""
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
           draggable={false}
         />
+        {/* Black Mosaiko logo on tile 4 (thick bottom area) */}
+        {tileNumber === 4 && (
+          <img
+            src="/logos/logo-negro.png"
+            alt="Mosaiko"
+            className="pointer-events-none absolute z-20"
+            style={{ right: '6%', bottom: '6%', height: '8%', width: 'auto', opacity: 0.6 }}
+            draggable={false}
+          />
+        )}
       </div>
     );
   }
