@@ -110,7 +110,8 @@ export function MagnetPreview({
           return;
         }
 
-        // Ghibli/Studio: custom extraction — portrait photo (1055×1204) spans 4 tiles + strip in panels
+        // Ghibli/Studio: ONE full image + 2 strips. Photo tiles use CSS background-position
+        // to show the correct portion, guaranteeing perfect alignment across tiles.
         if (categoryType === 'ghibli') {
           const pxScale = 200 / 615;
           const fullW = Math.round(1055 * pxScale);
@@ -118,17 +119,13 @@ export function MagnetPreview({
           const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
           if (cancelled) return;
 
-          // 6 portions: 4 photo tiles + 2 strips for text panel tops
-          const areas = [
-            { sx: 0, sy: 0, sw: 528, sh: 526 },        // tile 0: top-left photo
-            { sx: 528, sy: 0, sw: 527, sh: 526 },       // tile 1: top-right photo
-            { sx: 0, sy: 526, sw: 528, sh: 615 },       // tile 2: mid-left photo
-            { sx: 528, sy: 526, sw: 527, sh: 615 },     // tile 3: mid-right photo
-            { sx: 0, sy: 1141, sw: 528, sh: 63 },       // tile 4: left strip (panel top)
-            { sx: 528, sy: 1141, sw: 527, sh: 63 },     // tile 5: right strip (panel top)
-          ];
+          const fullUrl = fullCanvas.toDataURL('image/jpeg', 0.9);
 
-          const urls = areas.map(a => {
+          // Extract 2 strips for text panel tops (tiles 4-5)
+          const strips = [
+            { sx: 0, sy: 1141, sw: 528, sh: 63 },
+            { sx: 528, sy: 1141, sw: 527, sh: 63 },
+          ].map(a => {
             const tc = document.createElement('canvas');
             tc.width = Math.round(a.sw * pxScale);
             tc.height = Math.round(a.sh * pxScale);
@@ -147,7 +144,9 @@ export function MagnetPreview({
 
           fullCanvas.width = 0;
           fullCanvas.height = 0;
-          setTiles(urls);
+          // tiles[0-3] = fullUrl (same image, different bg-position per tile)
+          // tiles[4-5] = strip URLs for panel tops
+          setTiles([fullUrl, fullUrl, fullUrl, fullUrl, strips[0], strips[1]]);
           return;
         }
 
@@ -545,13 +544,29 @@ function PhotoTile({
     );
   }
 
-  // Ghibli/Studio: photo behind PNG template overlay (same as Spotify approach)
+  // Ghibli/Studio: full image with CSS background-position per tile (perfect alignment)
   if (categoryType === 'ghibli') {
     const tileNumber = index + 1;
-    if (tileNumber > 4) return null; // tiles 5-6 handled by GhibliPanelPreview
+    if (tileNumber > 4) return null;
+    // All 4 photo tiles use the SAME full image URL with different background-position
+    // Row 0 shows top portion (0%), row 1 shows from 77.9% (526/1204 of the image height offset)
+    const bgPositions: Record<number, string> = {
+      1: '0% 0%',      // top-left
+      2: '100% 0%',    // top-right
+      3: '0% 77.9%',   // mid-left
+      4: '100% 77.9%', // mid-right
+    };
     return (
       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-        {imgElement}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${tileSrc})`,
+            backgroundSize: '200% auto',
+            backgroundPosition: bgPositions[tileNumber],
+          }}
+        />
         <img
           src={`/templates/studio/${tileNumber}.png`}
           alt=""

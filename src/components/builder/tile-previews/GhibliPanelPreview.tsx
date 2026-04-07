@@ -75,6 +75,14 @@ export function GhibliPanelPreview({
           <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 700 }}>
             {customText || '(Tu Texto)'}
           </div>
+          {/* Mosaiko logo */}
+          <img
+            src="/logos/logo-negro.png"
+            alt="Mosaiko"
+            className="mt-[4%] ml-auto"
+            style={{ height: 'clamp(6px, 6%, 14px)', width: 'auto', opacity: 0.5 }}
+            draggable={false}
+          />
         </div>
       )}
     </div>
