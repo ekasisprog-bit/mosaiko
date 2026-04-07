@@ -110,23 +110,8 @@ export function MagnetPreview({
           return;
         }
 
-        // Ghibli/Studio: ONE full image used by ALL tiles via CSS background-position.
-        // Guarantees perfect alignment across photo tiles and panel strips.
-        if (categoryType === 'ghibli') {
-          const pxScale = 200 / 615;
-          const fullW = Math.round(1055 * pxScale);
-          const fullH = Math.round(1204 * pxScale);
-          const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
-          if (cancelled) return;
-          const fullUrl = fullCanvas.toDataURL('image/jpeg', 0.9);
-          fullCanvas.width = 0;
-          fullCanvas.height = 0;
-          setTiles([fullUrl, fullUrl, fullUrl, fullUrl]);
-          return;
-        }
-
         // For categories with special tiles, we only split the photo portion
-        const photoRows = categoryType === 'spotify' || categoryType === 'arte' ? 2 : gridConfig.rows;
+        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
         const photoCols = gridConfig.cols;
 
         // Create a modified config for splitting only photo tiles
@@ -271,28 +256,13 @@ export function MagnetPreview({
                     )}
 
                     {role === 'text-panel' && categoryType === 'ghibli' && (
-                      <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-                        {/* Same full image as photo tiles — background-position shows strip at top */}
-                        {tiles[0] && (
-                          <div
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              backgroundImage: `url(${tiles[0]})`,
-                              backgroundSize: '200% auto',
-                              backgroundPosition: index === 4 ? '0% 168.8%' : '100% 168.8%',
-                            }}
-                          />
-                        )}
-                        <GhibliPanelPreview
-                          label={label as 'ghibli-left' | 'ghibli-right'}
-                          year={textFields.year}
-                          japaneseText={textFields.japaneseText}
-                          customText={textFields.customText}
-                          studioText={textFields.studioText}
-                          className="absolute inset-0"
-                        />
-                      </div>
+                      <GhibliPanelPreview
+                        label={label as 'ghibli-left' | 'ghibli-right'}
+                        year={textFields.year}
+                        japaneseText={textFields.japaneseText}
+                        customText={textFields.customText}
+                        studioText={textFields.studioText}
+                      />
                     )}
 
                     {role === 'photo' && (
@@ -516,29 +486,13 @@ function PhotoTile({
     );
   }
 
-  // Ghibli/Studio: full image with CSS background-position per tile (perfect alignment)
+  // Ghibli/Studio: photo fills tile + PNG overlay (same as Spotify)
   if (categoryType === 'ghibli') {
     const tileNumber = index + 1;
     if (tileNumber > 4) return null;
-    // All 4 photo tiles use the SAME full image URL with different background-position
-    // Row 0 shows top portion (0%), row 1 shows from 77.9% (526/1204 of the image height offset)
-    const bgPositions: Record<number, string> = {
-      1: '0% 0%',      // top-left
-      2: '100% 0%',    // top-right
-      3: '0% 77.9%',   // mid-left
-      4: '100% 77.9%', // mid-right
-    };
     return (
       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${tileSrc})`,
-            backgroundSize: '200% auto',
-            backgroundPosition: bgPositions[tileNumber],
-          }}
-        />
+        {imgElement}
         <img
           src={`/templates/studio/${tileNumber}.png`}
           alt=""
