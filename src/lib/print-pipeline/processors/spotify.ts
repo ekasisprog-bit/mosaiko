@@ -1,22 +1,24 @@
 import sharp from 'sharp';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { TILE_PRINT_SIZE } from '../../grid-config';
 import type { SpotifyCustomization } from '../../customization-types';
 import type { PrintJob, TileOutput } from '../types';
 import { cropAndResize, splitIntoTiles } from '../utils/tile-splitter';
 
-const SPOTIFY_BLACK = '#191414';
-const SPOTIFY_GREEN = '#1DB954';
-const SPOTIFY_WHITE = '#FFFFFF';
-const SPOTIFY_GRAY = '#B3B3B3';
 const TILE = TILE_PRINT_SIZE;
 
+// Path to the template PNGs (relative to project root)
+const TEMPLATE_DIR = join(process.cwd(), 'mosaic-categories/spotify/spotify-template-PNGs');
+const LOGO_DIR = join(process.cwd(), 'mosaic-categories/spotify');
+const MOSAIKO_LOGO_DIR = join(process.cwd(), 'MOSAIKO-logos');
+
 /**
- * Spotify processor.
+ * Spotify processor — uses actual PNG templates from the client.
+ *
  * Grid is always 6 (3 rows x 2 cols):
- *   - Top 4 tiles (rows 0-1): 2x2 photo split
- *   - Bottom 2 tiles (row 2): Spotify-style black bar with song info
- *     - Left: song name + artist name centered, Spotify logo at bottom-left
- *     - Right: solid black, Mosaiko logo at bottom-right
+ *   - Top 4 tiles (rows 0-1): 2x2 photo split + PNG frame overlay
+ *   - Bottom 2 tiles (row 2): PNG background + text/logo composites
  */
 export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as SpotifyCustomization;
@@ -32,15 +34,32 @@ export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
 
   const photoTiles = await splitIntoTiles(croppedBuffer, 2, 2);
 
-  // Step 2: Generate bottom-left tile (song info + Spotify logo)
+  // Step 2: Overlay PNG template frames on each photo tile
+  const framedPhotoTiles = await Promise.all(
+    photoTiles.map(async (photoBuffer, index) => {
+      const templatePath = join(TEMPLATE_DIR, `${index + 1}.png`);
+      const templateBuffer = await readFile(templatePath);
+      const resizedTemplate = await sharp(templateBuffer)
+        .resize(TILE, TILE, { fit: 'fill' })
+        .png()
+        .toBuffer();
+
+      return sharp(photoBuffer)
+        .composite([{ input: resizedTemplate }])
+        .png()
+        .toBuffer();
+    }),
+  );
+
+  // Step 3: Generate bottom-left tile (template bg + song/artist text + Spotify logo)
   const bottomLeftBuffer = await renderBottomLeftTile(songName, artistName);
 
-  // Step 3: Generate bottom-right tile (black + Mosaiko logo)
+  // Step 4: Generate bottom-right tile (template bg + Mosaiko logo)
   const bottomRightBuffer = await renderBottomRightTile();
 
-  // Step 4: Assemble all tiles
-  const tiles: TileOutput[] = [
-    ...photoTiles.map((buffer, index) => ({
+  // Step 5: Assemble all tiles
+  return [
+    ...framedPhotoTiles.map((buffer, index) => ({
       index,
       buffer,
       filename: `${job.jobId}_spotify_tile_${index}.png`,
@@ -56,78 +75,90 @@ export async function processSpotify(job: PrintJob): Promise<TileOutput[]> {
       filename: `${job.jobId}_spotify_tile_5.png`,
     },
   ];
-
-  return tiles;
 }
 
 /**
- * Renders the bottom-left Spotify bar tile:
- * - Song name (large, white, bold) centered vertically in left area
- * - Artist name (smaller, gray) below song name
- * - Spotify green circle icon + "Spotify" text at bottom-left
+ * Bottom-left tile: template PNG background + song name + artist + Spotify logo.
  */
 async function renderBottomLeftTile(
   songName: string,
   artistName: string,
 ): Promise<Buffer> {
-  const textX = Math.round(TILE * 0.12);
-  const songY = Math.round(TILE * 0.45);
+  // Load and resize the template background
+  const templateBuffer = await readFile(join(TEMPLATE_DIR, '5.png'));
+  const baseBuffer = await sharp(templateBuffer)
+    .resize(TILE, TILE, { fit: 'fill' })
+    .png()
+    .toBuffer();
+
+  // Create text overlay SVG
+  const textX = Math.round(TILE * 0.10);
+  const songY = Math.round(TILE * 0.40);
   const artistY = Math.round(TILE * 0.55);
 
-  // Spotify icon at bottom-left
-  const iconSize = 28;
-  const iconX = textX;
-  const iconY = Math.round(TILE * 0.88);
-  const iconCx = iconX + iconSize / 2;
-  const iconCy = iconY + iconSize / 2;
-  const iconR = iconSize / 2;
-
-  const spotifyTextX = iconX + iconSize + 6;
-  const spotifyTextY = iconY + iconSize - 4;
-
-  const svg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${TILE}" height="${TILE}" fill="${SPOTIFY_BLACK}" />
-
-    <!-- Song name -->
-    <text x="${textX}" y="${songY}" font-family="sans-serif" font-size="52" font-weight="bold" fill="${SPOTIFY_WHITE}" dominant-baseline="auto">${escapeXml(songName)}</text>
-
-    <!-- Artist name -->
-    <text x="${textX}" y="${artistY}" font-family="sans-serif" font-size="36" fill="${SPOTIFY_GRAY}" dominant-baseline="auto">${escapeXml(artistName)}</text>
-
-    <!-- Spotify green circle icon -->
-    <circle cx="${iconCx}" cy="${iconCy}" r="${iconR}" fill="${SPOTIFY_GREEN}" />
-    <path d="M${iconCx - 7} ${iconCy - 4} Q${iconCx} ${iconCy - 7} ${iconCx + 8} ${iconCy - 3}" stroke="${SPOTIFY_BLACK}" stroke-width="2" stroke-linecap="round" fill="none" />
-    <path d="M${iconCx - 6} ${iconCy} Q${iconCx} ${iconCy - 2.5} ${iconCx + 6} ${iconCy + 1}" stroke="${SPOTIFY_BLACK}" stroke-width="2" stroke-linecap="round" fill="none" />
-    <path d="M${iconCx - 4.5} ${iconCy + 3.5} Q${iconCx} ${iconCy + 2} ${iconCx + 5} ${iconCy + 4.5}" stroke="${SPOTIFY_BLACK}" stroke-width="1.5" stroke-linecap="round" fill="none" />
-
-    <!-- "Spotify" text -->
-    <text x="${spotifyTextX}" y="${spotifyTextY}" font-family="sans-serif" font-size="24" font-weight="bold" fill="${SPOTIFY_WHITE}">${escapeXml('Spotify')}</text>
+  const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
+    <text x="${textX}" y="${songY}" font-family="'Source Sans 3', 'Source Sans Pro', sans-serif" font-size="56" font-weight="bold" fill="#FFFFFF">${escapeXml(songName)}</text>
+    <text x="${textX}" y="${artistY}" font-family="'Source Sans 3', 'Source Sans Pro', sans-serif" font-size="40" fill="#FFFFFF" opacity="0.7">${escapeXml(artistName)}</text>
   </svg>`;
 
-  return sharp(Buffer.from(svg))
+  const textBuffer = await sharp(Buffer.from(textSvg))
     .resize(TILE, TILE)
+    .png()
+    .toBuffer();
+
+  // Load and resize Spotify logo
+  const spotifyLogoBuffer = await readFile(join(LOGO_DIR, 'LOGO SPOTIFY.png'));
+  const spotifyLogoResized = await sharp(spotifyLogoBuffer)
+    .resize({ height: Math.round(TILE * 0.06) })
+    .png()
+    .toBuffer();
+  const spotifyMeta = await sharp(spotifyLogoResized).metadata();
+
+  // Composite everything onto the template base
+  return sharp(baseBuffer)
+    .composite([
+      { input: textBuffer },
+      {
+        input: spotifyLogoResized,
+        left: Math.round(TILE * 0.10),
+        top: Math.round(TILE * 0.85),
+      },
+    ])
     .png()
     .toBuffer();
 }
 
 /**
- * Renders the bottom-right Spotify bar tile:
- * - Solid black background
- * - "Mosaiko" text logo at bottom-right corner
+ * Bottom-right tile: template PNG background + Mosaiko white logo.
  */
 async function renderBottomRightTile(): Promise<Buffer> {
-  const logoX = Math.round(TILE * 0.92);
-  const logoY = Math.round(TILE * 0.92);
+  // Load and resize the template background
+  const templateBuffer = await readFile(join(TEMPLATE_DIR, '6.png'));
+  const baseBuffer = await sharp(templateBuffer)
+    .resize(TILE, TILE, { fit: 'fill' })
+    .png()
+    .toBuffer();
 
-  const svg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${TILE}" height="${TILE}" fill="${SPOTIFY_BLACK}" />
+  // Load and resize Mosaiko white logo
+  const mosaikoLogoBuffer = await readFile(join(MOSAIKO_LOGO_DIR, 'LOGO BLANCO.png'));
+  const mosaikoLogoResized = await sharp(mosaikoLogoBuffer)
+    .resize({ height: Math.round(TILE * 0.05) })
+    .png()
+    .toBuffer();
+  const mosaikoMeta = await sharp(mosaikoLogoResized).metadata();
 
-    <!-- Mosaiko logo text at bottom-right -->
-    <text x="${logoX}" y="${logoY}" font-family="sans-serif" font-size="22" font-weight="bold" fill="${SPOTIFY_WHITE}" text-anchor="end" opacity="0.7">Mosaiko</text>
-  </svg>`;
+  // Position at bottom-right
+  const logoLeft = TILE - Math.round(TILE * 0.08) - (mosaikoMeta.width || 100);
+  const logoTop = Math.round(TILE * 0.88);
 
-  return sharp(Buffer.from(svg))
-    .resize(TILE, TILE)
+  return sharp(baseBuffer)
+    .composite([
+      {
+        input: mosaikoLogoResized,
+        left: logoLeft,
+        top: logoTop,
+      },
+    ])
     .png()
     .toBuffer();
 }

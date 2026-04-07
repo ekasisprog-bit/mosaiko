@@ -1,12 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
-const SPOTIFY_BLACK = '#191414';
-const SPOTIFY_GREEN = '#1DB954';
-const SPOTIFY_WHITE = '#FFFFFF';
-const SPOTIFY_GRAY = '#B3B3B3';
-
 interface SpotifyBarPreviewProps {
   label: 'spotify-bar-left' | 'spotify-bar-right';
   songName?: string;
@@ -15,11 +8,9 @@ interface SpotifyBarPreviewProps {
 }
 
 /**
- * Client-side preview of the Spotify bar tiles.
- * Mirrors the print pipeline output from processors/spotify.ts.
- *
- * Left tile: song name + artist name centered, Spotify logo at bottom-left.
- * Right tile: solid black, Mosaiko logo at bottom-right.
+ * Spotify bar tile preview using actual PNG template backgrounds.
+ * Left tile: song name + artist text + Spotify logo over dark template bg.
+ * Right tile: Mosaiko white logo over dark template bg.
  */
 export function SpotifyBarPreview({
   label,
@@ -44,79 +35,54 @@ function SpotifyBarLeft({
 }) {
   return (
     <div
-      className={['relative flex h-full w-full flex-col overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: SPOTIFY_BLACK, aspectRatio: '1' }}
+      className={['relative h-full w-full overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
+      style={{ aspectRatio: '1' }}
     >
-      {/* Song name + artist name — positioned in center-left area */}
-      <div className="flex flex-1 flex-col justify-center px-[12%]">
+      {/* Template background PNG (dark with subtle M watermark pattern) */}
+      <img
+        src="/templates/spotify/5.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        draggable={false}
+      />
+
+      {/* Song name + artist — positioned to match template */}
+      <div
+        className="absolute flex flex-col"
+        style={{
+          left: '10%',
+          right: '6%',
+          top: '28%',
+          fontFamily: 'var(--font-source-sans), "Source Sans 3", sans-serif',
+        }}
+      >
         <span
-          className="truncate font-bold leading-tight"
-          style={{
-            color: SPOTIFY_WHITE,
-            fontSize: 'clamp(14px, 14%, 32px)',
-            fontFamily: 'system-ui, sans-serif',
-          }}
+          className="truncate font-bold leading-tight text-white"
+          style={{ fontSize: 'clamp(13px, 14%, 30px)' }}
         >
-          {songName || '\u2014'}
+          {songName || 'Tu Texto'}
         </span>
         <span
-          className="mt-[4%] truncate leading-tight"
-          style={{
-            color: SPOTIFY_GRAY,
-            fontSize: 'clamp(9px, 9%, 20px)',
-            fontFamily: 'system-ui, sans-serif',
-          }}
+          className="mt-[5%] truncate leading-tight text-white/70"
+          style={{ fontSize: 'clamp(9px, 10%, 22px)' }}
         >
-          {artistName || '\u2014'}
+          {artistName || 'Tu Texto'}
         </span>
       </div>
 
-      {/* Spotify logo + text at bottom-left */}
-      <div
-        className="absolute bottom-[8%] left-[8%] flex items-center"
-        style={{ gap: '3px' }}
-      >
-        {/* Spotify green circle with wave lines */}
-        <svg
-          viewBox="0 0 24 24"
-          style={{ width: 'clamp(12px, 12%, 24px)', height: 'clamp(12px, 12%, 24px)' }}
-          fill="none"
-        >
-          <circle cx="12" cy="12" r="12" fill={SPOTIFY_GREEN} />
-          {/* Three curved lines */}
-          <path
-            d="M7 9.5c2.5-1 6.5-1 10 0.5"
-            stroke={SPOTIFY_BLACK}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M8 12.5c2-0.8 5-0.8 7.5 0.3"
-            stroke={SPOTIFY_BLACK}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M9.5 15.3c1.5-0.5 3.5-0.5 5.5 0.2"
-            stroke={SPOTIFY_BLACK}
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            fill="none"
-          />
-        </svg>
-        <span
-          className="font-bold leading-none"
-          style={{
-            color: SPOTIFY_WHITE,
-            fontSize: 'clamp(8px, 7%, 14px)',
-            fontFamily: 'system-ui, sans-serif',
-          }}
-        >
-          Spotify
-        </span>
-      </div>
+      {/* Spotify logo at bottom-left (actual PNG) */}
+      <img
+        src="/templates/spotify/logo-spotify.png"
+        alt="Spotify"
+        className="absolute"
+        style={{
+          left: '10%',
+          bottom: '10%',
+          height: 'clamp(10px, 12%, 24px)',
+          width: 'auto',
+        }}
+        draggable={false}
+      />
     </div>
   );
 }
@@ -128,34 +94,31 @@ function SpotifyBarRight({
 }) {
   return (
     <div
-      className={['relative flex h-full w-full overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: SPOTIFY_BLACK, aspectRatio: '1' }}
+      className={['relative h-full w-full overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
+      style={{ aspectRatio: '1' }}
     >
-      {/* Mosaiko logo at bottom-right */}
-      <div
-        className="absolute bottom-[8%] right-[8%] flex items-end opacity-70"
-        style={{ gap: '1px' }}
-      >
-        <Image
-          src="/logos/logo-dark.png"
-          alt=""
-          width={14}
-          height={14}
-          className="shrink-0"
-          style={{ width: 'clamp(8px, 8%, 14px)', height: 'clamp(8px, 8%, 14px)' }}
-          unoptimized
-        />
-        <span
-          className="font-bold font-brand leading-none"
-          style={{
-            color: SPOTIFY_WHITE,
-            fontSize: 'clamp(6px, 7%, 12px)',
-            marginBottom: '0.5px',
-          }}
-        >
-          osaiko
-        </span>
-      </div>
+      {/* Template background PNG */}
+      <img
+        src="/templates/spotify/6.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        draggable={false}
+      />
+
+      {/* Mosaiko white full logo at bottom-right */}
+      <img
+        src="/logos/logo-blanco.png"
+        alt="Mosaiko"
+        className="absolute"
+        style={{
+          right: '8%',
+          bottom: '10%',
+          height: 'clamp(8px, 10%, 20px)',
+          width: 'auto',
+          opacity: 0.85,
+        }}
+        draggable={false}
+      />
     </div>
   );
 }

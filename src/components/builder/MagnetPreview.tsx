@@ -226,13 +226,8 @@ export function MagnetPreview({
               style={{
                 gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                 gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                gap: categoryType === 'spotify' ? '2px' : '4px',
+                gap: categoryType === 'spotify' ? '0px' : '4px',
                 maxWidth: `${gridConfig.cols * 120}px`,
-                ...(categoryType === 'spotify' ? {
-                  backgroundColor: '#191414',
-                  borderRadius: '8px 8px 4px 4px',
-                  padding: '3px',
-                } : {}),
               }}
             >
               {tileLayout.map((descriptor) => {
@@ -431,6 +426,22 @@ function PhotoTile({
       draggable={false}
     />
   );
+
+  // Spotify: photo with PNG template overlay (black frame with rounded corners)
+  if (categoryType === 'spotify') {
+    const tileNumber = index + 1;
+    return (
+      <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
+        {imgElement}
+        <img
+          src={`/templates/spotify/${tileNumber}.png`}
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          draggable={false}
+        />
+      </div>
+    );
+  }
 
   // Polaroid: wrap in frame
   if (categoryType === 'polaroid') {
