@@ -9,12 +9,11 @@ interface GhibliPanelPreviewProps {
 }
 
 /**
- * Studio/Ghibli text panels using actual PNG template backgrounds.
- * PNG provides the cream bg + teal border at top.
- * Text overlaid with Montserrat font (client spec).
+ * Studio/Ghibli text panels using PNG template backgrounds.
  *
- * Left panel (tile 5): year + "STUDIO GHIBLI" — left-aligned
- * Right panel (tile 6): Japanese text + title — right-aligned
+ * Font: Montserrat (all text same size per client instructions).
+ * Left panel: year (regular) + "STUDIO GHIBLI" (regular) — left-aligned at bottom.
+ * Right panel: Japanese text (regular) + title (bold) — right-aligned at bottom.
  */
 export function GhibliPanelPreview({
   label,
@@ -23,19 +22,9 @@ export function GhibliPanelPreview({
   customText = '',
   className,
 }: GhibliPanelPreviewProps) {
-  if (label === 'ghibli-left') {
-    return <GhibliLeftPanel year={year} className={className} />;
-  }
-  return <GhibliRightPanel japaneseText={japaneseText} customText={customText} className={className} />;
-}
+  const isLeft = label === 'ghibli-left';
+  const tileNum = isLeft ? 5 : 6;
 
-function GhibliLeftPanel({
-  year,
-  className,
-}: {
-  year: string;
-  className?: string;
-}) {
   return (
     <div
       className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
@@ -43,88 +32,51 @@ function GhibliLeftPanel({
     >
       {/* PNG template background (cream bg + teal border at top) */}
       <img
-        src="/templates/studio/5.png"
+        src={`/templates/studio/${tileNum}.png`}
         alt=""
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full"
+        style={{ objectFit: 'fill' }}
         draggable={false}
       />
 
-      {/* Text: year + "STUDIO GHIBLI" — left-aligned, at very bottom of tile */}
-      <div
-        className="absolute flex flex-col justify-end"
-        style={{
-          left: '5%',
-          bottom: '3%',
-          right: '10%',
-          top: '76%',
-          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-          color: '#2a2a2a',
-        }}
-      >
-        <span
-          className="leading-tight"
-          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
+      {/* Text anchored to absolute bottom */}
+      {isLeft ? (
+        <div
+          className="absolute"
+          style={{
+            left: '3%',
+            bottom: '3%',
+            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+            color: '#2a2a2a',
+            lineHeight: 1.3,
+          }}
         >
-          {year || '(Año)'}
-        </span>
-        <span
-          className="mt-[2%] leading-tight"
-          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
+          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
+            {year || '(Año)'}
+          </div>
+          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
+            STUDIO GHIBLI
+          </div>
+        </div>
+      ) : (
+        <div
+          className="absolute text-right"
+          style={{
+            right: '3%',
+            bottom: '3%',
+            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+            color: '#2a2a2a',
+            lineHeight: 1.3,
+          }}
         >
-          STUDIO GHIBLI
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function GhibliRightPanel({
-  japaneseText,
-  customText,
-  className,
-}: {
-  japaneseText: string;
-  customText: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
-      style={{ aspectRatio: '1' }}
-    >
-      {/* PNG template background */}
-      <img
-        src="/templates/studio/6.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-        draggable={false}
-      />
-
-      {/* Text: Japanese + title — right-aligned, at very bottom of tile */}
-      <div
-        className="absolute flex flex-col items-end justify-end"
-        style={{
-          right: '5%',
-          bottom: '3%',
-          left: '10%',
-          top: '72%',
-          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-          color: '#2a2a2a',
-        }}
-      >
-        <span
-          className="leading-tight text-right"
-          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
-        >
-          {japaneseText || '(テキスト)'}
-        </span>
-        <span
-          className="mt-[3%] text-right font-bold leading-tight"
-          style={{ fontSize: 'clamp(8px, 8.5%, 18px)' }}
-        >
-          {customText || '(Tu Texto)'}
-        </span>
-      </div>
+          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
+            {japaneseText || '(テキスト)'}
+          </div>
+          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 700 }}>
+            {customText || '(Tu Texto)'}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

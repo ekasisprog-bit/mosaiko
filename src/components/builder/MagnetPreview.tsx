@@ -110,7 +110,7 @@ export function MagnetPreview({
           return;
         }
 
-        // Ghibli/Studio: custom extraction — photo area is portrait (1055×1204), not square
+        // Ghibli/Studio: custom extraction — portrait photo (1055×1204) spans 4 tiles + strip in panels
         if (categoryType === 'ghibli') {
           const pxScale = 200 / 615;
           const fullW = Math.round(1055 * pxScale);
@@ -118,11 +118,14 @@ export function MagnetPreview({
           const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
           if (cancelled) return;
 
+          // 6 portions: 4 photo tiles + 2 strips for text panel tops
           const areas = [
-            { sx: 0, sy: 0, sw: 528, sh: 526 },
-            { sx: 528, sy: 0, sw: 527, sh: 526 },
-            { sx: 0, sy: 526, sw: 528, sh: 615 },
-            { sx: 528, sy: 526, sw: 527, sh: 615 },
+            { sx: 0, sy: 0, sw: 528, sh: 526 },        // tile 0: top-left photo
+            { sx: 528, sy: 0, sw: 527, sh: 526 },       // tile 1: top-right photo
+            { sx: 0, sy: 526, sw: 528, sh: 615 },       // tile 2: mid-left photo
+            { sx: 528, sy: 526, sw: 527, sh: 615 },     // tile 3: mid-right photo
+            { sx: 0, sy: 1141, sw: 528, sh: 63 },       // tile 4: left strip (panel top)
+            { sx: 528, sy: 1141, sw: 527, sh: 63 },     // tile 5: right strip (panel top)
           ];
 
           const urls = areas.map(a => {
@@ -294,12 +297,31 @@ export function MagnetPreview({
                     )}
 
                     {role === 'text-panel' && categoryType === 'ghibli' && (
-                      <GhibliPanelPreview
-                        label={label as 'ghibli-left' | 'ghibli-right'}
-                        year={textFields.year}
-                        japaneseText={textFields.japaneseText}
-                        customText={textFields.customText}
-                      />
+                      <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
+                        {/* Photo strip behind transparent area at top of panel PNG */}
+                        {tiles[index] && (
+                          <img
+                            src={tiles[index]}
+                            alt=""
+                            className="absolute"
+                            style={{
+                              left: index === 4 ? '14.15%' : '0%',
+                              top: '0%',
+                              width: index === 4 ? '85.85%' : '85.69%',
+                              height: '10.24%',
+                              objectFit: 'fill',
+                            }}
+                            draggable={false}
+                          />
+                        )}
+                        <GhibliPanelPreview
+                          label={label as 'ghibli-left' | 'ghibli-right'}
+                          year={textFields.year}
+                          japaneseText={textFields.japaneseText}
+                          customText={textFields.customText}
+                          className="absolute inset-0"
+                        />
+                      </div>
                     )}
 
                     {role === 'photo' && (
