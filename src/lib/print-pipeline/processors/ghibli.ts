@@ -1,148 +1,158 @@
+import sharp from 'sharp';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { TILE_PRINT_SIZE } from '../../grid-config';
 import type { GhibliCustomization } from '../../customization-types';
 import type { PrintJob, TileOutput } from '../types';
-import { cropAndResize, splitIntoTiles } from '../utils/tile-splitter';
-import { renderMultiTextToBuffer } from '../utils/text-renderer';
+import { cropAndResize } from '../utils/tile-splitter';
 
 const TILE = TILE_PRINT_SIZE;
-const GHIBLI_BG = '#EDE8E0';
-const GHIBLI_TEXT = '#2a2a2a';
+const TEMPLATE_DIR = join(process.cwd(), 'mosaic-categories/studio/studio-template-PNGs');
+const SRC_SIZE = 615;
+
+// Transparent area bounds per photo tile (measured from PNGs at 615px)
+const PHOTO_AREAS = [
+  { left: 87, top: 88, right: 615, bottom: 614 },   // tile 1: frame on top+left
+  { left: 0, top: 88, right: 527, bottom: 614 },     // tile 2: frame on top+right
+  { left: 87, top: 0, right: 615, bottom: 615 },     // tile 3: frame on left only
+  { left: 0, top: 0, right: 527, bottom: 615 },      // tile 4: frame on right only
+] as const;
 
 /**
- * Ghibli processor — clean, museum-like cream panels.
+ * Studio/Ghibli processor — PNG template overlays + text panels.
+ *
  * Grid is always 6 (3 rows x 2 cols):
- *   - Top 4 tiles (rows 0-1): 2x2 photo split
- *   - Bottom-left (tile 4): cream panel with year + "STUDIO GHIBLI"
- *   - Bottom-right (tile 5): cream panel with japaneseText + customText + Mosaiko
+ *   - Top 4 tiles: photo within PNG frame (cream + teal border)
+ *   - Bottom 2 tiles: PNG panel bg + composited text
  */
 export async function processGhibli(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as GhibliCustomization;
   const { year, japaneseText, customText } = customization;
 
-  // Step 1: Crop and split photo into 2x2 (top 4 tiles)
+  const scale = TILE / SRC_SIZE;
+
+  // Calculate visible photo area across the 4 tiles
+  const colLeftW = 615 - 87;  // 528
+  const colRightW = 527;
+  const rowTopH = 614 - 88;   // 526
+  const rowBotH = 615;
+
+  const printPhotoW = Math.round((colLeftW + colRightW) * scale);
+  const printPhotoH = Math.round((rowTopH + rowBotH) * scale);
+
+  // Crop user photo to match visible area
   const croppedBuffer = await cropAndResize(
     job.imageBuffer,
     job.cropArea,
-    2 * TILE,
-    2 * TILE,
+    printPhotoW,
+    printPhotoH,
   );
 
-  const photoTiles = await splitIntoTiles(croppedBuffer, 2, 2);
+  // Extract each tile's photo portion and composite with PNG frame
+  const photoTiles = await Promise.all(
+    PHOTO_AREAS.map(async (area, index) => {
+      const areaW = area.right - area.left;
+      const areaH = area.bottom - area.top;
+      const printAreaW = Math.round(areaW * scale);
+      const printAreaH = Math.round(areaH * scale);
 
-  // Step 2: Generate bottom-left panel (year + "STUDIO GHIBLI")
-  const bottomLeftBuffer = await renderGhibliLeftPanel(year);
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const extractLeft = col === 0 ? 0 : Math.round(colLeftW * scale);
+      const extractTop = row === 0 ? 0 : Math.round(rowTopH * scale);
 
-  // Step 3: Generate bottom-right panel (japaneseText + customText + Mosaiko)
-  const bottomRightBuffer = await renderGhibliRightPanel(japaneseText, customText);
+      const photoBuffer = await sharp(croppedBuffer)
+        .extract({ left: extractLeft, top: extractTop, width: printAreaW, height: printAreaH })
+        .png()
+        .toBuffer();
 
-  // Step 4: Assemble all tiles
-  const tiles: TileOutput[] = [
+      // Load frame template
+      const templateBuffer = await readFile(join(TEMPLATE_DIR, `${index + 1}.png`));
+      const resizedTemplate = await sharp(templateBuffer)
+        .resize(TILE, TILE, { fit: 'fill' })
+        .png()
+        .toBuffer();
+
+      // Create blank tile with cream bg
+      const blankTile = await sharp({
+        create: { width: TILE, height: TILE, channels: 4, background: { r: 237, g: 232, b: 224, alpha: 255 } },
+      }).png().toBuffer();
+
+      const photoLeft = Math.round(area.left * scale);
+      const photoTop = Math.round(area.top * scale);
+
+      return sharp(blankTile)
+        .composite([
+          { input: photoBuffer, left: photoLeft, top: photoTop },
+          { input: resizedTemplate },
+        ])
+        .png()
+        .toBuffer();
+    }),
+  );
+
+  // Generate text panels (tiles 5 and 6)
+  const leftPanelBuffer = await renderLeftPanel(year);
+  const rightPanelBuffer = await renderRightPanel(japaneseText, customText);
+
+  return [
     ...photoTiles.map((buffer, index) => ({
       index,
       buffer,
       filename: `${job.jobId}_ghibli_tile_${index}.png`,
     })),
-    {
-      index: 4,
-      buffer: bottomLeftBuffer,
-      filename: `${job.jobId}_ghibli_tile_4.png`,
-    },
-    {
-      index: 5,
-      buffer: bottomRightBuffer,
-      filename: `${job.jobId}_ghibli_tile_5.png`,
-    },
+    { index: 4, buffer: leftPanelBuffer, filename: `${job.jobId}_ghibli_tile_4.png` },
+    { index: 5, buffer: rightPanelBuffer, filename: `${job.jobId}_ghibli_tile_5.png` },
   ];
-
-  return tiles;
 }
 
-/**
- * Renders the bottom-left Ghibli panel:
- * - Large year number (left-aligned, upper area)
- * - "STUDIO GHIBLI" text below (left-aligned)
- * Cream background with dark text — clean, minimal.
- */
-async function renderGhibliLeftPanel(year: string): Promise<Buffer> {
-  const marginLeft = 70;
+async function renderLeftPanel(year: string): Promise<Buffer> {
+  const templateBuffer = await readFile(join(TEMPLATE_DIR, '5.png'));
+  const baseBuffer = await sharp(templateBuffer)
+    .resize(TILE, TILE, { fit: 'fill' })
+    .png()
+    .toBuffer();
 
-  return renderMultiTextToBuffer(
-    [
-      // Year — large, serif, left-aligned
-      {
-        text: year,
-        x: marginLeft,
-        y: Math.round(TILE * 0.42),
-        fontSize: 120,
-        fontFamily: 'Georgia, serif',
-        color: GHIBLI_TEXT,
-        anchor: 'start',
-      },
-      // STUDIO GHIBLI — smaller, sans-serif, left-aligned below year
-      {
-        text: 'STUDIO GHIBLI',
-        x: marginLeft,
-        y: Math.round(TILE * 0.58),
-        fontSize: 48,
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        color: GHIBLI_TEXT,
-        anchor: 'start',
-      },
-    ],
-    TILE,
-    TILE,
-    GHIBLI_BG,
-  );
+  const textX = Math.round(TILE * 0.05);
+  const yearY = Math.round(TILE * 0.62);
+  const studioY = Math.round(TILE * 0.75);
+
+  const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
+    <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="48" fill="#2a2a2a">${escapeXml(year)}</text>
+    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="38" fill="#2a2a2a" letter-spacing="1">STUDIO GHIBLI</text>
+  </svg>`;
+
+  const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();
+
+  return sharp(baseBuffer).composite([{ input: textBuffer }]).png().toBuffer();
 }
 
-/**
- * Renders the bottom-right Ghibli panel:
- * - Japanese text at top (left-aligned)
- * - Custom text / movie title below (left-aligned)
- * - "Mosaiko" small text at bottom-right
- * Cream background with dark text — clean, minimal.
- */
-async function renderGhibliRightPanel(
-  japaneseText: string,
-  customText: string,
-): Promise<Buffer> {
-  const marginLeft = 70;
+async function renderRightPanel(japaneseText: string, customText: string): Promise<Buffer> {
+  const templateBuffer = await readFile(join(TEMPLATE_DIR, '6.png'));
+  const baseBuffer = await sharp(templateBuffer)
+    .resize(TILE, TILE, { fit: 'fill' })
+    .png()
+    .toBuffer();
 
-  return renderMultiTextToBuffer(
-    [
-      // Japanese text — top, left-aligned
-      {
-        text: japaneseText,
-        x: marginLeft,
-        y: Math.round(TILE * 0.38),
-        fontSize: 52,
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        color: GHIBLI_TEXT,
-        anchor: 'start',
-      },
-      // Custom text / movie title — below, left-aligned
-      {
-        text: customText,
-        x: marginLeft,
-        y: Math.round(TILE * 0.54),
-        fontSize: 46,
-        fontFamily: 'Georgia, serif',
-        color: GHIBLI_TEXT,
-        anchor: 'start',
-      },
-      // Mosaiko — small, bottom-right corner
-      {
-        text: 'Mosaiko',
-        x: TILE - 70,
-        y: TILE - 60,
-        fontSize: 28,
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        color: GHIBLI_TEXT,
-        anchor: 'end',
-      },
-    ],
-    TILE,
-    TILE,
-    GHIBLI_BG,
-  );
+  const textRight = Math.round(TILE * 0.95);
+  const jpY = Math.round(TILE * 0.55);
+  const titleY = Math.round(TILE * 0.70);
+
+  const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
+    <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="38" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>
+    <text x="${textRight}" y="${titleY}" font-family="Montserrat, sans-serif" font-size="38" font-weight="bold" fill="#2a2a2a" text-anchor="end">${escapeXml(customText)}</text>
+  </svg>`;
+
+  const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();
+
+  return sharp(baseBuffer).composite([{ input: textBuffer }]).png().toBuffer();
+}
+
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }

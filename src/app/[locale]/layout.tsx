@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, DM_Sans, Source_Sans_3 } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans, Source_Sans_3, Montserrat } from 'next/font/google';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -30,6 +30,13 @@ const sourceSans = Source_Sans_3({
   subsets: ['latin'],
   display: 'swap',
   weight: ['400', '600', '700'],
+});
+
+const montserrat = Montserrat({
+  variable: '--font-montserrat',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '700'],
 });
 
 export function generateStaticParams() {
@@ -69,7 +76,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${cormorant.variable} ${dmSans.variable} ${sourceSans.variable} grain-overlay antialiased flex min-h-dvh flex-col`}
+        className={`${cormorant.variable} ${dmSans.variable} ${sourceSans.variable} ${montserrat.variable} grain-overlay antialiased flex min-h-dvh flex-col`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AnnouncementBar />

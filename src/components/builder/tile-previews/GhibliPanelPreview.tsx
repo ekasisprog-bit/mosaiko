@@ -1,8 +1,5 @@
 'use client';
 
-const GHIBLI_BG = '#EDE8E0';
-const GHIBLI_TEXT = '#2a2a2a';
-
 interface GhibliPanelPreviewProps {
   label: 'ghibli-left' | 'ghibli-right';
   year?: string;
@@ -12,9 +9,12 @@ interface GhibliPanelPreviewProps {
 }
 
 /**
- * Client-side SVG preview of the Ghibli text panels.
- * Cream background with dark text — clean, museum-like aesthetic.
- * Mirrors the print pipeline output from processors/ghibli.ts.
+ * Studio/Ghibli text panels using actual PNG template backgrounds.
+ * PNG provides the cream bg + teal border at top.
+ * Text overlaid with Montserrat font (client spec).
+ *
+ * Left panel (tile 5): year + "STUDIO GHIBLI" — left-aligned
+ * Right panel (tile 6): Japanese text + title — right-aligned
  */
 export function GhibliPanelPreview({
   label,
@@ -29,10 +29,6 @@ export function GhibliPanelPreview({
   return <GhibliRightPanel japaneseText={japaneseText} customText={customText} className={className} />;
 }
 
-/**
- * Bottom-left panel: Year (large) + "STUDIO GHIBLI" (smaller).
- * Left-aligned, cream background.
- */
 function GhibliLeftPanel({
   year,
   className,
@@ -42,45 +38,47 @@ function GhibliLeftPanel({
 }) {
   return (
     <div
-      className={['flex h-full w-full items-center overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: GHIBLI_BG, aspectRatio: '1' }}
+      className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
+      style={{ aspectRatio: '1' }}
     >
-      <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-        {/* Year — large, left-aligned */}
-        <text
-          x="12"
-          y="42"
-          fill={GHIBLI_TEXT}
-          fontSize="22"
-          fontWeight="bold"
-          fontFamily="Georgia, 'Times New Roman', serif"
-          textAnchor="start"
-        >
-          {year || ''}
-        </text>
+      {/* PNG template background (cream bg + teal border at top) */}
+      <img
+        src="/templates/studio/5.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        draggable={false}
+      />
 
-        {/* STUDIO GHIBLI — smaller, left-aligned below year */}
-        <text
-          x="12"
-          y="58"
-          fill={GHIBLI_TEXT}
-          fontSize="8"
-          fontWeight="500"
-          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
-          textAnchor="start"
-          letterSpacing="0.5"
+      {/* Text: year + "STUDIO GHIBLI" — left-aligned, in lower area */}
+      <div
+        className="absolute flex flex-col justify-end"
+        style={{
+          left: '5%',
+          bottom: '8%',
+          right: '10%',
+          top: '30%',
+          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+          color: '#2a2a2a',
+        }}
+      >
+        <span
+          className="leading-tight"
+          style={{ fontSize: 'clamp(12px, 13%, 28px)', fontWeight: 400 }}
         >
+          {year || '(Año)'}
+        </span>
+        <span
+          className="mt-[3%] leading-tight tracking-wide"
+          style={{ fontSize: 'clamp(8px, 8%, 18px)', fontWeight: 400 }}
+        >
+          {/* User-editable, defaults to STUDIO GHIBLI */}
           STUDIO GHIBLI
-        </text>
-      </svg>
+        </span>
+      </div>
     </div>
   );
 }
 
-/**
- * Bottom-right panel: japaneseText (top) + customText (below) + Mosaiko logo (bottom-right).
- * Left-aligned, cream background.
- */
 function GhibliRightPanel({
   japaneseText,
   customText,
@@ -92,49 +90,42 @@ function GhibliRightPanel({
 }) {
   return (
     <div
-      className={['flex h-full w-full items-center overflow-hidden rounded-md', className].filter(Boolean).join(' ')}
-      style={{ backgroundColor: GHIBLI_BG, aspectRatio: '1' }}
+      className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
+      style={{ aspectRatio: '1' }}
     >
-      <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-        {/* Japanese text — top, right-aligned */}
-        <text
-          x="88"
-          y="38"
-          fill={GHIBLI_TEXT}
-          fontSize="9"
-          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
-          textAnchor="end"
-        >
-          {japaneseText.length > 10 ? japaneseText.slice(0, 10) + '\u2026' : japaneseText || ''}
-        </text>
+      {/* PNG template background */}
+      <img
+        src="/templates/studio/6.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        draggable={false}
+      />
 
-        {/* Custom text / movie title — below Japanese text, right-aligned */}
-        <text
-          x="88"
-          y="56"
-          fill={GHIBLI_TEXT}
-          fontSize="7.5"
-          fontWeight="600"
-          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
-          textAnchor="end"
-          letterSpacing="0.3"
+      {/* Text: Japanese + title — right-aligned, in lower area */}
+      <div
+        className="absolute flex flex-col items-end justify-end"
+        style={{
+          right: '5%',
+          bottom: '8%',
+          left: '10%',
+          top: '30%',
+          fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+          color: '#2a2a2a',
+        }}
+      >
+        <span
+          className="leading-tight text-right"
+          style={{ fontSize: 'clamp(7px, 7.5%, 16px)', fontWeight: 400 }}
         >
-          {customText.length > 16 ? customText.slice(0, 16) + '\u2026' : customText || ''}
-        </text>
-
-        {/* Mosaiko — small, bottom-right */}
-        <text
-          x="88"
-          y="92"
-          fill={GHIBLI_TEXT}
-          fontSize="5"
-          fontFamily="system-ui, 'Helvetica Neue', sans-serif"
-          textAnchor="end"
-          opacity="0.5"
+          {japaneseText || '(テキスト)'}
+        </span>
+        <span
+          className="mt-[4%] text-right font-bold leading-tight tracking-wide"
+          style={{ fontSize: 'clamp(7px, 7.5%, 16px)' }}
         >
-          Mosaiko
-        </text>
-      </svg>
+          {customText || '(Tu Texto)'}
+        </span>
+      </div>
     </div>
   );
 }

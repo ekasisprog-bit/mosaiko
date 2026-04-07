@@ -226,7 +226,7 @@ export function MagnetPreview({
               style={{
                 gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                 gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                gap: categoryType === 'spotify' || categoryType === 'polaroid' ? '0px' : '4px',
+                gap: categoryType === 'spotify' || categoryType === 'polaroid' || categoryType === 'ghibli' ? '0px' : '4px',
                 maxWidth: `${gridConfig.cols * 120}px`,
               }}
             >
@@ -280,7 +280,7 @@ export function MagnetPreview({
               })}
 
               {/* Mosaiko logo watermark — skip for categories that have their own logo in special tiles */}
-              {categoryType !== 'spotify' && categoryType !== 'arte' && categoryType !== 'polaroid' && (
+              {categoryType !== 'spotify' && categoryType !== 'arte' && categoryType !== 'polaroid' && categoryType !== 'ghibli' && (
                 <MosaikoWatermark />
               )}
             </div>
@@ -485,26 +485,32 @@ function PhotoTile({
     );
   }
 
-  // Ghibli: wrap photo in cream border frame (matches reference product images)
+  // Ghibli/Studio: photo inside PNG template (cream frame + teal border)
   if (categoryType === 'ghibli') {
+    const tileNumber = index + 1;
+    const insets: Record<number, { left: string; top: string; width: string; height: string }> = {
+      1: { left: '14.1%', top: '14.3%', width: '85.9%', height: '85.7%' },
+      2: { left: '0%', top: '14.3%', width: '85.7%', height: '85.7%' },
+      3: { left: '14.1%', top: '0%', width: '85.9%', height: '100%' },
+      4: { left: '0%', top: '0%', width: '85.7%', height: '100%' },
+    };
+    const area = insets[tileNumber];
+    if (!area) return null; // tiles 5-6 handled by GhibliPanelPreview
     return (
-      <div
-        className="overflow-hidden rounded-md"
-        style={{
-          aspectRatio: '1',
-          backgroundColor: '#EDE8E0',
-          padding: '5.5%',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.06)',
-        }}
-      >
-        <div
-          className="h-full w-full overflow-hidden"
-          style={{
-            border: '1.5px solid rgba(0,0,0,0.2)',
-          }}
-        >
-          {imgElement}
-        </div>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
+        <img
+          src={tileSrc}
+          alt={`Pieza ${index + 1} de ${totalTiles}`}
+          className="absolute object-cover"
+          style={{ left: area.left, top: area.top, width: area.width, height: area.height }}
+          draggable={false}
+        />
+        <img
+          src={`/templates/studio/${tileNumber}.png`}
+          alt=""
+          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+          draggable={false}
+        />
       </div>
     );
   }
