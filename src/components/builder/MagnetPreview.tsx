@@ -226,7 +226,7 @@ export function MagnetPreview({
               style={{
                 gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                 gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                gap: categoryType === 'spotify' ? '0px' : '4px',
+                gap: categoryType === 'spotify' || categoryType === 'polaroid' ? '0px' : '4px',
                 maxWidth: `${gridConfig.cols * 120}px`,
               }}
             >
@@ -280,7 +280,7 @@ export function MagnetPreview({
               })}
 
               {/* Mosaiko logo watermark — skip for categories that have their own logo in special tiles */}
-              {categoryType !== 'spotify' && categoryType !== 'arte' && (
+              {categoryType !== 'spotify' && categoryType !== 'arte' && categoryType !== 'polaroid' && (
                 <MosaikoWatermark />
               )}
             </div>
@@ -443,12 +443,19 @@ function PhotoTile({
     );
   }
 
-  // Polaroid: wrap in frame
+  // Polaroid: photo with PNG template overlay (off-white frame with transparent center)
   if (categoryType === 'polaroid') {
+    const tileNumber = index + 1;
     return (
-      <PolaroidFrame>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
         {imgElement}
-      </PolaroidFrame>
+        <img
+          src={`/templates/polaroid/${tileNumber}.png`}
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          draggable={false}
+        />
+      </div>
     );
   }
 
