@@ -136,6 +136,7 @@
     "fieldTitle": "Título de la obra",
     "fieldArtist": "Artista",
     "fieldYear": "Año",
+    "fieldStudioText": "Texto del estudio",
     "fieldDecorativeText": "Texto decorativo",
     "fieldDecorativeTextHint": "Escribe en cualquier idioma usando el teclado de tu dispositivo",
     "fieldCustomText": "Texto personalizado",

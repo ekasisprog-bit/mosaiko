@@ -56,6 +56,7 @@ export interface GhibliCustomization {
   year: string;
   japaneseText: string;
   customText: string;
+  studioText: string;
 }
 
 export interface PolaroidCustomization {
@@ -128,7 +129,7 @@ export const CATEGORY_REGISTRY: Record<CategoryType, CategoryMeta> = {
     type: 'ghibli',
     label: 'Studio',
     allowedGridSizes: [6],
-    textFields: ['year', 'japaneseText', 'customText'],
+    textFields: ['year', 'studioText', 'japaneseText', 'customText'],
     hasTheme: false,
     description: 'Film-poster style with text panels',
   },

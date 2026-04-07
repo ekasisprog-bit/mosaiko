@@ -60,7 +60,7 @@ export function MagnetPreview({
       case 'arte':
         return { categoryType: 'arte', gridSize: 9, title: textFields.title || '', artist: textFields.artist || '', year: textFields.year || '' };
       case 'ghibli':
-        return { categoryType: 'ghibli', gridSize: 6, year: textFields.year || '', japaneseText: textFields.japaneseText || '', customText: textFields.customText || '' };
+        return { categoryType: 'ghibli', gridSize: 6, year: textFields.year || '', japaneseText: textFields.japaneseText || '', customText: textFields.customText || '', studioText: textFields.studioText || '' };
       case 'save-the-date':
         return { categoryType: 'save-the-date', gridSize: 9, eventText: textFields.eventText || '', date: textFields.date || '' };
       case 'flores':
@@ -110,43 +110,18 @@ export function MagnetPreview({
           return;
         }
 
-        // Ghibli/Studio: ONE full image + 2 strips. Photo tiles use CSS background-position
-        // to show the correct portion, guaranteeing perfect alignment across tiles.
+        // Ghibli/Studio: ONE full image used by ALL tiles via CSS background-position.
+        // Guarantees perfect alignment across photo tiles and panel strips.
         if (categoryType === 'ghibli') {
           const pxScale = 200 / 615;
           const fullW = Math.round(1055 * pxScale);
           const fullH = Math.round(1204 * pxScale);
           const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
           if (cancelled) return;
-
           const fullUrl = fullCanvas.toDataURL('image/jpeg', 0.9);
-
-          // Extract 2 strips for text panel tops (tiles 4-5)
-          const strips = [
-            { sx: 0, sy: 1141, sw: 528, sh: 63 },
-            { sx: 528, sy: 1141, sw: 527, sh: 63 },
-          ].map(a => {
-            const tc = document.createElement('canvas');
-            tc.width = Math.round(a.sw * pxScale);
-            tc.height = Math.round(a.sh * pxScale);
-            const ctx = tc.getContext('2d')!;
-            ctx.drawImage(
-              fullCanvas,
-              Math.round(a.sx * pxScale), Math.round(a.sy * pxScale),
-              tc.width, tc.height,
-              0, 0, tc.width, tc.height,
-            );
-            const url = tc.toDataURL('image/jpeg', 0.9);
-            tc.width = 0;
-            tc.height = 0;
-            return url;
-          });
-
           fullCanvas.width = 0;
           fullCanvas.height = 0;
-          // tiles[0-3] = fullUrl (same image, different bg-position per tile)
-          // tiles[4-5] = strip URLs for panel tops
-          setTiles([fullUrl, fullUrl, fullUrl, fullUrl, strips[0], strips[1]]);
+          setTiles([fullUrl, fullUrl, fullUrl, fullUrl]);
           return;
         }
 
@@ -297,20 +272,16 @@ export function MagnetPreview({
 
                     {role === 'text-panel' && categoryType === 'ghibli' && (
                       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-                        {/* Photo strip behind transparent area at top of panel PNG */}
-                        {tiles[index] && (
-                          <img
-                            src={tiles[index]}
-                            alt=""
-                            className="absolute"
+                        {/* Same full image as photo tiles — background-position shows strip at top */}
+                        {tiles[0] && (
+                          <div
                             style={{
-                              left: index === 4 ? '14.15%' : '0%',
-                              top: '0%',
-                              width: index === 4 ? '85.85%' : '85.69%',
-                              height: '10.24%',
-                              objectFit: 'fill',
+                              position: 'absolute',
+                              inset: 0,
+                              backgroundImage: `url(${tiles[0]})`,
+                              backgroundSize: '200% auto',
+                              backgroundPosition: index === 4 ? '0% 168.8%' : '100% 168.8%',
                             }}
-                            draggable={false}
                           />
                         )}
                         <GhibliPanelPreview
@@ -318,6 +289,7 @@ export function MagnetPreview({
                           year={textFields.year}
                           japaneseText={textFields.japaneseText}
                           customText={textFields.customText}
+                          studioText={textFields.studioText}
                           className="absolute inset-0"
                         />
                       </div>

@@ -5,21 +5,21 @@ interface GhibliPanelPreviewProps {
   year?: string;
   japaneseText?: string;
   customText?: string;
+  studioText?: string;
   className?: string;
 }
 
 /**
  * Studio/Ghibli text panels using PNG template backgrounds.
- *
- * Font: Montserrat (all text same size per client instructions).
- * Left panel: year (regular) + "STUDIO GHIBLI" (regular) — left-aligned at bottom.
- * Right panel: Japanese text (regular) + title (bold) — right-aligned at bottom.
+ * Text centered vertically within the cream area (below teal strip).
+ * Font: Montserrat, all same size 11 per client instructions.
  */
 export function GhibliPanelPreview({
   label,
   year = '',
   japaneseText = '',
   customText = '',
+  studioText = '',
   className,
 }: GhibliPanelPreviewProps) {
   const isLeft = label === 'ghibli-left';
@@ -30,7 +30,7 @@ export function GhibliPanelPreview({
       className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
       style={{ aspectRatio: '1' }}
     >
-      {/* PNG template background (cream bg + teal border at top) */}
+      {/* PNG template (cream bg + teal border at top, transparent strip) */}
       <img
         src={`/templates/studio/${tileNum}.png`}
         alt=""
@@ -39,47 +39,50 @@ export function GhibliPanelPreview({
         draggable={false}
       />
 
-      {/* Text anchored to absolute bottom */}
+      {/* Text centered vertically within cream area (below ~15% teal strip) */}
       {isLeft ? (
         <div
-          className="absolute"
+          className="absolute flex flex-col justify-center"
           style={{
-            left: '3%',
-            bottom: '3%',
+            left: '5%',
+            right: '10%',
+            top: '18%',
+            bottom: '10%',
             fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
             color: '#2a2a2a',
-            lineHeight: 1.3,
+            lineHeight: 1.4,
           }}
         >
           <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
             {year || '(Año)'}
           </div>
           <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
-            STUDIO GHIBLI
+            {studioText || 'STUDIO GHIBLI'}
           </div>
         </div>
       ) : (
         <div
-          className="absolute text-right"
+          className="absolute flex flex-col items-end justify-center"
           style={{
-            right: '3%',
-            bottom: '3%',
+            left: '10%',
+            right: '5%',
+            top: '18%',
+            bottom: '10%',
             fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
             color: '#2a2a2a',
-            lineHeight: 1.3,
+            lineHeight: 1.4,
           }}
         >
-          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
+          <div className="text-right" style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 400 }}>
             {japaneseText || '(テキスト)'}
           </div>
-          <div style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 700 }}>
+          <div className="text-right" style={{ fontSize: 'clamp(8px, 8%, 16px)', fontWeight: 700 }}>
             {customText || '(Tu Texto)'}
           </div>
-          {/* Mosaiko logo */}
           <img
             src="/logos/logo-negro.png"
             alt="Mosaiko"
-            className="mt-[4%] ml-auto"
+            className="mt-[6%]"
             style={{ height: 'clamp(6px, 6%, 14px)', width: 'auto', opacity: 0.5 }}
             draggable={false}
           />

@@ -20,6 +20,7 @@ const FIELD_I18N: Record<string, string> = {
   title: 'fieldTitle',
   artist: 'fieldArtist',
   year: 'fieldYear',
+  studioText: 'fieldStudioText',
   japaneseText: 'fieldDecorativeText',
   customText: 'fieldCustomText',
   eventText: 'fieldEventText',
@@ -197,6 +198,7 @@ function GhibliFields({
   return (
     <>
       <FieldInput field="year" value={values.year || ''} onChange={onChange} />
+      <FieldInput field="studioText" value={values.studioText || ''} onChange={onChange} hint="STUDIO GHIBLI" />
       <FieldInput
         field="japaneseText"
         value={values.japaneseText || ''}
