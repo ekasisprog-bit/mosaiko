@@ -54,9 +54,9 @@ function GhibliLeftPanel({
         className="absolute flex flex-col justify-end"
         style={{
           left: '5%',
-          bottom: '4%',
+          bottom: '3%',
           right: '10%',
-          top: '75%',
+          top: '76%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}
@@ -105,9 +105,9 @@ function GhibliRightPanel({
         className="absolute flex flex-col items-end justify-end"
         style={{
           right: '5%',
-          bottom: '4%',
+          bottom: '3%',
           left: '10%',
-          top: '70%',
+          top: '72%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}

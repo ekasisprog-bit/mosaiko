@@ -110,8 +110,46 @@ export function MagnetPreview({
           return;
         }
 
+        // Ghibli/Studio: custom extraction — photo area is portrait (1055×1204), not square
+        if (categoryType === 'ghibli') {
+          const pxScale = 200 / 615;
+          const fullW = Math.round(1055 * pxScale);
+          const fullH = Math.round(1204 * pxScale);
+          const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
+          if (cancelled) return;
+
+          const areas = [
+            { sx: 0, sy: 0, sw: 528, sh: 526 },
+            { sx: 528, sy: 0, sw: 527, sh: 526 },
+            { sx: 0, sy: 526, sw: 528, sh: 615 },
+            { sx: 528, sy: 526, sw: 527, sh: 615 },
+          ];
+
+          const urls = areas.map(a => {
+            const tc = document.createElement('canvas');
+            tc.width = Math.round(a.sw * pxScale);
+            tc.height = Math.round(a.sh * pxScale);
+            const ctx = tc.getContext('2d')!;
+            ctx.drawImage(
+              fullCanvas,
+              Math.round(a.sx * pxScale), Math.round(a.sy * pxScale),
+              tc.width, tc.height,
+              0, 0, tc.width, tc.height,
+            );
+            const url = tc.toDataURL('image/jpeg', 0.9);
+            tc.width = 0;
+            tc.height = 0;
+            return url;
+          });
+
+          fullCanvas.width = 0;
+          fullCanvas.height = 0;
+          setTiles(urls);
+          return;
+        }
+
         // For categories with special tiles, we only split the photo portion
-        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
+        const photoRows = categoryType === 'spotify' || categoryType === 'arte' ? 2 : gridConfig.rows;
         const photoCols = gridConfig.cols;
 
         // Create a modified config for splitting only photo tiles
