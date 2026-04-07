@@ -119,8 +119,8 @@ async function renderLeftPanel(year: string): Promise<Buffer> {
   const studioY = Math.round(TILE * 0.90);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="48" fill="#2a2a2a">${escapeXml(year)}</text>
-    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="38" fill="#2a2a2a" letter-spacing="1">STUDIO GHIBLI</text>
+    <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">${escapeXml(year)}</text>
+    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">STUDIO GHIBLI</text>
   </svg>`;
 
   const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();
@@ -140,8 +140,8 @@ async function renderRightPanel(japaneseText: string, customText: string): Promi
   const titleY = Math.round(TILE * 0.90);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="38" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>
-    <text x="${textRight}" y="${titleY}" font-family="Montserrat, sans-serif" font-size="38" font-weight="bold" fill="#2a2a2a" text-anchor="end">${escapeXml(customText)}</text>
+    <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="42" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>
+    <text x="${textRight}" y="${titleY}" font-family="Montserrat, sans-serif" font-size="42" font-weight="bold" fill="#2a2a2a" text-anchor="end">${escapeXml(customText)}</text>
   </svg>`;
 
   const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();

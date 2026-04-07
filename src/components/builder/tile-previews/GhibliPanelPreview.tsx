@@ -49,27 +49,27 @@ function GhibliLeftPanel({
         draggable={false}
       />
 
-      {/* Text: year + "STUDIO GHIBLI" — left-aligned, positioned at bottom of tile */}
+      {/* Text: year + "STUDIO GHIBLI" — left-aligned, at very bottom of tile */}
       <div
         className="absolute flex flex-col justify-end"
         style={{
           left: '5%',
-          bottom: '5%',
+          bottom: '4%',
           right: '10%',
-          top: '68%',
+          top: '75%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}
       >
         <span
           className="leading-tight"
-          style={{ fontSize: 'clamp(11px, 12%, 26px)', fontWeight: 400 }}
+          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
         >
           {year || '(Año)'}
         </span>
         <span
-          className="mt-[2%] leading-tight tracking-wide"
-          style={{ fontSize: 'clamp(7px, 7.5%, 16px)', fontWeight: 500 }}
+          className="mt-[2%] leading-tight"
+          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
         >
           STUDIO GHIBLI
         </span>
@@ -100,27 +100,27 @@ function GhibliRightPanel({
         draggable={false}
       />
 
-      {/* Text: Japanese + title — right-aligned, positioned at bottom of tile */}
+      {/* Text: Japanese + title — right-aligned, at very bottom of tile */}
       <div
         className="absolute flex flex-col items-end justify-end"
         style={{
           right: '5%',
-          bottom: '5%',
+          bottom: '4%',
           left: '10%',
-          top: '62%',
+          top: '70%',
           fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
           color: '#2a2a2a',
         }}
       >
         <span
           className="leading-tight text-right"
-          style={{ fontSize: 'clamp(7px, 7.5%, 16px)', fontWeight: 400 }}
+          style={{ fontSize: 'clamp(8px, 8.5%, 18px)', fontWeight: 400 }}
         >
           {japaneseText || '(テキスト)'}
         </span>
         <span
-          className="mt-[4%] text-right font-bold leading-tight tracking-wide"
-          style={{ fontSize: 'clamp(7px, 7.5%, 16px)' }}
+          className="mt-[3%] text-right font-bold leading-tight"
+          style={{ fontSize: 'clamp(8px, 8.5%, 18px)' }}
         >
           {customText || '(Tu Texto)'}
         </span>
