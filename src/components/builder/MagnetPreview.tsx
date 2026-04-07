@@ -110,47 +110,8 @@ export function MagnetPreview({
           return;
         }
 
-        // Ghibli/Studio: custom extraction — photo area is portrait (1055×1204), not square
-        if (categoryType === 'ghibli') {
-          const pxScale = 200 / 615;
-          const fullW = Math.round(1055 * pxScale);
-          const fullH = Math.round(1204 * pxScale);
-          const fullCanvas = getCroppedCanvas(image, cropArea, fullW, fullH, 0);
-          if (cancelled) return;
-
-          // Extract each tile's portion at source proportions (615px tile base)
-          const areas = [
-            { sx: 0, sy: 0, sw: 528, sh: 526 },      // tile 1 top-left
-            { sx: 528, sy: 0, sw: 527, sh: 526 },     // tile 2 top-right
-            { sx: 0, sy: 526, sw: 528, sh: 615 },     // tile 3 mid-left
-            { sx: 528, sy: 526, sw: 527, sh: 615 },   // tile 4 mid-right
-          ];
-
-          const urls = areas.map(a => {
-            const tc = document.createElement('canvas');
-            tc.width = Math.round(a.sw * pxScale);
-            tc.height = Math.round(a.sh * pxScale);
-            const ctx = tc.getContext('2d')!;
-            ctx.drawImage(
-              fullCanvas,
-              Math.round(a.sx * pxScale), Math.round(a.sy * pxScale),
-              tc.width, tc.height,
-              0, 0, tc.width, tc.height,
-            );
-            const url = tc.toDataURL('image/jpeg', 0.9);
-            tc.width = 0;
-            tc.height = 0;
-            return url;
-          });
-
-          fullCanvas.width = 0;
-          fullCanvas.height = 0;
-          setTiles(urls);
-          return;
-        }
-
         // For categories with special tiles, we only split the photo portion
-        const photoRows = categoryType === 'spotify' || categoryType === 'arte' ? 2 : gridConfig.rows;
+        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
         const photoCols = gridConfig.cols;
 
         // Create a modified config for splitting only photo tiles
@@ -524,29 +485,13 @@ function PhotoTile({
     );
   }
 
-  // Ghibli/Studio: photo inside PNG template (cream frame + teal border)
+  // Ghibli/Studio: photo behind PNG template overlay (same as Spotify approach)
   if (categoryType === 'ghibli') {
     const tileNumber = index + 1;
-    const insets: Record<number, { left: string; top: string; width: string; height: string }> = {
-      1: { left: '14.15%', top: '14.33%', width: '85.85%', height: '85.67%' },
-      2: { left: '0%', top: '14.33%', width: '85.69%', height: '85.67%' },
-      3: { left: '14.15%', top: '0%', width: '85.85%', height: '100%' },
-      4: { left: '0%', top: '0%', width: '85.69%', height: '100%' },
-    };
-    const area = insets[tileNumber];
-    if (!area) return null; // tiles 5-6 handled by GhibliPanelPreview
+    if (tileNumber > 4) return null; // tiles 5-6 handled by GhibliPanelPreview
     return (
       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-        <img
-          src={tileSrc}
-          alt={`Pieza ${index + 1} de ${totalTiles}`}
-          className="absolute"
-          style={{
-            left: area.left, top: area.top, width: area.width, height: area.height,
-            objectFit: 'fill',
-          }}
-          draggable={false}
-        />
+        {imgElement}
         <img
           src={`/templates/studio/${tileNumber}.png`}
           alt=""
