@@ -592,17 +592,30 @@ function PhotoTile({
     );
   }
 
-  // Ghibli/Studio: photo fills tile + PNG overlay (same as Spotify)
+  // Ghibli/Studio: photo inside transparent cutout + PNG frame on top (relative for flow height)
   if (categoryType === 'ghibli') {
     const tileNumber = index + 1;
     if (tileNumber > 4) return null;
+    const insets: Record<number, { left: string; top: string; width: string; height: string }> = {
+      1: { left: '14.15%', top: '14.31%', width: '85.85%', height: '85.53%' },
+      2: { left: '0%', top: '14.31%', width: '85.69%', height: '85.53%' },
+      3: { left: '14.15%', top: '0%', width: '85.85%', height: '100%' },
+      4: { left: '0%', top: '0%', width: '85.69%', height: '100%' },
+    };
+    const area = insets[tileNumber]!;
     return (
       <div className="relative overflow-hidden" style={{ aspectRatio: '1' }}>
-        {imgElement}
+        <img
+          src={tileSrc}
+          alt={`Pieza ${index + 1} de ${totalTiles}`}
+          className="absolute object-cover"
+          style={{ left: area.left, top: area.top, width: area.width, height: area.height }}
+          draggable={false}
+        />
         <img
           src={`/templates/studio/${tileNumber}.png`}
           alt=""
-          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+          className="pointer-events-none relative z-10 h-full w-full"
           draggable={false}
         />
       </div>
