@@ -111,13 +111,17 @@ export function MagnetPreview({
         }
 
         // For categories with special tiles, we only split the photo portion
-        const photoRows = categoryType === 'spotify' || categoryType === 'ghibli' || categoryType === 'arte' ? 2 : gridConfig.rows;
+        // Ghibli: split full 3×2 grid (6 tiles) so photo extends into bottom tiles' strip
+        const photoRows = categoryType === 'spotify' || categoryType === 'arte' ? 2
+          : categoryType === 'ghibli' ? 3
+          : gridConfig.rows;
         const photoCols = gridConfig.cols;
 
-        // Create a modified config for splitting only photo tiles
+        // For ghibli, split the full grid (6 tiles); others split only photo tiles
+        const splitTileCount = categoryType === 'ghibli' ? gridConfig.size : photoTileCount;
         const splitConfig = {
           ...gridConfig,
-          size: photoTileCount as typeof gridConfig.size,
+          size: splitTileCount as typeof gridConfig.size,
           rows: photoRows,
           cols: photoCols,
         };
@@ -256,13 +260,27 @@ export function MagnetPreview({
                     )}
 
                     {role === 'text-panel' && categoryType === 'ghibli' && (
-                      <GhibliPanelPreview
-                        label={label as 'ghibli-left' | 'ghibli-right'}
-                        year={textFields.year}
-                        japaneseText={textFields.japaneseText}
-                        customText={textFields.customText}
-                        studioText={textFields.studioText}
-                      />
+                      <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
+                        {/* Photo layer — visible through 10.24% transparent strip at top of PNG template */}
+                        {tiles[index] && (
+                          <img
+                            src={tiles[index]}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover"
+                            draggable={false}
+                          />
+                        )}
+                        {/* Panel overlay with PNG template + text */}
+                        <div className="absolute inset-0 z-10">
+                          <GhibliPanelPreview
+                            label={label as 'ghibli-left' | 'ghibli-right'}
+                            year={textFields.year}
+                            japaneseText={textFields.japaneseText}
+                            customText={textFields.customText}
+                            studioText={textFields.studioText}
+                          />
+                        </div>
+                      </div>
                     )}
 
                     {role === 'photo' && (

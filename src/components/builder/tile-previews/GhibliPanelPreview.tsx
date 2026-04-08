@@ -10,9 +10,14 @@ interface GhibliPanelPreviewProps {
 }
 
 /**
- * Studio/Ghibli text panels.
- * PNG template background + Montserrat text centered in cream area.
- * Same simple approach as Spotify bar tiles.
+ * Studio/Ghibli text panels (tiles 5-6).
+ * PNG template background + Montserrat text at print-pipeline-exact positions.
+ *
+ * Positioning derived from ghibli.ts SVG baseline → CSS top conversion:
+ *   CSS top = (SVG_y - fontSize) / TILE
+ *   Left:  year 75.9%, studioText 84.9%  (baseline 81%, 90%)
+ *   Right: japaneseText 72.9%, customText 84.9%  (baseline 78%, 90%)
+ *   Font:  42/827 = 5.08% of tile width → 5.08cqi
  */
 export function GhibliPanelPreview({
   label,
@@ -25,10 +30,17 @@ export function GhibliPanelPreview({
   const isLeft = label === 'ghibli-left';
   const tileNum = isLeft ? 5 : 6;
 
+  const textStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
+    fontSize: 'clamp(10px, 5.08cqi, 20px)',
+    color: '#2a2a2a',
+    lineHeight: 1,
+  };
+
   return (
     <div
       className={['relative h-full w-full overflow-hidden', className].filter(Boolean).join(' ')}
-      style={{ aspectRatio: '1' }}
+      style={{ aspectRatio: '1', backgroundColor: 'transparent', containerType: 'inline-size' }}
     >
       {/* PNG template background */}
       <img
@@ -40,62 +52,36 @@ export function GhibliPanelPreview({
       />
 
       {isLeft ? (
-        /* Left panel: year + studioText — left-aligned, centered vertically in cream area */
-        <div
-          className="absolute flex flex-col justify-center"
-          style={{
-            left: '5%',
-            right: '8%',
-            top: '20%',
-            bottom: '15%',
-            fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-            color: '#2a2a2a',
-            lineHeight: 1.5,
-          }}
-        >
-          <div style={{ fontSize: 'clamp(9px, 9%, 20px)', fontWeight: 400 }}>
-            {year || '(Año)'}
-          </div>
-          <div style={{ fontSize: 'clamp(9px, 9%, 20px)', fontWeight: 400 }}>
-            {studioText || 'STUDIO GHIBLI'}
-          </div>
-        </div>
-      ) : (
-        /* Right panel: japaneseText + title — right-aligned, centered vertically */
+        /* Left panel: year + studioText — absolutely positioned to match print pipeline */
         <>
-          <div
-            className="absolute flex flex-col items-end justify-center"
-            style={{
-              left: '8%',
-              right: '5%',
-              top: '20%',
-              bottom: '22%',
-              fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-              color: '#2a2a2a',
-              lineHeight: 1.5,
-            }}
+          <span
+            className="absolute"
+            style={{ ...textStyle, top: '75.9%', left: '5%', fontWeight: 400 }}
           >
-            <div className="text-right" style={{ fontSize: 'clamp(9px, 9%, 20px)', fontWeight: 400 }}>
-              {japaneseText || '(テキスト)'}
-            </div>
-            <div className="text-right" style={{ fontSize: 'clamp(9px, 9%, 20px)', fontWeight: 700 }}>
-              {customText || '(Tu Texto)'}
-            </div>
-          </div>
-          {/* Mosaiko logo at bottom-right, independent of text */}
-          <img
-            src="/logos/logo-negro.png"
-            alt="Mosaiko"
-            className="pointer-events-none absolute"
-            style={{
-              right: '5%',
-              bottom: '5%',
-              height: 'clamp(10px, 10%, 22px)',
-              width: 'auto',
-              opacity: 0.6,
-            }}
-            draggable={false}
-          />
+            {year || '(Ano)'}
+          </span>
+          <span
+            className="absolute"
+            style={{ ...textStyle, top: '84.9%', left: '5%', fontWeight: 400 }}
+          >
+            {studioText || 'STUDIO GHIBLI'}
+          </span>
+        </>
+      ) : (
+        /* Right panel: japaneseText + customText — right-aligned */
+        <>
+          <span
+            className="absolute text-right"
+            style={{ ...textStyle, top: '72.9%', right: '5%', fontWeight: 400 }}
+          >
+            {japaneseText || '(テキスト)'}
+          </span>
+          <span
+            className="absolute text-right"
+            style={{ ...textStyle, top: '84.9%', right: '5%', fontWeight: 700 }}
+          >
+            {customText || '(Tu Texto)'}
+          </span>
         </>
       )}
     </div>

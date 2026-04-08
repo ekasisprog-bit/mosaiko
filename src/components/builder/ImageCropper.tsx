@@ -58,7 +58,7 @@ const FIT_MODE_OPTIONS: FitModeOption[] = [
 
 // ─── Grid gradient helper ───────────────────────────────────────────────────
 
-function buildGridGradientStyle(rows: number, cols: number): React.CSSProperties {
+function buildGridGradientStyle(rows: number, cols: number, dimStartPct?: number): React.CSSProperties {
   const gradients: string[] = [];
 
   for (let i = 1; i < cols; i++) {
@@ -72,6 +72,13 @@ function buildGridGradientStyle(rows: number, cols: number): React.CSSProperties
     const pct = (i / rows) * 100;
     gradients.push(
       `linear-gradient(to bottom, transparent calc(${pct}% - 1px), rgba(255,255,255,0.4) calc(${pct}% - 0.5px), rgba(255,255,255,0.4) calc(${pct}% + 0.5px), transparent calc(${pct}% + 1px))`,
+    );
+  }
+
+  // Dim non-photo area (e.g. text panels in Ghibli bottom row)
+  if (dimStartPct !== undefined) {
+    gradients.push(
+      `linear-gradient(to bottom, transparent 0%, transparent ${dimStartPct}%, rgba(237,232,224,0.7) ${dimStartPct}%, rgba(237,232,224,0.7) 100%)`,
     );
   }
 
@@ -91,6 +98,8 @@ interface ImageCropperProps {
   overlayRows?: number;
   /** Override grid overlay cols. */
   overlayCols?: number;
+  /** Dim crop area below this percentage (e.g. 70 = bottom 30% dimmed for text panels). */
+  overlayDimStartPct?: number;
   /** Layout rotation controls */
   onLayoutRotate?: () => void;
   canRotateLayout?: boolean;
@@ -104,6 +113,7 @@ export function ImageCropper({
   onCropChange,
   overlayRows,
   overlayCols,
+  overlayDimStartPct,
   onLayoutRotate,
   canRotateLayout = false,
   layoutRotated = false,
@@ -124,8 +134,8 @@ export function ImageCropper({
 
   // Grid overlay as CSS gradients — renders ON the crop area, not the container
   const gridOverlayStyle = useMemo(
-    () => buildGridGradientStyle(overlayRows ?? gridConfig.rows, overlayCols ?? gridConfig.cols),
-    [gridConfig.rows, gridConfig.cols, overlayRows, overlayCols],
+    () => buildGridGradientStyle(overlayRows ?? gridConfig.rows, overlayCols ?? gridConfig.cols, overlayDimStartPct),
+    [gridConfig.rows, gridConfig.cols, overlayRows, overlayCols, overlayDimStartPct],
   );
 
   // Load image dimensions for stretch mode

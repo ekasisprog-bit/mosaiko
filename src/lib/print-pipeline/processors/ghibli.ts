@@ -27,7 +27,7 @@ const PHOTO_AREAS = [
  */
 export async function processGhibli(job: PrintJob): Promise<TileOutput[]> {
   const customization = job.customization as GhibliCustomization;
-  const { year, japaneseText, customText } = customization;
+  const { year, japaneseText, customText, studioText } = customization;
 
   const scale = TILE / SRC_SIZE;
 
@@ -93,7 +93,7 @@ export async function processGhibli(job: PrintJob): Promise<TileOutput[]> {
   );
 
   // Generate text panels (tiles 5 and 6)
-  const leftPanelBuffer = await renderLeftPanel(year);
+  const leftPanelBuffer = await renderLeftPanel(year, studioText);
   const rightPanelBuffer = await renderRightPanel(japaneseText, customText);
 
   return [
@@ -107,7 +107,7 @@ export async function processGhibli(job: PrintJob): Promise<TileOutput[]> {
   ];
 }
 
-async function renderLeftPanel(year: string): Promise<Buffer> {
+async function renderLeftPanel(year: string, studioText?: string): Promise<Buffer> {
   const templateBuffer = await readFile(join(TEMPLATE_DIR, '5.png'));
   const baseBuffer = await sharp(templateBuffer)
     .resize(TILE, TILE, { fit: 'fill' })
@@ -120,7 +120,7 @@ async function renderLeftPanel(year: string): Promise<Buffer> {
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
     <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">${escapeXml(year)}</text>
-    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">STUDIO GHIBLI</text>
+    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">${escapeXml(studioText || 'STUDIO GHIBLI')}</text>
   </svg>`;
 
   const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();

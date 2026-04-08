@@ -70,10 +70,15 @@ export function PredesignedPreview({ productId, initialProduct }: PredesignedPre
   }, [product, gridConfig, effectiveGrid]);
 
   const tileRotations = useMemo(() => {
-    return Array.from({ length: occupiedCells.length }, () => ({
-      initial: -2 + Math.random() * 4,
-      hover: -1.5 + Math.random() * 3,
-    }));
+    return Array.from({ length: occupiedCells.length }, (_, i) => {
+      // Deterministic pseudo-random from index (avoids hydration mismatch)
+      const hash1 = Math.sin(i * 2654435761 + 0.1) * 10000;
+      const hash2 = Math.sin(i * 1597334677 + 0.7) * 10000;
+      return {
+        initial: -2 + (hash1 - Math.floor(hash1)) * 4,
+        hover: -1.5 + (hash2 - Math.floor(hash2)) * 3,
+      };
+    });
   }, [occupiedCells.length]);
 
   const handleAddToCart = useCallback(() => {
