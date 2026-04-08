@@ -114,13 +114,13 @@ async function renderLeftPanel(year: string, studioText?: string): Promise<Buffe
     .png()
     .toBuffer();
 
-  const textX = Math.round(TILE * 0.05);
-  const yearY = Math.round(TILE * 0.81);
-  const studioY = Math.round(TILE * 0.90);
+  const textX = Math.round(TILE * 0.07);
+  const yearY = Math.round(TILE * 0.325);
+  const studioY = Math.round(TILE * 0.405);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">${escapeXml(year)}</text>
-    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="42" fill="#2a2a2a">${escapeXml(studioText || 'STUDIO GHIBLI')}</text>
+    <text x="${textX}" y="${yearY}" font-family="Montserrat, sans-serif" font-size="58" fill="#2a2a2a">${escapeXml(year)}</text>
+    <text x="${textX}" y="${studioY}" font-family="Montserrat, sans-serif" font-size="58" fill="#2a2a2a">${escapeXml(studioText || 'STUDIO GHIBLI')}</text>
   </svg>`;
 
   const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();
@@ -135,13 +135,13 @@ async function renderRightPanel(japaneseText: string, customText: string): Promi
     .png()
     .toBuffer();
 
-  const textRight = Math.round(TILE * 0.95);
-  const jpY = Math.round(TILE * 0.78);
-  const titleY = Math.round(TILE * 0.90);
+  const textRight = Math.round(TILE * 0.93);
+  const jpY = Math.round(TILE * 0.325);
+  const titleY = Math.round(TILE * 0.415);
 
   const textSvg = `<svg width="${TILE}" height="${TILE}" xmlns="http://www.w3.org/2000/svg">
-    <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="42" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>
-    <text x="${textRight}" y="${titleY}" font-family="Montserrat, sans-serif" font-size="42" font-weight="bold" fill="#2a2a2a" text-anchor="end">${escapeXml(customText)}</text>
+    <text x="${textRight}" y="${jpY}" font-family="sans-serif" font-size="58" fill="#2a2a2a" text-anchor="end">${escapeXml(japaneseText)}</text>
+    <text x="${textRight}" y="${titleY}" font-family="Montserrat, sans-serif" font-size="58" font-weight="bold" fill="#2a2a2a" text-anchor="end">${escapeXml(customText)}</text>
   </svg>`;
 
   const textBuffer = await sharp(Buffer.from(textSvg)).resize(TILE, TILE).png().toBuffer();
