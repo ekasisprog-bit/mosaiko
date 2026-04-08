@@ -125,12 +125,14 @@ function FieldInput({
   onChange,
   type = 'text',
   hint,
+  placeholder: customPlaceholder,
 }: {
   field: string;
   value: string;
   onChange: (field: string, value: string) => void;
   type?: 'text' | 'date';
   hint?: string;
+  placeholder?: string;
 }) {
   const t = useTranslations('builder');
   const label = t(FIELD_I18N[field] || field);
@@ -149,7 +151,7 @@ function FieldInput({
         value={value}
         onChange={(e) => onChange(field, e.target.value)}
         className="min-h-[48px] rounded-lg border-2 border-light-gray bg-white px-4 py-3 text-sm text-charcoal transition-colors focus:border-terracotta focus:outline-none"
-        placeholder={type === 'date' ? '' : label}
+        placeholder={customPlaceholder || (type === 'date' ? '' : label)}
       />
     </motion.div>
   );
@@ -197,15 +199,18 @@ function GhibliFields({
 
   return (
     <>
-      <FieldInput field="year" value={values.year || ''} onChange={onChange} />
-      <FieldInput field="studioText" value={values.studioText || ''} onChange={onChange} hint="STUDIO GHIBLI" />
-      <FieldInput
-        field="japaneseText"
-        value={values.japaneseText || ''}
-        onChange={onChange}
-        hint={t('fieldDecorativeTextHint')}
-      />
-      <FieldInput field="customText" value={values.customText || ''} onChange={onChange} />
+      <FieldInput field="year" value={values.year || ''} onChange={onChange}
+        placeholder="ej. 2001"
+        hint={t('fieldYearHint')} />
+      <FieldInput field="studioText" value={values.studioText || ''} onChange={onChange}
+        placeholder="STUDIO GHIBLI"
+        hint={t('fieldStudioTextHint')} />
+      <FieldInput field="japaneseText" value={values.japaneseText || ''} onChange={onChange}
+        placeholder="ej. 千と千尋の神隠し"
+        hint={t('fieldDecorativeTextHint')} />
+      <FieldInput field="customText" value={values.customText || ''} onChange={onChange}
+        placeholder="ej. EL VIAJE DE CHIHIRO"
+        hint={t('fieldCustomTextHint')} />
     </>
   );
 }
