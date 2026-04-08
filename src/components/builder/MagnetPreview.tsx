@@ -182,7 +182,7 @@ export function MagnetPreview({
         style={{
           gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
           gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-          gap: '4px',
+          gap: '0px',
           maxWidth: `${gridConfig.cols * 120}px`,
         }}
       >
