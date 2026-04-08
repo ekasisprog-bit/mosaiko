@@ -26,12 +26,14 @@ interface MagnetPreviewProps {
   imageSrc: string;
   cropArea: CropArea;
   gridConfig: GridConfig;
-  onAddToCart: () => void;
-  onReset: () => void;
+  onAddToCart?: () => void;
+  onReset?: () => void;
   isUploading?: boolean;
   categoryType?: CategoryType;
   textFields?: Record<string, string>;
   filterTheme?: FloresTheme;
+  /** Compact mode: render only the tile grid (no heading, fridge wrapper, buttons). Used in sidebar preview. */
+  compact?: boolean;
 }
 
 export function MagnetPreview({
@@ -44,6 +46,7 @@ export function MagnetPreview({
   categoryType = 'mosaicos',
   textFields = {},
   filterTheme,
+  compact = false,
 }: MagnetPreviewProps) {
   const t = useTranslations('builder');
   const tc = useTranslations('common');
@@ -161,6 +164,91 @@ export function MagnetPreview({
     }
     return map;
   }, [tileLayout]);
+
+  // Compact mode: render only the tile grid (sidebar preview)
+  if (compact) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-light-gray border-t-terracotta" />
+        </div>
+      );
+    }
+    if (error || tiles.length === 0) return null;
+
+    return (
+      <div
+        className="relative mx-auto grid"
+        style={{
+          gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
+          gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+          gap: categoryType === 'spotify' || categoryType === 'polaroid' || categoryType === 'ghibli' ? '0px' : '4px',
+          maxWidth: `${gridConfig.cols * 120}px`,
+        }}
+      >
+        {tileLayout.map((descriptor) => {
+          const { index, role, label, gridColumn, gridRow } = descriptor;
+          const placementStyle: React.CSSProperties | undefined =
+            gridColumn || gridRow
+              ? { gridColumn: gridColumn, gridRow: gridRow }
+              : undefined;
+
+          return (
+            <TileWrapper key={index} index={index} style={placementStyle}>
+              {role === 'special' && categoryType === 'spotify' && (
+                <SpotifyBarPreview
+                  label={label as 'spotify-bar-left' | 'spotify-bar-right'}
+                  songName={textFields.songName}
+                  artistName={textFields.artistName}
+                />
+              )}
+
+              {role === 'special' && categoryType === 'arte' && (
+                <ArteInfoPreview
+                  title={textFields.title}
+                  artist={textFields.artist}
+                  year={textFields.year}
+                />
+              )}
+
+              {role === 'text-panel' && categoryType === 'ghibli' && (
+                <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
+                  {tiles[index] && (
+                    <img src={tiles[index]} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+                  )}
+                  <div className="absolute inset-0 z-10">
+                    <GhibliPanelPreview
+                      label={label as 'ghibli-left' | 'ghibli-right'}
+                      year={textFields.year}
+                      japaneseText={textFields.japaneseText}
+                      customText={textFields.customText}
+                      studioText={textFields.studioText}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {role === 'photo' && (
+                <PhotoTile
+                  tileSrc={tiles[photoTileIndexMap.get(index) ?? 0] || ''}
+                  index={index}
+                  totalTiles={gridConfig.size}
+                  categoryType={categoryType}
+                  floresFilter={floresFilters?.find((f) => f.tileIndex === index)?.filter}
+                  textFields={textFields}
+                  gridSize={gridConfig.size}
+                />
+              )}
+            </TileWrapper>
+          );
+        })}
+
+        {categoryType !== 'spotify' && categoryType !== 'arte' && categoryType !== 'polaroid' && categoryType !== 'ghibli' && (
+          <MosaikoWatermark />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

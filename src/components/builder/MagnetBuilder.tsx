@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GRID_CONFIGS, formatPrice, type GridSize, type GridConfig } from '@/lib/grid-config';
-import { CATEGORY_REGISTRY, type CategoryType } from '@/lib/customization-types';
+import { CATEGORY_REGISTRY, type CategoryType, type FloresTheme } from '@/lib/customization-types';
 import type { CropArea } from '@/lib/canvas-utils';
 import { useCartStore } from '@/lib/cart-store';
 import { createPreviewCanvas, getCroppedCanvas, loadImage } from '@/lib/canvas-utils';
@@ -265,7 +265,10 @@ export function MagnetBuilder() {
             imageSrc={flow.imageSrc}
             gridConfig={flow.gridConfig}
             liveCropArea={flow.liveCropArea}
+            cropAreaPixels={flow.cropAreaPixels}
             selectedCategory={flow.selectedCategory}
+            textFields={flow.customizationValues}
+            filterTheme={flow.selectedTheme ?? undefined}
           />
         </aside>
       </div>
@@ -372,19 +375,25 @@ function LivePreviewSidebar({
   imageSrc,
   gridConfig,
   liveCropArea,
+  cropAreaPixels,
   selectedCategory,
+  textFields,
+  filterTheme,
 }: {
   currentStepId: StepId;
   selectedGrid: GridSize | null;
   imageSrc: string | null;
   gridConfig: GridConfig | null;
   liveCropArea?: CropArea | null;
+  cropAreaPixels?: CropArea | null;
   selectedCategory: CategoryType | null;
+  textFields?: Record<string, string>;
+  filterTheme?: FloresTheme;
 }) {
   const t = useTranslations('builder');
 
   return (
-    <div className="sticky top-[calc(var(--header-height)+2rem)] rounded-2xl bg-white p-6 shadow-sm border border-light-gray">
+    <div className="sticky top-[calc(var(--header-height)+12rem)] rounded-2xl bg-white p-6 shadow-sm border border-light-gray">
       <h3 className="mb-4 text-center font-serif text-lg font-semibold text-charcoal">
         {t('stepPreview')}
       </h3>
@@ -448,7 +457,7 @@ function LivePreviewSidebar({
             </motion.div>
           )}
 
-          {selectedGrid && imageSrc && gridConfig && (
+          {selectedGrid && imageSrc && gridConfig && (liveCropArea || cropAreaPixels) && (
             <motion.div
               key="has-image"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -456,23 +465,15 @@ function LivePreviewSidebar({
               exit={{ opacity: 0, scale: 0.9 }}
               className="relative p-6"
             >
-              <ImagePreviewGrid
-                rows={gridConfig.rows}
-                cols={gridConfig.cols}
+              <MagnetPreview
+                compact
                 imageSrc={imageSrc}
-                cropArea={liveCropArea}
+                cropArea={(liveCropArea ?? cropAreaPixels)!}
+                gridConfig={gridConfig}
+                categoryType={selectedCategory ?? undefined}
+                textFields={textFields}
+                filterTheme={filterTheme}
               />
-              {/* Mosaiko watermark */}
-              <div
-                className="pointer-events-none absolute bottom-7 right-7 z-20 flex items-end opacity-60"
-                style={{ gap: '1px' }}
-                aria-hidden="true"
-              >
-                <img src="/logos/logo-dark.png" alt="" width={12} height={12} style={{ width: '12px', height: '12px' }} />
-                <span className="font-bold font-brand leading-none text-charcoal" style={{ fontSize: '8px', marginBottom: '0.5px' }}>
-                  osaiko
-                </span>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
