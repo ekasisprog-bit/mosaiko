@@ -182,7 +182,7 @@ export function MagnetPreview({
         style={{
           gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
           gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-          gap: categoryType === 'spotify' || categoryType === 'polaroid' || categoryType === 'ghibli' ? '0px' : '4px',
+          gap: '4px',
           maxWidth: `${gridConfig.cols * 120}px`,
         }}
       >
@@ -318,7 +318,7 @@ export function MagnetPreview({
               style={{
                 gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                 gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                gap: categoryType === 'spotify' || categoryType === 'polaroid' || categoryType === 'ghibli' ? '0px' : '4px',
+                gap: '4px',
                 maxWidth: `${gridConfig.cols * 120}px`,
               }}
             >
