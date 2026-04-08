@@ -211,22 +211,28 @@ export function MagnetPreview({
                 />
               )}
 
-              {role === 'text-panel' && categoryType === 'ghibli' && (
-                <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
-                  {tiles[index] && (
-                    <img src={tiles[index]} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
-                  )}
-                  <div className="absolute inset-0 z-10">
-                    <GhibliPanelPreview
-                      label={label as 'ghibli-left' | 'ghibli-right'}
-                      year={textFields.year}
-                      japaneseText={textFields.japaneseText}
-                      customText={textFields.customText}
-                      studioText={textFields.studioText}
-                    />
+              {role === 'text-panel' && categoryType === 'ghibli' && (() => {
+                const isLeft = label === 'ghibli-left';
+                const stripStyle = isLeft
+                  ? { left: '14.15%', top: '0%', width: '85.85%', height: '100%' }
+                  : { left: '0%', top: '0%', width: '85.69%', height: '100%' };
+                return (
+                  <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
+                    {tiles[index] && (
+                      <img src={tiles[index]} alt="" className="absolute" style={stripStyle} draggable={false} />
+                    )}
+                    <div className="absolute inset-0 z-10">
+                      <GhibliPanelPreview
+                        label={label as 'ghibli-left' | 'ghibli-right'}
+                        year={textFields.year}
+                        japaneseText={textFields.japaneseText}
+                        customText={textFields.customText}
+                        studioText={textFields.studioText}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {role === 'photo' && (
                 <PhotoTile
@@ -347,29 +353,28 @@ export function MagnetPreview({
                       />
                     )}
 
-                    {role === 'text-panel' && categoryType === 'ghibli' && (
-                      <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
-                        {/* Photo layer — visible through 10.24% transparent strip at top of PNG template */}
-                        {tiles[index] && (
-                          <img
-                            src={tiles[index]}
-                            alt=""
-                            className="absolute inset-0 h-full w-full object-cover"
-                            draggable={false}
-                          />
-                        )}
-                        {/* Panel overlay with PNG template + text */}
-                        <div className="absolute inset-0 z-10">
-                          <GhibliPanelPreview
-                            label={label as 'ghibli-left' | 'ghibli-right'}
-                            year={textFields.year}
-                            japaneseText={textFields.japaneseText}
-                            customText={textFields.customText}
-                            studioText={textFields.studioText}
-                          />
+                    {role === 'text-panel' && categoryType === 'ghibli' && (() => {
+                      const isLeft = label === 'ghibli-left';
+                      const stripStyle = isLeft
+                        ? { left: '14.15%', top: '0%', width: '85.85%', height: '100%' }
+                        : { left: '0%', top: '0%', width: '85.69%', height: '100%' };
+                      return (
+                        <div className="relative h-full w-full overflow-hidden" style={{ aspectRatio: '1' }}>
+                          {tiles[index] && (
+                            <img src={tiles[index]} alt="" className="absolute" style={stripStyle} draggable={false} />
+                          )}
+                          <div className="absolute inset-0 z-10">
+                            <GhibliPanelPreview
+                              label={label as 'ghibli-left' | 'ghibli-right'}
+                              year={textFields.year}
+                              japaneseText={textFields.japaneseText}
+                              customText={textFields.customText}
+                              studioText={textFields.studioText}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {role === 'photo' && (
                       <PhotoTile
@@ -608,7 +613,7 @@ function PhotoTile({
         <img
           src={tileSrc}
           alt={`Pieza ${index + 1} de ${totalTiles}`}
-          className="absolute object-cover"
+          className="absolute"
           style={{ left: area.left, top: area.top, width: area.width, height: area.height }}
           draggable={false}
         />
