@@ -226,7 +226,13 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
       setSelectedGrid(null);
     }
 
-    // Reset downstream state
+    // Reset downstream state — clear previous image/crop when switching categories
+    if (imageSrc) URL.revokeObjectURL(imageSrc);
+    setImageFile(null);
+    imageFileRef.current = null;
+    setImageSrc(null);
+    setCropAreaPixels(null);
+    setLiveCropArea(null);
     setCustomizationValues({});
     // Default flores theme to 'calido' so filters are always applied
     setSelectedTheme(cat === 'flores' ? ('calido' as FloresTheme) : null);
@@ -238,7 +244,7 @@ export function useBuilderFlow(options?: BuilderFlowOptions): BuilderFlowState {
       setDirection(1);
       setCurrentStepId(nextStep);
     }, 250);
-  }, []);
+  }, [imageSrc]);
 
   // ─── Grid select ───
   const handleGridSelect = useCallback((grid: GridSize) => {

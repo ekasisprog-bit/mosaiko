@@ -530,6 +530,8 @@ function PhotoTile({
   textFields?: Record<string, string>;
   gridSize?: number;
 }) {
+  if (!tileSrc) return null;
+
   const imgElement = (
     <img
       src={tileSrc}
